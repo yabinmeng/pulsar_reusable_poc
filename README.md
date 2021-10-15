@@ -389,6 +389,8 @@ This example starts a service application in the background listening to a JMS q
 
 # 5. More Advanced DS FastJMS API Example
 
+**NOTE**: Currently the source codes for these advanced JMS pattern demos are still under different GitHub repositories (please refer to each demo for more details). They will be consolidated under this repository in the future.
+
 ## 5.1. Multiple Queue Consumers - Message Consumption by "Keys"
 
-Please refer to [here](advanced_pattern/topic_to_multiqueue) for more details.
+[README](advanced_pattern/topic_to_multiqueue)
