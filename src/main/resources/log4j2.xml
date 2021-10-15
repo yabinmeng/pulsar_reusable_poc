@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="trace" packages="org.apache.pulsar.log4j2.appender">
+    <Properties>
+        <Property name="LOG_DIR">logs/</Property>
+        <Property name="DEFAULT_PATTERN">[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} %c %M - %msg%n</Property>
+        <Property name="MSGONLY_PATTERN">%msg%n</Property>
+        <Property name="SHORT_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] - %msg%n</Property>
+    </Properties>
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout pattern="${DEFAULT_PATTERN}"/>
+        </Console>
+        <RollingFile
+                name="RollingFileAppender_SimplePulsar"
+                fileName="${LOG_DIR}/pulsar_simple.log"
+                filePattern="${LOG_DIR}/pulsar_simple.%i.log.gz"
+                ignoreExceptions="false">
+            <PatternLayout>
+                <Pattern>${SHORT_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="1MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="5" />
+        </RollingFile>
+        <RollingFile
+                name="RollingFileAppender_SimpleFastJMS"
+                fileName="${LOG_DIR}/fastjms_simple.log"
+                filePattern="${LOG_DIR}/fastjms_simple.%i.log.gz"
+                ignoreExceptions="false">
+            <PatternLayout>
+                <Pattern>${SHORT_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="1MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="5" />
+        </RollingFile>
+        <RollingFile
+                name="RollingFileAppender_QueuePattern"
+                fileName="${LOG_DIR}/fastjms_queue_pattern.log"
+                filePattern="${LOG_DIR}/fastjms_queue_pattern.%i.log.gz"
+                ignoreExceptions="false">
+            <PatternLayout>
+                <Pattern>${SHORT_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="1MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="5" />
+        </RollingFile>
+        <RollingFile
+                name="RollingFileAppender_TopicPattern"
+                fileName="${LOG_DIR}/fastjms_topic_pattern.log"
+                filePattern="${LOG_DIR}/fastjms_topic_pattern.%i.log.gz"
+                ignoreExceptions="false">
+            <PatternLayout>
+                <Pattern>${SHORT_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="1MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="5" />
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.example.pulsar" level="info" additivity="false">
+            <AppenderRef ref="RollingFileAppender_SimplePulsar"/>
+        </Logger>
+        <Logger name="com.example.fastjms" level="info" additivity="false">
+            <AppenderRef ref="RollingFileAppender_SimpleFastJMS"/>
+        </Logger>
+        <Logger name="com.example.fastjms.queue_pattern" level="info" additivity="false">
+            <AppenderRef ref="RollingFileAppender_QueuePattern"/>
+        </Logger>
+        <Logger name="com.example.fastjms.topic_pattern" level="info" additivity="false">
+            <AppenderRef ref="RollingFileAppender_TopicPattern"/>
+        </Logger>
+        <Root level="info">
+            <AppenderRef ref="ConsoleAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>
