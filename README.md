@@ -391,4 +391,4 @@ This example starts a service application in the background listening to a JMS q
 
 ## 5.1. Multiple Queue Consumers - Message Consumption by "Keys"
 
-Please refer to [this repo](https://github.com/yabinmeng/puslar_jms_keyshared) for more details.
+Please refer to [here](advanced_pattern/topic_to_multiqueue) for more details.
