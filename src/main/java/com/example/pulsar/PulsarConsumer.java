@@ -9,13 +9,13 @@ import java.util.*;
 
 public class PulsarConsumer {
 
-    private String topicName;
-    private Consumer<byte[]> consumer;
-    private String clientIdentifier;
-    private String subscription;
-    private SubscriptionType subscriptionType;
+    private final String topicName;
+    private final Consumer<byte[]> consumer;
+    private final String clientIdentifier;
+    private final String subscription;
+    private final SubscriptionType subscriptionType;
 
-    private Map<String, List<String>> msgListByKey = new HashMap<>();
+    private final Map<String, List<String>> msgListByKey = new HashMap<>();
 
     public PulsarConsumer(PulsarClient pulsarClient,
                           String topicName,

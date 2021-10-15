@@ -11,9 +11,9 @@ import java.util.Map;
 
 public class PulsarClientConn {
 
-    private String brokerSvcUrl;
-    private Map<String, Object> clientConfMap;
-    private Map<String, Object> clientMiscConfMap;
+    private final String brokerSvcUrl;
+    private final Map<String, Object> clientConfMap;
+    private final Map<String, Object> clientMiscConfMap;
     private PulsarClient pulsarClient = null;
 
     public PulsarClientConn(String brokerSvcUrl,

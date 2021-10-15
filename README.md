@@ -7,6 +7,7 @@
       - [1.1.3.2. Demonstrate Pulsar Admin CLI](#1132-demonstrate-pulsar-admin-cli)
 - [2. Demo Program Description](#2-demo-program-description)
   - [2.1. Configure Connection Properties](#21-configure-connection-properties)
+  - [2.2. Build the Program](#22-build-the-program)
 - [3. Pulsar Native Client API Demo](#3-pulsar-native-client-api-demo)
   - [3.1. Simple Demo](#31-simple-demo)
     - [3.1.1.  Run as a Message Producer](#311--run-as-a-message-producer)
@@ -38,7 +39,7 @@ In this repo, we're going to do some demos about how to use DS FastJMS API to ac
 * OS: Linux or MacOS
 * Java: JDK 8 or 11
 
-### 1.1.1. Download Apache Pulsar 
+### 1.1.1. Download Apache Pulsar
 
 ** latest release: 2.8.0
 
@@ -53,9 +54,9 @@ export PATH="$PULSAR_HOME/bin:$PATH"
 which pulsar
 ``` 
 
-### 1.1.2. Run Pulsar in "Standalone" Mode 
+### 1.1.2. Run Pulsar in "Standalone" Mode
 
-Run the following command to start a standalone Pulsar server locally. 
+Run the following command to start a standalone Pulsar server locally.
 
 ```
 bin/pulsar standalone &
@@ -64,27 +65,27 @@ bin/pulsar standalone &
 ### 1.1.3. Pulsar CLI Commands
 
 Pulsar has a set of built-in CLI command utilities:
-* Pulsar Admin CLI: for the purpose of administrating Pulsar objects such as tenants, namespaces, topics, and etc.  
+* Pulsar Admin CLI: for the purpose of administrating Pulsar objects such as tenants, namespaces, topics, and etc.
   * https://pulsar.apache.org/tools/pulsar-admin/2.8.0-SNAPSHOT/
-* Pulsar Client CLI: for the purpose of quick simulation of a message sending and consuming client 
+* Pulsar Client CLI: for the purpose of quick simulation of a message sending and consuming client
   * https://pulsar.apache.org/docs/en/reference-cli-tools/#pulsar-client
 * Pulsar Perf CLI: for Pulsar performance testing purposes
   * https://pulsar.apache.org/docs/en/reference-cli-tools/#pulsar-perf
 
-In this demo, we'll briefly explore some Pulsar Admin CLI commands. 
-  
+In this demo, we'll briefly explore some Pulsar Admin CLI commands.
+
 #### 1.1.3.1. Configure CLI Connection to Pulsar Server
 
 In order to use these CLI utilities, we need to first configure the client connection property file.
 
 * default: <PULSAR_HOME>/conf/**client.conf**
 * https://pulsar.apache.org/docs/en/reference-configuration/#client
-  
+
 ```
 PULSAR_CLIENT_CONF=<custom_client_conf_path> pulsar-admin [sub-command ...]
 ```
 
-#### 1.1.3.2. Demonstrate Pulsar Admin CLI  
+#### 1.1.3.2. Demonstrate Pulsar Admin CLI
 
 *  Verify Pulsar cluster
 ```
@@ -132,7 +133,7 @@ In this repo, there are several sets of demo programs organized under different 
 
 ## 2.1. Configure Connection Properties
 
-In order to run the demo programs against the Pulsar server, we need to first configure the connection properties. An example is as below: 
+In order to run the demo programs against the Pulsar server, we need to first configure the connection properties. An example is as below:
 
 ```
 ## Pulsar Client connection configuration
@@ -155,7 +156,7 @@ jms.queueSubscriptionName=myjms-queue
 jms.forceDeleteTemporaryDestinations=true
 ```
 
-There are four major sections you can specify in the configuration property file: 
+There are four major sections you can specify in the configuration property file:
 
 * Core Pulsar connection related settings
   * service URLs - web and broker
@@ -181,7 +182,13 @@ There are four major sections you can specify in the configuration property file
   * prefix: **jms**
   * https://docs.datastax.com/en/fast-pulsar-jms/docs/1.1/pulsar-jms-reference.html#_configuration_options
 
-# 3. Pulsar Native Client API Demo 
+## 2.2. Build the Program
+
+```
+% gradle clean build shadowJar
+```
+
+# 3. Pulsar Native Client API Demo
 
 In order to use the Pulsar Native Client AP, includes the following dependency in your program:
 (gradle dependency)
@@ -239,7 +246,7 @@ implementation group: 'com.datastax.oss', name: 'pulsar-jms-all', version: '1.2.
 ## 4.1. Simple Demo (Including JMS Topic Pattern Demo)
 
 The first FastJMS API demo program, **com.example.fastjms.JmsSimpleDemo**, is similar to the Pulsar native client API demo program in the previous section. It follows JMS 2.0 spec and demonstrates how message sending/publishing and receiving/consuming works with DS FastJMS API.
- 
+
 Its usage is as below:
 ```text
 usage: JmsSimpleDemo [-dn <arg>] [-dt <arg>] [-f <arg>] [-h] [-n <arg>] [-op <arg>] [-sn <arg>]
@@ -258,7 +265,7 @@ JmsSimpleDemo Options:
 * For a \"topic\" destination, the valid operation types can be all of them
   * Producer (TopicPublisher)
   * Consumer (TopicSubscriber)
-  * SharedConsumer 
+  * SharedConsumer
   * DurableConsumer
   * SharedDurableConsumer
 
@@ -365,7 +372,7 @@ An example of browsing messages from a JMS queue using JMS QueueBrowser is as be
 
 ### 4.2.4. Send Messages and Wait for Responses using JMS QueueRequestor
 
-JMS QueueRequestor example requires 2 parts: 
+JMS QueueRequestor example requires 2 parts:
 * one client application sends a messages to a JMS Queue and waits for a response
 * one service application receives each message from the JMS Queue, processes it, and sends the response back
 

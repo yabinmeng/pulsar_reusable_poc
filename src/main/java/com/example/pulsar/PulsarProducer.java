@@ -15,9 +15,9 @@ import java.util.Date;
 
 public class PulsarProducer {
 
-    private String topicName;
-    private Producer<byte[]> producer;
-    private String clientIdentifier;
+    private final String topicName;
+    private final Producer<byte[]> producer;
+    private final String clientIdentifier;
 
     public PulsarProducer(PulsarClient pulsarClient, String topicName) throws PulsarClientException {
         this.topicName = topicName;

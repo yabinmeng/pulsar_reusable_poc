@@ -12,17 +12,17 @@ public class JmsClientConn {
 
     static final Logger LOGGER = LogManager.getLogger(JmsClientConn.class);
 
-    private Map<String, Object> jmsConnMap;
+    private final Map<String, Object> jmsConnMap;
     private PulsarConnectionFactory factory;
-    private JMSContext dftJmsContext;
-    private Connection dftJmsConnection;
-    private Destination dftDestination;
+    private final JMSContext dftJmsContext;
+    private final Connection dftJmsConnection;
+    private final Destination dftDestination;
 
     private final int sessionMode = Session.AUTO_ACKNOWLEDGE;
     //private final int sessionMode = Session.CLIENT_ACKNOWLEDGE;
 
-    private boolean isQueue;
-    private String destName;
+    private final boolean isQueue;
+    private final String destName;
 
     public JmsClientConn(boolean isQueue, String destName, Map<String, Object> jmsConnMap) {
         this.isQueue = isQueue;
