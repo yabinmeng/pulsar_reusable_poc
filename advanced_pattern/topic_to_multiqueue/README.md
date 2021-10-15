@@ -42,4 +42,4 @@ In order for the DS FastJMS API to utilize Pulsar's Key_Shared subscription feat
 
 # 3. Appendix
 
-The complete code repository, including the scripts to setup the environment, for this advanced JMS pattern can be found at [here](https://github.com/yabinmeng/puslar_jms_keyshared).
+The complete code repository, including the scripts to set up the testing environment, for this advanced JMS pattern demo can be found [here](https://github.com/yabinmeng/puslar_jms_keyshared).
