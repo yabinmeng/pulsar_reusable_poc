@@ -12,7 +12,7 @@
   - [3.1. Simple Demo](#31-simple-demo)
     - [3.1.1.  Run as a Message Producer](#311--run-as-a-message-producer)
     - [3.1.2. Run as a Message Consumer](#312-run-as-a-message-consumer)
-- [4. DS FastJMS API Demo](#4-ds-fastjms-api-demo)
+- [4. Starlight for JMS Demo](#4-ds-fastjms-api-demo)
   - [4.1. Simple Demo (Including JMS Topic Pattern Demo)](#41-simple-demo-including-jms-topic-pattern-demo)
     - [4.1.1. Run as a Message Producer to a JMS Queue (p2p)](#411-run-as-a-message-producer-to-a-jms-queue-p2p)
     - [4.1.2. Run as a Message Consumer to a JMS Queue (p2p)](#412-run-as-a-message-consumer-to-a-jms-queue-p2p)
@@ -23,16 +23,16 @@
     - [4.2.2. Receive Messages Using JMS QueueReceiver with Message Selector](#422-receive-messages-using-jms-queuereceiver-with-message-selector)
     - [4.2.3. Browse JMS Queue Messages Using JMS QueueBrowser](#423-browse-jms-queue-messages-using-jms-queuebrowser)
     - [4.2.4. Send Messages and Wait for Responses using JMS QueueRequestor](#424-send-messages-and-wait-for-responses-using-jms-queuerequestor)
-- [5. More Advanced DS FastJMS API Example](#5-more-advanced-ds-fastjms-api-example)
+- [5. More Advanced JMS API Example](#5-more-advanced-ds-fastjms-api-example)
   - [5.1. Multiple Queue Consumers - Message Consumption by "Keys"](#51-multiple-queue-consumers---message-consumption-by-keys)
 
 # 1. Overview
 
-[DataStax FastJMS for Pulsar API (DS FastJMS API)](https://github.com/datastax/pulsar-jms) is a Java based API that allows existing JMS based applications connecting to [Apache Pulsar](https://pulsar.apache.org/) as a JMS provider to publish and consume messages. Compared with an existing JMS provider like ActiveMQ, RabbitMQ, etc., Apache Pulsar is a modern, unified messaging and streaming platform that can deliver much higher throughput message publishing and consuming while maintaining consistent low latency. It also has other major benefits that are not available in any existing JMS providers, such as effective multi-tenancy support, native schema registry, out-of-the-box message geo-replication, and so on.
+[Starlight for JMS](https://github.com/datastax/pulsar-jms) is a Java based API that allows existing JMS based applications connecting to [Apache Pulsar](https://pulsar.apache.org/) as a JMS provider to publish and consume messages. Compared with an existing JMS provider like ActiveMQ, RabbitMQ, etc., Apache Pulsar is a modern, unified messaging and streaming platform that can deliver much higher throughput message publishing and consuming while maintaining consistent low latency. It also has other major benefits that are not available in any existing JMS providers, such as effective multi-tenancy support, native schema registry, out-of-the-box message geo-replication, and so on.
 
-DS FastJMS API is the only JMS API for Apache Pulsar that supports JMS 2.0 with backward-compatibility with JMS 1.1. It is a full-fledged API that supports the vast majority of the JMS functionalities as described JMS spec. It passes about 98% JMS compliance TCK test suite.
+Starlight for JMS supports JMS 2.0 with backward-compatibility with JMS 1.1. It is a full-fledged API that supports the vast majority of the JMS functionalities as described JMS spec. It passes about 98% of the JMS compliance TCK test suite.
 
-In this repo, we're going to do some demos about how to use DS FastJMS API to achieve some typical JMS message sending and receiving methods against an Apache Pulsar server.
+In this repo, we're going to do some demos about how to use Starlight for JMS to achieve some typical JMS message sending and receiving methods against an Apache Pulsar server.
 
 ## 1.1. Prepare Environment
 
@@ -128,8 +128,8 @@ In this repo, there are several sets of demo programs organized under different 
 | Demo Program Package | Description |
 | -------------------- | ----------- |
 | com.example.pulsar.* | Simple message producer and consumer using native Pulsar client API |
-| com.example.fastjms.* | Simple message producer and consumer using DS FastJMS API, including JMS topic related operations. |
-| com.example.fastjms.queue_pattern.* | Specific JMS queue related operations using DS FastJMS API |
+| com.example.fastjms.* | Simple message producer and consumer using Starlight for JMS, including JMS topic related operations. |
+| com.example.fastjms.queue_pattern.* | Specific JMS queue related operations using Starlight for JMS |
 
 ## 2.1. Configure Connection Properties
 
@@ -235,9 +235,9 @@ An example of receiving 10 messages from a Pulsar topic is as below:
   -st Shared 
 ```
 
-# 4. DS FastJMS API Demo
+# 4. Starlight for JMS Demo
 
-In order to use the DS FastJMS AP, includes the following dependency in your program:
+In order to use Starlight for JMS, include the following dependency in your program:
 (gradle dependency)
 ```
 implementation group: 'com.datastax.oss', name: 'pulsar-jms-all', version: '1.2.2'
@@ -245,7 +245,7 @@ implementation group: 'com.datastax.oss', name: 'pulsar-jms-all', version: '1.2.
 
 ## 4.1. Simple Demo (Including JMS Topic Pattern Demo)
 
-The first FastJMS API demo program, **com.example.fastjms.JmsSimpleDemo**, is similar to the Pulsar native client API demo program in the previous section. It follows JMS 2.0 spec and demonstrates how message sending/publishing and receiving/consuming works with DS FastJMS API.
+The first JMS demo program, **com.example.fastjms.JmsSimpleDemo**, is similar to the Pulsar native client API demo program in the previous section. It follows JMS 2.0 spec and demonstrates how message sending/publishing and receiving/consuming works with Starlight for JMS.
 
 Its usage is as below:
 ```text
@@ -320,7 +320,7 @@ An example of consuming 10 messages from a JMS topic is as below:
 
 ## 4.2. JMS Queue Pattern Demo
 
-The second FastJMS API demo program, **com.example.fastjms.queue_pattern.QueuePatternDemo**, is used to demonstrate JMS queue specific operations in JMS 1.1 spec. Its usage is as below:
+The second JMS demo program, **com.example.fastjms.queue_pattern.QueuePatternDemo**, is used to demonstrate JMS queue specific operations in JMS 1.1 spec. Its usage is as below:
 ```text
 usage: QueuePatternDemo [-dn <arg>] [-f <arg>] [-h] [-ms <arg>] [-pn <arg>]
 QueuePatternDemo Options:
@@ -394,7 +394,7 @@ This example starts a service application in the background listening to a JMS q
 2021-10-14 20:29:46.561 [main] -   > sent message: {1}, response message: {100}
 ```
 
-# 5. More Advanced DS FastJMS API Example
+# 5. More Advanced JMS Examples
 
 **NOTE**: Currently the source codes for these advanced JMS pattern demos are still under different GitHub repositories (please refer to each demo for more details). They will be consolidated under this repository in the future.
 
