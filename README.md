@@ -12,7 +12,7 @@
   - [3.1. Simple Demo](#31-simple-demo)
     - [3.1.1.  Run as a Message Producer](#311--run-as-a-message-producer)
     - [3.1.2. Run as a Message Consumer](#312-run-as-a-message-consumer)
-- [4. Starlight for JMS Demo](#4-ds-fastjms-api-demo)
+- [4. Starlight for JMS Demo](#4-starlight-for-jms-demo)
   - [4.1. Simple Demo (Including JMS Topic Pattern Demo)](#41-simple-demo-including-jms-topic-pattern-demo)
     - [4.1.1. Run as a Message Producer to a JMS Queue (p2p)](#411-run-as-a-message-producer-to-a-jms-queue-p2p)
     - [4.1.2. Run as a Message Consumer to a JMS Queue (p2p)](#412-run-as-a-message-consumer-to-a-jms-queue-p2p)
@@ -23,7 +23,7 @@
     - [4.2.2. Receive Messages Using JMS QueueReceiver with Message Selector](#422-receive-messages-using-jms-queuereceiver-with-message-selector)
     - [4.2.3. Browse JMS Queue Messages Using JMS QueueBrowser](#423-browse-jms-queue-messages-using-jms-queuebrowser)
     - [4.2.4. Send Messages and Wait for Responses using JMS QueueRequestor](#424-send-messages-and-wait-for-responses-using-jms-queuerequestor)
-- [5. More Advanced JMS API Example](#5-more-advanced-ds-fastjms-api-example)
+- [5. More Advanced JMS Examples](#5-more-advanced-jms-examples)
   - [5.1. Multiple Queue Consumers - Message Consumption by "Keys"](#51-multiple-queue-consumers---message-consumption-by-keys)
 
 # 1. Overview
