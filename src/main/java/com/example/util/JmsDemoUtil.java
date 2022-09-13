@@ -1,7 +1,6 @@
 package com.example.util;
 
-import org.apache.commons.lang3.BooleanUtils;
-
+import javax.naming.Context;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -85,7 +84,7 @@ public class JmsDemoUtil {
 
     /////////
     // Get JMS connection properties in the right format
-    public static Map<String, Object> getPulsarJmsConfMap(ConfLoaderUtil confLoaderUtil) {
+    public static Map<String, Object> getPulsarJmsConfMap(ConfLoaderUtil confLoaderUtil, boolean forJndi) {
         Map<String, Object> clientConfMap = confLoaderUtil.getClientConfMap();
         Map<String, Object> clientMiscConfMap = confLoaderUtil.getClientMiscConfMap();
         Map<String, Object> producerConfMap = confLoaderUtil.getProducerConfMap();
@@ -94,10 +93,20 @@ public class JmsDemoUtil {
 
         Map<String, Object>  pulsarJmsConnProperties = new HashMap<>();
 
+        if (forJndi) {
+            pulsarJmsConnProperties.put(Context.INITIAL_CONTEXT_FACTORY,
+                    "com.datastax.oss.pulsar.jms.jndi.PulsarInitialContextFactory");
+        }
+
         String pulsarSvcUrl;
         if (clientConfMap.containsKey(CommonUtil.CONF_KEY_BROKER_SVC_URL)) {
             pulsarSvcUrl = clientConfMap.get(CommonUtil.CONF_KEY_BROKER_SVC_URL).toString();
-            pulsarJmsConnProperties.put(CommonUtil.CONF_KEY_BROKER_SVC_URL, pulsarSvcUrl);
+
+            if (forJndi) {
+                pulsarJmsConnProperties.put(Context.PROVIDER_URL, pulsarSvcUrl);
+            } else {
+                pulsarJmsConnProperties.put(CommonUtil.CONF_KEY_BROKER_SVC_URL, pulsarSvcUrl);
+            }
         }
 
         pulsarJmsConnProperties.putAll(clientConfMap);

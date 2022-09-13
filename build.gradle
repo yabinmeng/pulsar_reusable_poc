@@ -15,6 +15,7 @@ group 'com.example'
 version '1.0-SNAPSHOT'
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -23,7 +24,11 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
     // https://mvnrepository.com/artifact/com.datastax.oss/pulsar-jms
-    implementation group: 'com.datastax.oss', name: 'pulsar-jms-all', version: '1.2.2'
+    implementation group: 'com.datastax.oss', name: 'pulsar-jms-all', version: '2.4.10'
+
+    // https://mvnrepository.com/artifact/org.apache.pulsar/pulsar-client
+    implementation group: 'org.apache.pulsar', name: 'pulsar-client', version: '2.10.1'
+
 
     implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'

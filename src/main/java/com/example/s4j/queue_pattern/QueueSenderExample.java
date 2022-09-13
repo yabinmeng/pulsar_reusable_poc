@@ -1,4 +1,4 @@
-package com.example.fastjms.queue_pattern;
+package com.example.s4j.queue_pattern;
 
 import com.example.util.CommonUtil;
 import com.example.util.JmsDemoUtil;
@@ -18,7 +18,6 @@ public class QueueSenderExample extends QueuePatternExample {
     @Override
     void demo() throws JMSException {
         if (queueSession != null) {
-
             QueueSender queueSender = queueSession.createSender(queue);
 
             LOGGER.info("QueueSender:: sending 10 messages from queue: {}", queue.getQueueName());

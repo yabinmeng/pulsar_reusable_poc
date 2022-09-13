@@ -1,7 +1,6 @@
 package com.example.conn;
 
 import com.datastax.oss.pulsar.jms.PulsarConnectionFactory;
-import com.example.fastjms.queue_pattern.QueuePatternDemo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,7 +12,7 @@ public class JmsClientConn {
     static final Logger LOGGER = LogManager.getLogger(JmsClientConn.class);
 
     private final Map<String, Object> jmsConnMap;
-    private PulsarConnectionFactory factory;
+    private final PulsarConnectionFactory factory;
     private final JMSContext dftJmsContext;
     private final Connection dftJmsConnection;
     private final Destination dftDestination;
@@ -29,14 +28,9 @@ public class JmsClientConn {
         this.destName = destName;
         this.jmsConnMap = jmsConnMap;
 
-        try {
-            this.factory = new PulsarConnectionFactory(jmsConnMap);
-            LOGGER.trace("PulsarConnectionFactory created with config {}",
-                    this.jmsConnMap);
-        }
-        catch (JMSException e) {
-            e.printStackTrace();
-        }
+        this.factory = new PulsarConnectionFactory(jmsConnMap);
+        LOGGER.trace("PulsarConnectionFactory created with config {}",
+                this.jmsConnMap);
 
         this.dftJmsContext = newJmsContext();
         this.dftJmsConnection = newJmsConnection();

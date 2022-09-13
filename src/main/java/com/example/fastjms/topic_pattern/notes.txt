@@ -1,1 +1,0 @@
-This is covered in Simple Demo (com.example.fasstjms.JmsSimpleDemo)

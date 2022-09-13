@@ -1,15 +1,13 @@
-package com.example.fastjms;
+package com.example.s4j;
 
 import com.example.conn.JmsClientConn;
 import com.example.util.CommonUtil;
 import com.example.util.ConfLoaderUtil;
 import com.example.util.JmsDemoUtil;
 import org.apache.commons.cli.*;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -163,7 +161,7 @@ public class JmsSimpleDemo {
          */
         try {
             boolean isQueue = StringUtils.equalsIgnoreCase(destType, JmsDemoUtil.JMS_DEST_TYPE.queue.label);
-            Map<String, Object> jmsConfMap = JmsDemoUtil.getPulsarJmsConfMap(confLoaderUtil);
+            Map<String, Object> jmsConfMap = JmsDemoUtil.getPulsarJmsConfMap(confLoaderUtil, false);
             JmsClientConn jmsClientConn = new JmsClientConn(isQueue, destName, jmsConfMap);
             JMSContext jmsContext = jmsClientConn.getDftJmsContext();
             Destination destination = jmsClientConn.getDftDestination();

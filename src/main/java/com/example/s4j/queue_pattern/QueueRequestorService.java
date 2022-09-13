@@ -1,4 +1,4 @@
-package com.example.fastjms.queue_pattern;
+package com.example.s4j.queue_pattern;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,4 +1,4 @@
-package com.example.fastjms.queue_pattern;
+package com.example.s4j.queue_pattern;
 
 import com.example.util.JmsDemoUtil;
 import org.apache.commons.lang3.StringUtils;

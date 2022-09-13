@@ -1,4 +1,4 @@
-package com.example.fastjms.queue_pattern;
+package com.example.s4j.queue_pattern;
 
 import com.example.conn.JmsClientConn;
 import com.example.util.CommonUtil;
@@ -135,7 +135,7 @@ public class QueuePatternDemo {
           Get JMS connection factory
          */
         try {
-            Map<String, Object> jmsConfMap = JmsDemoUtil.getPulsarJmsConfMap(confLoaderUtil);
+            Map<String, Object> jmsConfMap = JmsDemoUtil.getPulsarJmsConfMap(confLoaderUtil, false);
             JmsClientConn jmsClientConn = new JmsClientConn(true, destName, jmsConfMap);
             QueueConnection queueConnection = (QueueConnection) jmsClientConn.getDftJmsConnection();
             Queue queue = (Queue) jmsClientConn.getDftDestination();

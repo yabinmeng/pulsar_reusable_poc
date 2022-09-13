@@ -1,4 +1,4 @@
-package com.example.fastjms.queue_pattern;
+package com.example.s4j.queue_pattern;
 
 import javax.jms.*;
 import java.util.Objects;
