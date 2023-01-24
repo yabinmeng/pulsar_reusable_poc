@@ -1,16 +1,17 @@
-package com.example.pulsarworkshop.utilities.exception;
+package com.example.pulsarworkshop.common.exception;
 
 public class CliOptProcRuntimeException extends RuntimeException {
 
-    int systemErrExitCode;
+    int errorExitCode;
+    String errorDescription;
 
     public CliOptProcRuntimeException(int errorCode, String errorDescription) {
         super(errorDescription);
-        this.systemErrExitCode = errorCode;
-        if (errorCode != 0) {
-            this.printStackTrace();
-        }
+        this.errorExitCode = errorCode;
+        this.errorDescription = errorDescription;
     }
 
-    public int getSystemErrExitCode() { return systemErrExitCode; }
+    public int getErrorExitCode() { return errorExitCode; }
+
+    public String getErrorDescription() { return errorDescription; }
 }

@@ -1,0 +1,9 @@
+{
+  "type": "record",
+  "name": "IotSensorKey",
+  "namespace": "TestNS",
+  "fields" : [
+    {"name": "device_id", "type": "string"},
+    {"name": "ts", "type": "string", "logicalType" : "timestamp-micros"}
+  ]
+}

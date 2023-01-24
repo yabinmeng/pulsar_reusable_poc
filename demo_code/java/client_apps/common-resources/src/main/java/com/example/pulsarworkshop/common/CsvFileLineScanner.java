@@ -1,13 +1,10 @@
-package com.example.pulsarworkshop.utilities;
+package com.example.pulsarworkshop.common;
 
 import org.apache.pulsar.shade.org.apache.commons.io.FileUtils;
 import org.apache.pulsar.shade.org.apache.commons.io.LineIterator;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Scanner;
 
 public class CsvFileLineScanner {
 

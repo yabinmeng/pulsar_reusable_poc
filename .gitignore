@@ -1,0 +1,8 @@
+.gradle/*
+.vscode/*
+demo_code/bin/*
+cluster_deploy/helm_chart/bkup
+cluster_deploy/helm_chart/charts
+cluster_deploy/helm_chart/Chart.lock
+demo_code/java/client_apps/.idea
+demo_code/java/client_apps/*/target

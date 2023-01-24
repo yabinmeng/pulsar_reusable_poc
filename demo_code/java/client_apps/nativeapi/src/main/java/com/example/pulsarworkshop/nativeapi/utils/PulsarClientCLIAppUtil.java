@@ -1,17 +1,22 @@
-package com.example.pulsarworkshop.nativeapi;
+package com.example.pulsarworkshop.nativeapi.utils;
 
-import org.apache.commons.cli.*;
-import org.apache.commons.compress.archivers.sevenz.CLI;
-import org.apache.pulsar.shade.org.checkerframework.checker.units.qual.C;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+
 public class PulsarClientCLIAppUtil {
 
-    enum CLI_OPTION {
+    public enum CLI_OPTION {
         Help("h"),
-        CfgFile("f"),
+        WorkloadFile("wf"),
+        ConfigFile("cf"),
         MsgNum("n"),
         SvcUrl("svc"),
         ClntName("name"),
@@ -27,20 +32,20 @@ public class PulsarClientCLIAppUtil {
         }
     }
 
-    static boolean isValidCliOption(String item) {
+    public static boolean isValidCliOption(String item) {
         return Arrays.stream(CLI_OPTION.values()).anyMatch((t) -> t.name().equals(item));
     }
     public static String getValidCliOptionList() {
         return Arrays.stream(CLI_OPTION.values()).map(Object::toString).collect(Collectors.joining(", "));
     }
 
-    static Options cliOptions = new Options();
+    public static Options cliOptions = new Options();
     static {
-        // Common to both producer and consumer
+        // Common options ...
         Option helpOption = new Option(
                 CLI_OPTION.Help.label, false, "Displays this help message.");
-        Option cfgOption = new Option(
-                CLI_OPTION.CfgFile.label, true, "Configuration properties file.");
+        Option cfgFileOption = new Option(
+                CLI_OPTION.ConfigFile.label, true, "Configuration properties file.");
         Option msgNumOption = new Option(
                 CLI_OPTION.MsgNum.label, true, "Number of messages to process.");
         Option pulsarSvcOption = new Option(
@@ -53,30 +58,34 @@ public class PulsarClientCLIAppUtil {
                 "For producers, this must be a single topic name; for consumers, this can be a list of topic names" +
                 "that are separated by comma");
 
-        // Consumer only
+        // Producer only options ...
+        Option wrkldFileOption = new Option(
+                CLI_OPTION.WorkloadFile.label, true, "Raw workload csv file.");
+
+        // Consumer only options ...
         Option cTopicPtnOption = new Option(
                 CLI_OPTION.TpNamePatn.label, true, "(Consumer only) Topic name pattern string");
-        // Consumer only
         Option cSubNameOption = new Option(
                 CLI_OPTION.SubName.label, true, "(Consumer only) Subscription name");
-        // Only relevant when OpType is "consumer"
         Option cSubTypeOption = new Option(
                 CLI_OPTION.SubType.label, true,
                 "(Consumer only) Subscription type (default to \"Exclusive\")");
 
         cliOptions.addOption(helpOption);
-        cliOptions.addOption(cfgOption);
+        cliOptions.addOption(cfgFileOption);
         cliOptions.addOption(msgNumOption);
         cliOptions.addOption(pulsarSvcOption);
         cliOptions.addOption(pulsarClntNameOption);
         cliOptions.addOption(topicNameOption);
-
+        // producer only
+        cliOptions.addOption(wrkldFileOption);
+        // consumer only
         cliOptions.addOption(cTopicPtnOption);
         cliOptions.addOption(cSubNameOption);
         cliOptions.addOption(cSubTypeOption);
     }
 
-    enum SUBSCRIPTION_TYPE {
+    public enum SUBSCRIPTION_TYPE {
         Exclusive("Exclusive"),
         Failover("Failover"),
         Shared("Shared"),
@@ -89,10 +98,30 @@ public class PulsarClientCLIAppUtil {
         }
     }
 
-    static boolean isValidSubscriptionType(String item) {
+    public static boolean isValidSubscriptionType(String item) {
         return Arrays.stream(SUBSCRIPTION_TYPE.values()).anyMatch((t) -> t.name().equalsIgnoreCase(item));
     }
     public static String getValidSubscriptionTypeList() {
         return Arrays.stream(SUBSCRIPTION_TYPE.values()).map(Object::toString).collect(Collectors.joining(", "));
+    }
+
+    public static File getResourceFile(String resourceFileName) {
+        File resourceFile = null;
+
+        String resourceFileName2 = resourceFileName;
+        if ( !StringUtils.startsWith(resourceFileName2, "/") ) {
+            resourceFileName2 = "/" + resourceFileName2;
+        }
+
+        try {
+            System.out.println("===> " + resourceFileName2);
+            URI uri = PulsarClientCLIAppUtil.class.getResource(resourceFileName2).toURI();
+            System.out.println("===> " + uri);
+            resourceFile = new File(uri.getPath());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        return resourceFile;
     }
 }

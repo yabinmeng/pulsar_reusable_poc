@@ -1,6 +1,6 @@
-package com.example.pulsarworkshop.utilities;
+package com.example.pulsarworkshop.common;
 
-import com.example.pulsarworkshop.utilities.exception.InvalidCfgParamException;
+import com.example.pulsarworkshop.common.exception.InvalidCfgParamException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.FileBasedConfiguration;
@@ -11,10 +11,10 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.client.impl.MultiplierRedeliveryBackoff;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class PulsarClientConf {
 
-    private final static Logger logger = LogManager.getLogger(PulsarClientConf.class);
+    private final static Logger logger = LoggerFactory.getLogger(PulsarClientConf.class);
 
     ///////
     // Valid configuration categories
@@ -67,23 +67,32 @@ public class PulsarClientConf {
         // Read related Pulsar client configuration settings from a file
         readRawConfFromFile(cfgFile);
 
-
-        //////////////////
-        // Ignores the following Pulsar client/producer/consumer configurations since
-        // they need to be specified as the CLI input parameters
-        clientConfMapRaw.remove("serviceUrl");
-        producerConfMapRaw.remove("topicName");
-        producerConfMapRaw.remove("producerName");
-        consumerConfMapRaw.remove("topicNames");
-        consumerConfMapRaw.remove("subscriptionName");
-        consumerConfMapRaw.remove("subscriptionType");
-        consumerConfMapRaw.remove("consumerName");
-
         //////////////////
         //  Convert the raw configuration map (<String,String>) to the required map (<String,Object>)
+        clientConfMapTgt.putAll(ConfConverter.convertStdRawClientConf(clientConfMapRaw));
         producerConfMapTgt.putAll(ConfConverter.convertStdRawProducerConf(producerConfMapRaw));
         consumerConfMapTgt.putAll(ConfConverter.convertStdRawConsumerConf(consumerConfMapRaw));
         // TODO: Reader API is not enabled at the moment. Revisit when needed
+
+        //////////////////
+        // Ignores the following Pulsar client/producer/consumer configurations since
+        // they will be explicitly handled via CLI input parameters
+        clientConfMapTgt.remove("serviceUrl");
+        clientConfMapTgt.remove("authPluginClassName");
+        clientConfMapTgt.remove("authParams");
+        clientConfMapTgt.remove("enableTls");
+        clientConfMapTgt.remove("tlsTrustCertsFilePath");
+        clientConfMapTgt.remove("tlsHostnameVerificationEnable");
+        clientConfMapTgt.remove("tlsAllowInsecureConnection");
+
+        producerConfMapTgt.remove("topicName");
+        producerConfMapTgt.remove("producerName");
+
+        consumerConfMapTgt.remove("topicNames");
+        consumerConfMapTgt.remove("topicsPattern");
+        consumerConfMapTgt.remove("subscriptionName");
+        consumerConfMapTgt.remove("subscriptionType");
+        consumerConfMapTgt.remove("consumerName");
     }
 
 
@@ -146,6 +155,8 @@ public class PulsarClientConf {
 
     public Map<String, String> getSchemaConfMapRaw() { return  this.schemaConfMapRaw; }
     public Map<String, String> getClientConfMapRaw() { return this.clientConfMapRaw; }
+    public Map<String, Object> getClientConfMapTgt() { return this.clientConfMapTgt; }
+
     public Map<String, String> getProducerConfMapRaw() { return this.producerConfMapRaw; }
     public Map<String, Object> getProducerConfMapTgt() { return this.producerConfMapTgt; }
     public Map<String, String> getConsumerConfMapRaw() { return this.consumerConfMapRaw; }
@@ -332,6 +343,49 @@ public class PulsarClientConf {
             return Arrays.stream(ConfConverter.REGEX_SUBSCRIPTION_MODE.values()).map(t -> t.label).collect(Collectors.joining(", "));
         }
 
+
+        // <<< https://pulsar.apache.org/docs/client-libraries-java/#client >>>
+        private final static Map<String, String> validStdClientConfKeyTypeMap = Map.ofEntries(
+            Map.entry("serviceUrl", "String"),
+            Map.entry("authPluginClassName", "String"),
+            Map.entry("authParams", "String"),
+            Map.entry("operationTimeoutMs", "long"),
+            Map.entry("statsIntervalSeconds", "String"),
+            Map.entry("numIoThreads", "int"),
+            Map.entry("numListenerThreads", "int"),
+            Map.entry("useTcpNoDelay", "boolean"),
+            Map.entry("enableTls", "boolean"),
+            Map.entry("tlsTrustCertsFilePath", "String"),
+            Map.entry("tlsAllowInsecureConnection", "boolean"),
+            Map.entry("tlsHostnameVerificationEnable", "boolean"),
+            Map.entry("concurrentLookupRequest", "int"),
+            Map.entry("maxLookupRequest", "int"),
+            Map.entry("maxNumberOfRejectedRequestPerConnection", "int"),
+            Map.entry("keepAliveIntervalSeconds", "int"),
+            Map.entry("connectionTimeoutMs", "int"),
+            Map.entry("requestTimeoutMs", "int"),
+            Map.entry("defaultBackoffIntervalNanos", "int"),
+            Map.entry("maxBackoffIntervalNanos", "long"),
+            Map.entry("socks5ProxyAddress", "SocketAddress"),
+            Map.entry("socks5ProxyUsername", "String"),
+            Map.entry("socks5ProxyPassword", "String"),
+            Map.entry("connectionMaxIdleSeconds", "int")
+        );
+        public static Map<String, Object> convertStdRawClientConf(Map<String, String> pulsarClientConfMapRaw) {
+            Map<String, Object> clientConfObjMap = new HashMap<>();
+            setConfObjMapForPrimitives(clientConfObjMap, pulsarClientConfMapRaw, validStdClientConfKeyTypeMap);
+
+            /**
+             * Non-primitive type processing for Pulsar producer configuration items
+             */
+            // TODO: Skip the following client configuration items for now because they're not really
+            //       needed at the moment. Add support for them when needed.
+            //       * socks5ProxyAddress
+
+            return  clientConfObjMap;
+        }
+
+
         // <<< https://pulsar.apache.org/docs/client-libraries-java/#configure-producer >>>
         private final static Map<String, String> validStdProducerConfKeyTypeMap = Map.ofEntries(
                 Map.entry("topicName", "String"),
@@ -350,7 +404,6 @@ public class PulsarClientConf {
                 Map.entry("compressionType", "CompressionType"),
                 Map.entry("initialSubscriptionName", "string")
         );
-
         public static Map<String, Object> convertStdRawProducerConf(Map<String, String> pulsarProducerConfMapRaw) {
             Map<String, Object> producerConfObjMap = new HashMap<>();
             setConfObjMapForPrimitives(producerConfObjMap, pulsarProducerConfMapRaw, validStdProducerConfKeyTypeMap);
@@ -358,8 +411,8 @@ public class PulsarClientConf {
             /**
              * Non-primitive type processing for Pulsar producer configuration items
              */
-            // TODO: Skip the following Pulsar configuration items for now because they're not really
-            //       needed in the NB S4J testing at the moment. Add support for them when needed.
+            // TODO: Skip the following producer configuration items for now because they're not really
+            //       needed at the moment. Add support for them when needed.
             //       * messageRoutingMode
             //       * hashingScheme
             //       * cryptoFailureAction
@@ -438,14 +491,8 @@ public class PulsarClientConf {
             /**
              * Non-primitive type processing for Pulsar consumer configuration items
              */
-            // NOTE: The following non-primitive type configuration items are excluded since
-            //       they'll be handled by the CLI command line processing method directly
-            //       * topicNames
-            //       * topicPattern
-            //       * subscriptionType
-
-            // TODO: Skip the following Pulsar configuration items for now because they're not really
-            //       needed in the NB S4J testing right now. Add the support for them when needed.
+            // TODO: Skip the following consumer configuration items for now because they're not really
+            //       needed right now. Add the support for them when needed.
             //       * cryptoFailureAction
 
             // "properties" has value type "SortedMap<String, String>"

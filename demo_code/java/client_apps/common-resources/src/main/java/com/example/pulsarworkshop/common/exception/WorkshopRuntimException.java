@@ -1,4 +1,4 @@
-package com.example.pulsarworkshop.utilities.exception;
+package com.example.pulsarworkshop.common.exception;
 
 public class WorkshopRuntimException extends RuntimeException {
     public WorkshopRuntimException(String paramName, String errDesc) {
