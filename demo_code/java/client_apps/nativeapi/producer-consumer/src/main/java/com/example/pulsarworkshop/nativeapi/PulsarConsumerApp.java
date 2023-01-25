@@ -5,7 +5,6 @@ import com.example.pulsarworkshop.common.exception.CliOptProcRuntimeException;
 import com.example.pulsarworkshop.common.exception.HelpExitException;
 import com.example.pulsarworkshop.common.exception.InvalidCfgParamException;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.pulsar.client.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Pattern;
 
 public class PulsarConsumerApp extends  PulsarClientCLIApp {
 

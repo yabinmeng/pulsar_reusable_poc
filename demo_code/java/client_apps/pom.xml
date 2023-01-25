@@ -30,7 +30,8 @@
     </properties>
 
     <modules>
-        <module>nativeapi</module>
+        <module>nativeapi/producer-consumer</module>
+        <module>nativeapi/open-tracing-interceptor</module>
         <module>s4j</module>
         <module>s4k</module>
         <module>s4r</module>
