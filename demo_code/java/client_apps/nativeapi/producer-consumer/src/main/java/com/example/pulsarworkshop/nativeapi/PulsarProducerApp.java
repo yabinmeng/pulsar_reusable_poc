@@ -1,10 +1,11 @@
 package com.example.pulsarworkshop.nativeapi;
 
-import com.example.pulsarworkshop.common.CommonUtils;
+import com.example.pulsarworkshop.common.utils.CommonUtils;
+import com.example.pulsarworkshop.common.PulsarClientCLIApp;
 import com.example.pulsarworkshop.common.exception.CliOptProcRuntimeException;
 import com.example.pulsarworkshop.common.exception.HelpExitException;
 import com.example.pulsarworkshop.common.exception.InvalidCfgParamException;
-import com.example.pulsarworkshop.common.CsvFileLineScanner;
+import com.example.pulsarworkshop.common.utils.CsvFileLineScanner;
 import com.example.pulsarworkshop.common.PulsarClientConf;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.pulsar.client.api.*;
@@ -47,7 +48,10 @@ public class PulsarProducerApp extends PulsarClientCLIApp {
             }
 
             File workloadCsvFile = producerCmdApp.getRawWorkloadFile();
-            if (workloadCsvFile != null) {
+            if (workloadCsvFile == null) {
+                throw new CliOptProcRuntimeException(50, "Invalid raw workload input file for a producer!" );
+            }
+            else {
                 CsvFileLineScanner csvFileLineScanner = new CsvFileLineScanner(workloadCsvFile);
 
                 TypedMessageBuilder messageBuilder = producer.newMessage();

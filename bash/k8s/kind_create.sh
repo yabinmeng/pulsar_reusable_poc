@@ -1,6 +1,6 @@
 #! /bin/bash
 
-source ./_utilities.sh
+source ../_utilities.sh
 
 
 ### 
@@ -18,7 +18,7 @@ fi
 
 usage() {
    echo
-   echo "Usage: k8s_kind_crtclstr.sh [-h] [-clstrName <cluster_name>] [-preLoad <docker_image_name>]"
+   echo "Usage: kind_create.sh [-h] [-clstrName <cluster_name>] [-preLoad <docker_image_name>]"
    echo "       -h : Show usage info"
    echo "       -clstrName : (Optional) Custom Kind cluster name."
    echo "       -preLoad   : (Optional) Preload the specified docker image"
@@ -42,14 +42,14 @@ while [[ "$#" -gt 0 ]]; do
    shift
 done
 
-dockerExistence=$(chkSvcExistence docker)
+dockerExistence=$(chkSysSvcExistence docker)
 debugMsg "dockerExistence=${dockerExistence}"
 if [[ ${dockerExistence} -eq 0 ]]; then
     echo "[ERROR] Docker engine isn't installed on the local machine yet; please install it first!"
     errExit 40;
 fi
 
-kindExistence=$(chkSvcExistence kind)
+kindExistence=$(chkSysSvcExistence kind)
 debugMsg "kindExistence=${kindExistence}"
 if [[ ${kindExistence} -eq 0 ]]; then
     echo "[ERROR] Kind isn't installed on the local machine yet; please install it first!"

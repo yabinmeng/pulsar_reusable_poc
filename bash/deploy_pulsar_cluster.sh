@@ -1,7 +1,6 @@
 #! /bin/bash
 
-source ./_utilities.sh
-
+source "./_utilities.sh"
 
 ### 
 # This script is used to deploy a Pulsar cluster on a K8s cluster whose
@@ -40,7 +39,7 @@ done
 
 echo
 
-helmExistence=$(chkSvcExistence helm)
+helmExistence=$(chkSysSvcExistence helm)
 debugMsg "helmExistence=${helmExistence}"
 if [[ ${helmExistence} -eq 0 ]]; then
     echo "[ERROR] 'helm' isn't installed on the local machine yet; please install it first!"
@@ -65,7 +64,7 @@ debugMsg "helmSecEnabled=${helmSecEnabled}"
 debugMsg "helmOAuthEnabled=${helmOAuthEnabled}"
 debugMsg "helmStarlightEnabled=${helmStarlightEnabled}"
 
-helmChartHomeDir="${WORKSHOP_HOMEDIR}/cluster_deploy/helm_chart"
+helmChartHomeDir="${WORKSHOP_HOMEDIR}/cluster_deploy/pulsar_helm"
 
 # Choose the right Pulsar helm chart based on the settings
 if [[ "${helmStarlightEnabled}" == "true" ]]; then
@@ -93,6 +92,29 @@ echo "= "
 echo "= Helm chart file \"${helmChartFile}\" will be used to deploy the Pulsar cluster with name \"${clstrName}\" ...  "
 echo "= "
 
+
+if [[ "${helmSecEnabled}" == "true" ]]; then
+    certManagerEnabled=$(getDeployPropVal "tools.cert_manager.enabled")
+    if [[ "${certManagerEnabled}" == "true" ]]; then
+        cmGhRelUrlBase="https://github.com/cert-manager/cert-manager/releases"
+        cmVersion=$(chkGitHubLatestRelVer "${cmGhRelUrlBase}/latest")
+        debugMsg "certManagerVersion=${cmVersion}"
+
+        echo
+        echo "--------------------------------------------------------------"
+        echo ">> Install \"cert_manager\" as required for a secured Pulsar cluster install ... "
+        helm repo add jetstack https://charts.jetstack.io
+        helm repo update jetstack
+        helm upgrade --install \
+             cert-manager jetstack/cert-manager \
+             --namespace cert-manager \
+             --create-namespace \
+             --version "v${cmVersion}" \
+             --set installCRDs=true
+    fi
+fi
+
+
 echo
 echo "--------------------------------------------------------------"
 echo ">> Add Pulsar helm to the local repository ... "
@@ -102,18 +124,17 @@ if [[ "${helmRepoUpdt}" == "true" ]]; then
     helm repo update datastax-pulsar
 fi
 
-
 # Update the Helm chart file with the proper cluster name and docker image release version
 pulsarRelease=$(getDeployPropVal "pulsar.image")
 helmDepUpdt=$(getDeployPropVal "helm.dependency.update")
 if [[ "${helmDepUpdt}" == "true" ]]; then
-    source update_pulsar_helm.sh \
+    source pulsar/update_helm.sh \
         -depUpdt \
         -file "${helmChartFile}" \
         -clstrName "${clstrName}" \
         -tgtRelease "${pulsarRelease}"
 else
-    source update_pulsar_helm.sh \
+    source pulsar/update_helm.sh \
         -file "${helmChartFile}" \
         -clstrName "${clstrName}" \
         -tgtRelease "${pulsarRelease}"
@@ -123,5 +144,12 @@ echo
 echo "--------------------------------------------------------------"
 echo ">> Install a Pulsar cluster named \"${clstrName}\" in the current K8s cluster ... "
 helm upgrade --install "${clstrName}" -f "${helmChartHomeDir}/${helmChartFile}" datastax-pulsar/pulsar
+
+echo
+echo "--------------------------------------------------------------"
+echo ">> Wait for Proxy pod is ready and then do port forwarding on port 6650 ... "
+kubectl wait -n default --timeout=180s --for condition=Available=True deployment -l=component="proxy"
+kubectl port-forward $(kubectl get pods -l=component="proxy" -o name) 6650:6650 &
+kubectl port-forward $(kubectl get pods -l=component="proxy" -o name) 6651:6651 &
 
 echo

@@ -1,4 +1,4 @@
-package com.example.pulsarworkshop.common;
+package com.example.pulsarworkshop.common.utils;
 
 import org.apache.pulsar.shade.org.apache.commons.io.FileUtils;
 import org.apache.pulsar.shade.org.apache.commons.io.LineIterator;

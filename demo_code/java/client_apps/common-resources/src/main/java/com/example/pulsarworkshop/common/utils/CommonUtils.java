@@ -1,4 +1,4 @@
-package com.example.pulsarworkshop.common;
+package com.example.pulsarworkshop.common.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;

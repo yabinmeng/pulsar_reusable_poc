@@ -17,6 +17,11 @@ nodes:
   - containerPort: 443
     hostPort: 443
     protocol: TCP
+  # this is used for jaeger span data transfer
+  # from jaeger agent to jaeger collector
+  # - containerPort: 6831
+  #   hostPort: 6831
+  #   protocol: UDP
 - role: worker
   image: kindest/node:v1.26.0
 - role: worker

@@ -85,6 +85,12 @@
             <artifactId>json</artifactId>
             <version>20220924</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.streamnative.pulsar.tracing</groupId>
+            <artifactId>opentracing-pulsar-client</artifactId>
+            <version>0.2.0</version>
+        </dependency>
     </dependencies>
 
 

@@ -1,5 +1,6 @@
 package com.example.pulsarworkshop.nativeapi;
 
+import com.example.pulsarworkshop.common.PulsarClientCLIApp;
 import com.example.pulsarworkshop.common.PulsarClientConf;
 import com.example.pulsarworkshop.common.exception.CliOptProcRuntimeException;
 import com.example.pulsarworkshop.common.exception.HelpExitException;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class PulsarConsumerApp extends  PulsarClientCLIApp {
+public class PulsarConsumerApp extends PulsarClientCLIApp {
 
     private static Logger logger = LoggerFactory.getLogger(PulsarConsumerApp.class);
 

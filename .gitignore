@@ -1,9 +1,9 @@
 .gradle/*
 .vscode/*
 *.class
-cluster_deploy/helm_chart/bkup
-cluster_deploy/helm_chart/charts
-cluster_deploy/helm_chart/Chart.lock
+cluster_deploy/pulsar_helm/bkup
+cluster_deploy/pulsar_helm/charts
+cluster_deploy/pulsar_helm/Chart.lock
 demo_code/java/client_apps/.idea
 demo_code/java/client_apps/*/target
 demo_code/java/client_apps/*/*/target

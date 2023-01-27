@@ -19,7 +19,7 @@ fi
 
 usage() {
    echo
-   echo "Usage: update_pulsar_helm.sh [-h]"
+   echo "Usage: update_helm.sh [-h]"
    echo "                             -chart </path/to/helm/chart/file>"
    echo "                             [-depUpdt]"
    echo "                             [-clstrName <cluster_name>]"
@@ -62,7 +62,7 @@ if [[ -z "{tgtRelName// }" || -z  "{tgtRelName// }" ]]; then
    exit 40
 fi
 
-HELM_HOMEDIR="${WORKSHOP_HOMEDIR}/cluster_deploy/helm_chart"
+HELM_HOMEDIR="${WORKSHOP_HOMEDIR}/cluster_deploy/pulsar_helm"
 chgWorkingDir "${HELM_HOMEDIR}"
 
 if ! [[ -f "${chartFile}" ]]; then

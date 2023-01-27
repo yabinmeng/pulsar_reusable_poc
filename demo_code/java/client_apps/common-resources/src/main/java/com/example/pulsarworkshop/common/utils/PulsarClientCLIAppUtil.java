@@ -1,4 +1,4 @@
-package com.example.pulsarworkshop.nativeapi.utils;
+package com.example.pulsarworkshop.common.utils;
 
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;

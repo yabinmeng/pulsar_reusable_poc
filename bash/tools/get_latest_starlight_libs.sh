@@ -1,15 +1,12 @@
 #! /bin/bash
 
+source ./_utilities.sh
 
 ### 
 # This script is used to get the latest starlight API releases for
 # 1) Starlight for JMS client Jar file
 # 2) LunaStreaming version update
 # 
-
-
-source ./_setenv.sh
-source ./_utilities.sh
 
 if [[ -z "${WORKSHOP_HOMEDIR// }" ]]; then
     echo "Home direcotry is not set! Please make sure it is set properly in \"_setenv.sh\" file."

@@ -1,5 +1,6 @@
 #! /bin/bash
 
+source ./_utilities.sh
 
 ### 
 # This script is used to tear down a K8s cluster that was created by
@@ -14,7 +15,6 @@
 # - eks
 # 
 
-source ./_utilities.sh
 if [[ -z "${WORKSHOP_HOMEDIR// }" ]]; then
     echo "Home direcotry is not set! Please make sure it is set properly in \"_setenv.sh\" file."
     errExit 10;
@@ -87,7 +87,7 @@ if [[ "${prompt// }" == "yes" || "${prompt// }" == "y" ]]; then
             ;;
 
         kind)
-            source k8s_kind_delclstr.sh -clstrName  ${clstrName}
+            source k8s/kind_delete.sh -clstrName  ${clstrName}
             ;;
 
         k3s)

@@ -1,5 +1,6 @@
 #! /bin/bash
 
+source ./_utilities.sh
 
 ### 
 # This script is used to deploy a K8s cluster with 1 control plane node 
@@ -14,7 +15,6 @@
 # - eks
 # 
 
-source ./_utilities.sh
 if [[ -z "${WORKSHOP_HOMEDIR// }" ]]; then
     echo "Home direcotry is not set! Please make sure it is set properly in \"_setenv.sh\" file."
     errExit 10;
@@ -47,7 +47,7 @@ while [[ "$#" -gt 0 ]]; do
    shift
 done
 
-kubeCtlExistence=$(chkSvcExistence kubectl)
+kubeCtlExistence=$(chkSysSvcExistence kubectl)
 debugMsg "kubeCtlExistence=${kubeCtlExistence}"
 if [[ ${kubeCtlExistence} -eq 0 ]]; then
     echo "[ERROR] 'kubectl' isn't installed on the local machine yet; please install it first!"
@@ -90,9 +90,9 @@ case ${k8sOpt} in
         preLoadImage=$(getDeployPropVal "kind.preload")
         if [[ "${preLoadImage}" == "true" ]]; then
             pulsarImage=$(getDeployPropVal "pulsar.image")
-            source k8s_kind_crtclstr.sh -clstrName ${clstrName} -preLoad ${pulsarImage}
+            source k8s/kind_create.sh -clstrName ${clstrName} -preLoad ${pulsarImage}
         else
-            source k8s_kind_crtclstr.sh -clstrName ${clstrName}
+            source k8/kind_create.sh -clstrName ${clstrName}
         fi
         ;;
 
@@ -115,5 +115,25 @@ case ${k8sOpt} in
         echo "Unsupported K8s deployment option : \"${k8sOpt}\""
         ;;
 esac
+
+nginxIngressEnabled=$(getDeployPropVal "k8s.nginx.ingress")
+if [[ "${nginxIngressEnabled}" == "true" ]]; then
+    echo
+    echo "--------------------------------------------------------------"
+    echo ">> Deploy NGINX ingress controller in the current K8s cluster if needed ... "
+    helm upgrade \
+         --install ingress-nginx ingress-nginx \
+         --repo https://kubernetes.github.io/ingress-nginx \
+         --namespace ingress-nginx --create-namespace
+
+    echo
+    echo "--------------------------------------------------------------"
+    echo ">> Deploy NGINX ingress controller in the current K8s cluster if needed ... "
+
+    kubectl wait --namespace ingress-nginx \
+        --for=condition=ready pod \
+        --selector=app.kubernetes.io/component=controller \
+        --timeout=60s
+fi
 
 echo

@@ -1,9 +1,10 @@
-package com.example.pulsarworkshop.nativeapi;
+package com.example.pulsarworkshop.common;
 
 import com.example.pulsarworkshop.common.exception.HelpExitException;
-import com.example.pulsarworkshop.nativeapi.utils.PulsarClientCLIAppUtil;
-import com.example.pulsarworkshop.common.PulsarClientConf;
 import com.example.pulsarworkshop.common.exception.CliOptProcRuntimeException;
+import com.example.pulsarworkshop.common.utils.PulsarClientCLIAppUtil;
+import io.streamnative.pulsar.tracing.TracingConsumerInterceptor;
+import io.streamnative.pulsar.tracing.TracingProducerInterceptor;
 import org.apache.commons.cli.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -51,22 +52,22 @@ public class PulsarClientCLIApp {
     // Consumer only
     private SubscriptionType consumerSubscriptionType = SubscriptionType.Exclusive;
 
-    PulsarClientCLIApp(boolean producer) {
+    public PulsarClientCLIApp(boolean producer) {
         this.bProducerApp = producer;
     }
 
-    File getConfigurartionFile() { return configurartionFile; }
-    File getRawWorkloadFile() { return rawWorkloadFile; }
-    int getNumMessage() { return numMessage; }
-    String getPulsarSvcUrl() { return pulsarSvcUrl; }
-    String getPulsarClientName() { return pulsarClientName; }
-    String getProducerTopicName() { return topicName; }
-    List<String> getConsumerTopicList() { return consumerTopicList; }
-    Pattern getConsumerTopicsPattern() { return consumerTopicsPattern; }
-    String getConsumerSubscriptionName() { return consumerSubscriptionName; }
-    SubscriptionType getConsumerSubscriptionType() { return consumerSubscriptionType; }
+    public File getConfigurartionFile() { return configurartionFile; }
+    public File getRawWorkloadFile() { return rawWorkloadFile; }
+    public int getNumMessage() { return numMessage; }
+    public String getPulsarSvcUrl() { return pulsarSvcUrl; }
+    public String getPulsarClientName() { return pulsarClientName; }
+    public String getProducerTopicName() { return topicName; }
+    public List<String> getConsumerTopicList() { return consumerTopicList; }
+    public Pattern getConsumerTopicsPattern() { return consumerTopicsPattern; }
+    public String getConsumerSubscriptionName() { return consumerSubscriptionName; }
+    public SubscriptionType getConsumerSubscriptionType() { return consumerSubscriptionType; }
 
-    static void usageAndExit(int errorCode) {
+    public static void usageAndExit(int errorCode) {
 
         System.out.println();
 
@@ -80,7 +81,7 @@ public class PulsarClientCLIApp {
         System.out.println();
     }
 
-    void processInputParameters(String[] inputParams) {
+    public void processInputParameters(String[] inputParams) {
         try {
             cmd = parser.parse(PulsarClientCLIAppUtil.cliOptions, inputParams);
         } catch (ParseException e) {
@@ -150,9 +151,6 @@ public class PulsarClientCLIApp {
 //        else {
 //            rawWorkloadFile = PulsarClientCLIAppUtil.getResourceFile("raw_data_iot_telemetry.csv");
 //        }
-        if (bProducerApp && rawWorkloadFile == null) {
-            throw new CliOptProcRuntimeException(50, "Invalid raw workload input file for a producer!" );
-        }
 
 
         /////////////
@@ -202,7 +200,7 @@ public class PulsarClientCLIApp {
         }
     }
 
-    PulsarClient createPulsarClient(PulsarClientConf pulsarClientConf)
+    public PulsarClient createPulsarClient(PulsarClientConf pulsarClientConf)
     throws PulsarClientException
     {
         ClientBuilder clientBuilder = PulsarClient.builder();
@@ -253,6 +251,12 @@ public class PulsarClientCLIApp {
 
     public Producer createPulsarProducer(PulsarClient pulsarClient,
                                          PulsarClientConf pulsarClientConf)
+    throws PulsarClientException {
+        return createPulsarProducer(pulsarClient, pulsarClientConf, false);
+    }
+    public Producer createPulsarProducer(PulsarClient pulsarClient,
+                                         PulsarClientConf pulsarClientConf,
+                                         boolean withInterceptor)
     throws PulsarClientException
     {
         ProducerBuilder producerBuilder = pulsarClient.newProducer();
@@ -274,11 +278,55 @@ public class PulsarClientCLIApp {
             producerBuilder.producerName(clientName);
         }
 
+        if (withInterceptor) {
+            producerBuilder.intercept(new TracingProducerInterceptor());
+        }
+
         return producerBuilder.create();
     }
 
     public Consumer<?> createPulsarConsumer(PulsarClient pulsarClient,
                                             PulsarClientConf pulsarClientConf)
+    throws PulsarClientException {
+        return createPulsarConsumer(pulsarClient, pulsarClientConf, null,false);
+    }
+    public Consumer<?> createPulsarConsumer(PulsarClient pulsarClient,
+                                            PulsarClientConf pulsarClientConf,
+                                            String topicName,
+                                            boolean withInterceptor)
+    throws PulsarClientException
+    {
+        return createPulsarConsumer(
+                pulsarClient,
+                pulsarClientConf,
+                topicName,
+                null,
+                null,
+                withInterceptor);
+    }
+
+    public Consumer<?> createPulsarConsumer(PulsarClient pulsarClient,
+                                            PulsarClientConf pulsarClientConf,
+                                            String topicName,
+                                            String consumerSubscriptionName,
+                                            boolean withInterceptor)
+    throws PulsarClientException
+    {
+        return createPulsarConsumer(
+                pulsarClient,
+                pulsarClientConf,
+                topicName,
+                consumerSubscriptionName,
+                null,
+                withInterceptor);
+    }
+
+    public Consumer<?> createPulsarConsumer(PulsarClient pulsarClient,
+                                            PulsarClientConf pulsarClientConf,
+                                            String topicName,
+                                            String consumerSubscriptionName,
+                                            SubscriptionType consumerSubscriptionType,
+                                            boolean withInterceptor)
     throws PulsarClientException
     {
         ConsumerBuilder<?> consumerBuilder = pulsarClient.newConsumer();
@@ -311,13 +359,17 @@ public class PulsarClientCLIApp {
             consumerBuilder.consumerName(clientName);
         }
 
-        List<String> topicNames = getConsumerTopicList();
-        if (!topicNames.isEmpty()) {
-            consumerBuilder.topics(topicNames);
+        if (StringUtils.isNotBlank(topicName)) {
+            consumerBuilder.topic(topicName);
         }
         else {
-            Pattern topicNamePattern = getConsumerTopicsPattern();
-            consumerBuilder.topicsPattern(topicNamePattern);
+            List<String> topicNames = getConsumerTopicList();
+            if (!topicNames.isEmpty()) {
+                consumerBuilder.topics(topicNames);
+            } else {
+                Pattern topicNamePattern = getConsumerTopicsPattern();
+                consumerBuilder.topicsPattern(topicNamePattern);
+            }
         }
 
         if (consumerConfMap.containsKey("deadLetterPolicy")) {
@@ -333,8 +385,23 @@ public class PulsarClientCLIApp {
                     (RedeliveryBackoff) consumerConfMap.get("ackTimeoutRedeliveryBackoff"));
         }
 
-        consumerBuilder.subscriptionName(getConsumerSubscriptionName());
-        consumerBuilder.subscriptionType(getConsumerSubscriptionType());
+        if (StringUtils.isNotBlank(consumerSubscriptionName)) {
+            consumerBuilder.subscriptionName(consumerSubscriptionName);
+        }
+        else {
+            consumerBuilder.subscriptionName(getConsumerSubscriptionName());
+        }
+
+        if (consumerSubscriptionType != null) {
+            consumerBuilder.subscriptionType(consumerSubscriptionType);
+        }
+        else {
+            consumerBuilder.subscriptionType(getConsumerSubscriptionType());
+        }
+
+        if (withInterceptor) {
+            consumerBuilder.intercept(new TracingConsumerInterceptor<>());
+        }
 
         return consumerBuilder.subscribe();
     }

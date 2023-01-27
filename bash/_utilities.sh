@@ -48,7 +48,7 @@ chkGitHubLatestRelVer() {
 ##
 # Check if the required executeable (e.g. docker, kind) has been installed locally
 #
-chkSvcExistence() {
+chkSysSvcExistence() {
     local whichCmdOutput=$(which ${1})
     if [[ -z "${whichCmdOutput// }" ]]; then
         echo 0
@@ -58,9 +58,54 @@ chkSvcExistence() {
 }
 
 ##
+# Check if the helm repo has been installed locally
+#
+chkHelmRepoExistence() {
+    local localRepoName="$(helm list | tail +2 | grep ${1} | awk '{print $1}')"
+    if [[ -z "${localRepoName// }" ]]; then
+        echo 0
+    else
+        echo 1
+    fi   
+}
+
+##
 # Read the properties file and returns the value based on the key
 # - $1: search key
-function getDeployPropVal {
-    value=$(grep "${1}" ${WORKSHOP_HOMEDIR}/${DEPLOY_PROP_FILE} | grep -Ev "^#|^$" | cut -d'=' -f2)
+getDeployPropVal() {
+    local value=$(grep "${1}" ${WORKSHOP_HOMEDIR}/${DEPLOY_PROP_FILE} | grep -Ev "^#|^$" | cut -d'=' -f2)
     echo $value
+}
+
+##
+# Terminate a forwarded port
+# - $1: the port to terminate
+termForwardedPort() {
+    local pid=$(ps -ef | grep port-forward | grep "${1}" | awk '{print $2}')
+    if [[ -n ${pid// } ]]; then
+        kill -TERM ${pid}
+    fi
+}
+
+##
+# Install cert-manager
+installCertManager() {
+    certManagerEnabled=$(getDeployPropVal "tools.cert_manager.enabled")
+    if [[ "${certManagerEnabled}" == "true" ]]; then
+        cmGhRelUrlBase="https://github.com/cert-manager/cert-manager/releases"
+        cmVersion=$(chkGitHubLatestRelVer "${cmGhRelUrlBase}/latest")
+        debugMsg "certManagerVersion=${cmVersion}"
+
+        echo
+        echo "--------------------------------------------------------------"
+        echo ">> Install \"cert_manager\" as required for a secured Pulsar cluster install ... "
+        helm repo add jetstack https://charts.jetstack.io
+        helm repo update jetstack
+        helm upgrade --install \
+             cert-manager jetstack/cert-manager \
+             --namespace cert-manager \
+             --create-namespace \
+             --version "v${cmVersion}" \
+             --set installCRDs=true
+    fi
 }
