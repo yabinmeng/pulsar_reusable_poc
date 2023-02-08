@@ -7,5 +7,4 @@ cluster_deploy/pulsar_helm/Chart.lock
 demo_code/java/client_apps/.idea
 demo_code/java/client_apps/*/target
 demo_code/java/client_apps/*/*/target
-demo_code/codes_from_old_repo/.gradle
-demo_code/codes_from_old_repo/bin
+demo_code/codes_from_old_repo/*

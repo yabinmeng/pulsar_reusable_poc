@@ -1,33 +1,32 @@
 #! /bin/bash
 
-source ../_utilities.sh
+if [[ -z "${WORKSHOP_HOMEDIR// }" ]]; then
+    echo "Workshop home direcotry is not set! Please run \"deploy_k8s_cluster.sh\" instead and"
+    echo "   make sure the workshop home directory is properly set in \"_setenv.sh\" file."
+    errExit 100;
+fi
 
+source ${WORKSHOP_HOMEDIR}/bash/_utilities.sh
 
 ### 
-# This script is used to create a Kind (K8s) cluster with 1 control plane node 
-# and 3 worker nodes
+# This script is used to create a local Kind (K8s) cluster with
+# 1 control plan node and 3 worker nodes
 # 
-
-if [[ -z "${WORKSHOP_HOMEDIR// }" ]]; then
-    echo "Home direcotry is not set! Please make sure it is set properly in \"_setenv.sh\" file."
-    errExit 10;
-elif ! [[ -n "${DEPLOY_PROP_FILE// }" && -f "${WORKSHOP_HOMEDIR// }/${DEPLOY_PROP_FILE// }" ]]; then
-    echo "[ERROR] Deployment properties file is not set or it can't be found!."
-    errExit 11;
-fi
 
 usage() {
    echo
-   echo "Usage: kind_create.sh [-h] [-clstrName <cluster_name>] [-preLoad <docker_image_name>]"
-   echo "       -h : Show usage info"
+   echo "Usage: kind_create.sh [-h]"
+   echo "                      [-clstrName <cluster_name>]"
+   echo "                      [-preLoad <docker_image_name>]"
+   echo "       -h : (Optional) Show usage info."
    echo "       -clstrName : (Optional) Custom Kind cluster name."
-   echo "       -preLoad   : (Optional) Preload the specified docker image"
+   echo "       -preLoadImage : (Optional) Preload the specified docker image"
    echo
 }
 
-if [[ $# -gt 4 ]]; then
+if [[ $# -eq 0 || $# -gt 4 ]]; then
    usage
-   errExit 20
+   errExit 110
 fi
 
 echo
@@ -36,8 +35,8 @@ while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
       -clstrName) clstrName=$2; shift ;;
-      -preLoad) imageNameTag=$2; shift ;;
-      *) echo "[ERROR] Unknown parameter passed: $1"; errExit 30 ;;
+      -preLoadImage) imageNameTag=$2; shift ;;
+      *) echo "[ERROR] Unknown parameter passed: $1"; errExit 120 ;;
    esac
    shift
 done
@@ -46,37 +45,32 @@ dockerExistence=$(chkSysSvcExistence docker)
 debugMsg "dockerExistence=${dockerExistence}"
 if [[ ${dockerExistence} -eq 0 ]]; then
     echo "[ERROR] Docker engine isn't installed on the local machine yet; please install it first!"
-    errExit 40;
+    errExit 130;
 fi
 
 kindExistence=$(chkSysSvcExistence kind)
 debugMsg "kindExistence=${kindExistence}"
 if [[ ${kindExistence} -eq 0 ]]; then
     echo "[ERROR] Kind isn't installed on the local machine yet; please install it first!"
-    errExit 50;
+    errExit 140;
 fi
 
-if [[ -z "${clstrName// }" ]]; then
-    tgtClstrName="kind"
-else
-    tgtClstrName="${clstrName}"
-fi
 
 echo "--------------------------------------------------------------"
-echo ">> Create the Kind cluster with the name \"${tgtClstrName}\" ..."
+echo ">> Create the Kind cluster with the name \"${clstrName}\" ..."
 
-clusterExistence=$(kind get clusters 2>&1 | grep "${tgtClstrName}")
+clusterExistence=$(kind get clusters 2>&1 | grep "${clstrName}")
 if [[ -z "${clusterExistence}" ]] || [[ "${clusterExistence}" == "No kind clusters found."  ]]; then
     kindCfgFile="${WORKSHOP_HOMEDIR}/cluster_deploy/kubernetes/kind/cluster-config.yaml"
     if ! [[ -f "${kindCfgFile}" ]]; then
         echo "   [ERROR] Cannot find the Kind cluster configuration file!"
-        errExit 60
+        errExit 150
     fi
 
-    kind create cluster --name "${tgtClstrName}" --config "${WORKSHOP_HOMEDIR}/cluster_deploy/kubernetes/kind/cluster-config.yaml"
+    kind create cluster --name "${clstrName}" --config "${WORKSHOP_HOMEDIR}/cluster_deploy/kubernetes/kind/cluster-config.yaml"
     if [[ $? -ne 0 ]]; then
         echo "   [ERROR] Cluster creation failed!"
-        errExit 70
+        errExit 160
     else
         echo "   Cluster creation succeeded!"
         echo
@@ -99,7 +93,7 @@ if [[ -n "${imageNameTag// }" ]]; then
     echo ">> Preload the specified docker image: \"${imageNameTag}\" ..."
     if [[ -z "${imageName// }" || -z "${imageTag// }" ]]; then
         echo "   [ERROR] Invalid docker image and version; must be in format \"<image_name>:<image_tag>\""
-        errExit 80;
+        errExit 170;
     fi
     
     # Check whether we need to pull the image first
@@ -111,12 +105,12 @@ if [[ -n "${imageNameTag// }" ]]; then
 
     echo
 
-    echo "   Load the specified docker image (${imageName}:${imageTag}) into the Kind cluster \"${tgtClstrName}\" ..."
-    kind load --name ${tgtClstrName} docker-image "${imageName}:${imageTag}"
+    echo "   Load the specified docker image (${imageName}:${imageTag}) into the Kind cluster \"${clstrName}\" ..."
+    kind load --name ${clstrName} docker-image "${imageName}:${imageTag}"
 
     if [[ $? -ne 0 ]]; then
         echo "   [ERROR] Docker image preload failed!"
-        errExit 90
+        errExit 180
     fi
 fi
 
@@ -126,5 +120,5 @@ fi
 ##
 # echo
 # echo "--------------------------------------------------------------"
-# echo ">> Set current K8s context to: \"kind-${tgtClstrName}\" ..."
-# kubectl config set-context "kind-${tgtClstrName}"
+# echo ">> Set current K8s context to: \"kind-${clstrName}\" ..."
+# kubectl config set-context "kind-${clstrName}"

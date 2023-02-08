@@ -7,17 +7,18 @@ source "./_utilities.sh"
 # client context configuration is current (kubectl config current-context)
 #
 
-if [[ -z "${WORKSHOP_HOMEDIR// }" ]]; then
-    echo "Home direcotry is not set! Please make sure it is set properly in \"_setenv.sh\" file."
+if [[ -z "${WORKSHOP_HOMEDIR}" ]]; then
+    echo "Workshop home direcotry is not set! Please make sure it is set properly in \"_setenv.sh\"."
     errExit 10;
-elif ! [[ -n "${DEPLOY_PROP_FILE// }" && -f "${WORKSHOP_HOMEDIR// }/${DEPLOY_PROP_FILE// }" ]]; then
+elif ! [[ -n "${DEPLOY_PROP_FILE}" && -f "${WORKSHOP_HOMEDIR}/${DEPLOY_PROP_FILE}" ]]; then
     echo "[ERROR] Deployment properties file is not set or it can't be found!."
-    errExit 11;
+    errExit 20;
 fi
 
 usage() {
    echo
-   echo "Usage: deploy_pulsar_cluster.sh [-h] -clstrName <cluster_name>"
+   echo "Usage: deploy_pulsar_cluster.sh [-h]"
+   echo "                                -clstrName <cluster_name>"
    echo "       -h : Show usage info"
    echo "       -clstrName : Pulsar cluster name."
    echo
@@ -25,14 +26,14 @@ usage() {
 
 if [[ $# -gt 2 ]]; then
    usage
-   errExit 20
+   errExit 30
 fi
 
 while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
       -clstrName) clstrName=$2; shift ;;
-      *) echo "[ERROR] Unknown parameter passed: $1"; exit 30 ;;
+      *) echo "[ERROR] Unknown parameter passed: $1"; exit 40 ;;
    esac
    shift
 done
@@ -43,14 +44,14 @@ helmExistence=$(chkSysSvcExistence helm)
 debugMsg "helmExistence=${helmExistence}"
 if [[ ${helmExistence} -eq 0 ]]; then
     echo "[ERROR] 'helm' isn't installed on the local machine yet; please install it first!"
-    errExit 40;
+    errExit 50;
 fi
 
 if [[ -z ${clstrName// } ]]; then
     clstrName=$(getDeployPropVal "pulsar.cluster.name")
     if [[ -z ${clstrName// } ]]; then
         echo "[ERROR] Pulsar cluster name cannot be empty! "
-        errExit 50
+        errExit 60
     fi
 fi
 # Name must be lowercase
@@ -151,5 +152,7 @@ echo ">> Wait for Proxy pod is ready and then do port forwarding on port 6650 ..
 kubectl wait -n default --timeout=180s --for condition=Available=True deployment -l=component="proxy"
 kubectl port-forward $(kubectl get pods -l=component="proxy" -o name) 6650:6650 &
 kubectl port-forward $(kubectl get pods -l=component="proxy" -o name) 6651:6651 &
+kubectl port-forward $(kubectl get pods -l=component="proxy" -o name) 8080:8080 &
+kubectl port-forward $(kubectl get pods -l=component="proxy" -o name) 8843:8843 &
 
 echo

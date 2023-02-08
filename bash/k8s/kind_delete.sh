@@ -1,18 +1,18 @@
 #! /bin/bash
 
-source ./_utilities.sh
+if [[ -z "${WORKSHOP_HOMEDIR// }" ]]; then
+    echo "Workshop home direcotry is not set! Please run \"deploy_k8s_cluster.sh\" instead and"
+    echo "   make sure the workshop home directory is properly set in \"_setenv.sh\" file."
+    errExit 100;
+fi
+
+source ${WORKSHOP_HOMEDIR}/bash/_utilities.sh
 
 
 ### 
 # This script is used to delete a Kind (K8s) cluster that was created by 
-# the "k8s_kind_crtclstr.sh" script
+# the "kind_create.sh" script
 # 
-
-
-if [[ -z "${WORKSHOP_HOMEDIR// }" ]]; then
-    echo "[ERROR] Home direcotry is not set! Please make sure it is set properly in \"_setenv.sh\" file."
-    exit 10;
-fi
 
 usage() {
    echo
@@ -22,9 +22,9 @@ usage() {
    echo
 }
 
-if [[ $# -gt 2 ]]; then
+if [[ $# -eq 0 || $# -gt 2 ]]; then
    usage
-   exit 20
+   exit 110
 fi
 
 echo
@@ -33,7 +33,7 @@ while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
       -clstrName) clstrName=$2; shift ;;
-      *) echo "[ERROR] Unknown parameter passed: $1"; exit 30 ;;
+      *) echo "[ERROR] Unknown parameter passed: $1"; exit 120 ;;
    esac
    shift
 done
@@ -42,14 +42,14 @@ dockerExistence=$(chkSysSvcExistence docker)
 debugMsg "dockerExistence=${dockerExistence}"
 if [[ ${dockerExistence} -eq 0 ]]; then
     echo "[ERROR] Docker engine isn't installed on the local machine yet; please install it first!"
-    exit 40;
+    exit 130;
 fi
 
 kindExistence=$(chkSysSvcExistence kind)
 debugMsg "kindExistence=${kindExistence}"
 if [[ ${kindExistence} -eq 0 ]]; then
     echo "[ERROR] Kind isn't installed on the local machine yet; please install it first!"
-    exit 50;
+    exit 140;
 fi
 
 if [[ -z "${clstrName// }" ]]; then
@@ -67,7 +67,7 @@ if [[ -n "${clusterExistence}" ]] && [[ "${clusterExistence}" != "No kind cluste
     kind delete cluster --name ${tgtClstrName}
     if [[ $? -ne 0 ]]; then
         echo "   [ERROR] Cluster deletion failed!"
-        errExit 60
+        errExit 150
     fi
 else
     echo "   [WARN] The Kind cluster with the spcified name does not exist!"

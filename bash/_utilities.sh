@@ -5,7 +5,7 @@ source ./_setenv.sh
 ##
 # Supported K8s deployment options
 # 
-K8S_DEPLOY_OPTIONS=("minikube" "kind" "k3s" "gke" "aks" "eks")
+K8S_DEPLOY_OPTIONS=("kind" "gke" "aks" "eks")
 
 
 ##
