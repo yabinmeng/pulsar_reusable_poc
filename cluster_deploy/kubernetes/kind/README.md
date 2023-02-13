@@ -32,9 +32,9 @@ This created Kind cluster has 1 control plane node and 3 worker nodes. You can c
 
 When deploying a container in the Kind cluster, the docker image for the container is fetched from the public docker image repository. Alternatively, you can load a docker image into the Kind cluster before using them to deploy containers. 
 
-For example, the following command load the DataStax Luna Streaming docker image (version 2.10_2.10) into the previously created Kind cluster in advance.
+For example, the following command load the DataStax Luna Streaming docker image (version 2.10_3.1) into the previously created Kind cluster in advance.
 ```
-kind load docker-image datastax/lunastreaming:2.10_2.10
+kind load docker-image datastax/lunastreaming:2.10_3.1
 ```
 
 ### Verify the loaded docker image

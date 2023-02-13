@@ -7,6 +7,17 @@ source ./_setenv.sh
 # 
 K8S_DEPLOY_OPTIONS=("kind" "gke" "aks" "eks")
 
+# 6650: Pulsar native protocol port
+# 8080: Pulsar web admin port
+# 9092: Kafka client listenting port
+# 8081: Kafka schema registry port (this is also TLS port)
+PULSAR_PROXY_PORTS=(6650 8080 9092 8081)
+# 6651: Pulsar native protocol TLS port
+# 8443: Pulsar web admin TLS port
+# 9093: Kafka client listenting TLS port
+# 8081: Kafka schema registry TLS port
+PULSAR_PROXY_PORTS_TLS=(6651 8443 9093)
+
 
 ##
 # Show debug message 
@@ -78,13 +89,42 @@ getDeployPropVal() {
 }
 
 ##
-# Terminate a forwarded port
-# - $1: the port to terminate
-termForwardedPort() {
-    local pid=$(ps -ef | grep port-forward | grep "${1}" | awk '{print $2}')
-    if [[ -n ${pid// } ]]; then
-        kill -TERM ${pid}
+# Forward the Pulsar proxy service ports to localhost
+# - $1: pulsar proxy service name
+# - $2: TLS enabled
+# - $3: nohup output file 
+startProxyPortForward() {
+    local proxySvcName=${1}
+    local tlsEnabled=${2}
+    local nohupOutFile=${3}
+    touch ${nohupOutFile}
+    
+    echo "   forwarding non-TLS ports (${PULSAR_PROXY_PORTS[@]}) ..."
+    for port in "${PULSAR_PROXY_PORTS[@]}"; do
+        # echo "   - port ${port}"
+        kubectl port-forward ${proxySvcName} ${port}:${port} >> ${nohupOutFile} 2>&1 &
+    done
+
+    if [[ "${tlsEnabled}" == "true" ]]; then
+        echo "   forwarding TLS ports (${PULSAR_PROXY_PORTS_TLS[@]})"
+        for port in "${PULSAR_PROXY_PORTS_TLS[@]}"; do
+            # echo "   - port ${port}"
+            kubectl port-forward ${proxySvcName} ${port}:${port} >> ${nohupOutFile} 2>&1 &
+        done
     fi
+}
+
+##
+# Terminate the forwarded ports of the Pulsar proxy service
+# - $1: pulsar proxy service name
+stopProxyPortForward() {
+    local proxySvcName=${1}
+    for port in "${PULSAR_PROXY_PORTS[@]}" "${PULSAR_PROXY_PORTS_TLS[@]}"; do
+        local pid=$(ps -ef | grep port-forward | grep "${port}" | awk '{print $2}')
+        if [[ -n ${pid// } ]]; then
+            kill -TERM ${pid}
+        fi
+    done
 }
 
 ##

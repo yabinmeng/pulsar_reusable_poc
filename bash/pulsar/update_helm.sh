@@ -20,30 +20,29 @@ fi
 usage() {
    echo
    echo "Usage: update_helm.sh [-h]"
-   echo "                             -chart </path/to/helm/chart/file>"
-   echo "                             [-depUpdt]"
-   echo "                             [-clstrName <cluster_name>]"
-   echo "                             -tgtRelease <version_string>"
+   echo "                       -chart </path/to/helm/chart/file>"
+   echo "                       [-depUpdt] <true|false>"
+   echo "                       [-clstrName <cluster_name>]"
+   echo "                       -tgtRelease <version_string>"
    echo "       -h : Show usage info"
    echo "       -chart:    : Helm chart file to update"
-   echo "       -depUpdt   : (Optional) Update helm chart dependencies. Skip dependency update if not specified."
+   echo "       -depUpdt   : (Optional) Update helm chart dependencies if true (default \"false\")."
    echo "       -clstrName : (Optional) Update Pulsar cluster name (default: \"pulsar\")."
    echo "       -tgtRelease : Update to a specific Pulsar release version."
    echo
 }
 
-if [[ $# -gt 7 ]]; then
+if [[ $# -gt 8 ]]; then
    usage
    exit 20
 fi
 
 echo
 
-depUpdt=0
 while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
-      -depUpdt) depUpdt=1 ;;
+      -depUpdt) depUpdt=$2; shift ;;
       -file) chartFile=$2; shift ;;
       -clstrName) clstrName=$2; shift ;;
       -tgtRelease) tgtRelease=$2; shift ;;
@@ -71,15 +70,14 @@ if ! [[ -f "${chartFile}" ]]; then
    if ! [[ -f "${helmChartHomeDir}/template/${helmChartFile}.tmpl" ]]; then
       echo "  [ERROR] Can't find the required Pulsar helm chart file template!"
       echo "          (\"${HELM_HOMEDIR}/template/${helmChartFile}.tmpl\")"
-      errExit 50
-   else
-      cp "${HELM_HOMEDIR}/template/${helmChartFile}.tmpl" "${HELM_HOMEDIR}/${helmChartFile}"
+      errExit 50   
    fi
    echo
 else
    mkdir -p bkup
    cp "${helmChartFile}" "bkup/${helmChartFile}_$(date +%Y%m%d)"
 fi
+cp "${HELM_HOMEDIR}/template/${helmChartFile}.tmpl" "${HELM_HOMEDIR}/${helmChartFile}"
 
 # Update Pulsar helm chart dependency if needed
 if [[ -f "Chart.yaml" ]]; then
@@ -87,7 +85,7 @@ if [[ -f "Chart.yaml" ]]; then
 fi
 
 echo "--------------------------------------------------------------"
-if [[ ${depUpdt} -eq 1 && ${chartYamlFileExists} -eq 1 ]]; then
+if [[ "${depUpdt}" == "true" && ${chartYamlFileExists} -eq 1 ]]; then
    echo ">> Update chart depdendency (depUpdt: ${depUpdt}, chartYamlFileExists: ${chartYamlFileExists}) "
    helm dependency update
    if [[ $? -ne 0 ]]; then

@@ -1,6 +1,6 @@
 #! /bin/bash
 
-source "./_utilities.sh"
+source ./_utilities.sh
 
 ### 
 # This script is used to deploy a Pulsar cluster on a K8s cluster whose
@@ -39,6 +39,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 echo
+curDir=$(pwd)
 
 helmExistence=$(chkSysSvcExistence helm)
 debugMsg "helmExistence=${helmExistence}"
@@ -57,35 +58,39 @@ fi
 # Name must be lowercase
 clstrName=$(echo "${clstrName}" | tr '[:upper:]' '[:lower:]')
 
-helmSecEnabled=$(getDeployPropVal "helm.security.enabled")
-helmOAuthEnabled=$(getDeployPropVal "helm.oauth")
-helmStarlightEnabled=$(getDeployPropVal "helm.starlight.enabled")
-
-debugMsg "helmSecEnabled=${helmSecEnabled}"
-debugMsg "helmOAuthEnabled=${helmOAuthEnabled}"
-debugMsg "helmStarlightEnabled=${helmStarlightEnabled}"
-
 helmChartHomeDir="${WORKSHOP_HOMEDIR}/cluster_deploy/pulsar_helm"
 
-# Choose the right Pulsar helm chart based on the settings
-if [[ "${helmStarlightEnabled}" == "true" ]]; then
-    if [[ "${helmSecEnabled}" == "true" ]]; then
-        helmChartFile="values_starlight_sec.yaml"
-    else
-        helmChartFile="values_starlight_nosec.yaml"
-    fi
-else
-    if [[ "${helmSecEnabled}" == "true" ]]; then
-        if [[ "${helmOAuthEnabled}" == "true" ]]; then
-            helmChartFile="values_sec_oauth.yaml"
-        else
-            helmChartFile="values_sec.yaml"
-        fi
-    else
-        helmChartFile="values_nosec.yaml"
-    fi
-fi
+helmAuthMethod=$(getDeployPropVal "helm.auth.method")
+helmTlsEnabled=$(getDeployPropVal "helm.tls.enabled")
+debugMsg "helmAuthMethod=${helmAuthMethod}"
+debugMsg "helmTlsEnabled=${helmTlsEnabled}"
 
+if [[ -z "${helmAuthMethod// }" || "${helmAuthMethod// }" == "jwt" ]]; then
+    if [[ -z "${helmTlsEnabled// }" || "${helmTlsEnabled// }" == "false" ]]; then
+        # Helm chart with JWT authentication enabled (and authorization), 
+        # and NO client-to-server TLS encryption
+        helmChartFile="values_jwtAuth.yaml"
+    else
+        # Helm chart with JWT authentication enabled (and authorization), 
+        # and WITH client-to-server TLS encryption
+        helmChartFile="values_jwtAuthTls.yaml"
+    fi
+elif [[ "${helmAuthMethod// }" == "oauth" ]]; then
+    if [[ -z "${helmTlsEnabled// }" || "${helmTlsEnabled// }" == "false" ]]; then
+        # Helm chart with OAuth authentication enabled (and authorization), 
+        # and NO client-to-server TLS encryption
+        helmChartFile="values_oauth.yaml"
+    else
+        # Helm chart with OAuth authentication enabled (and authorization), 
+        # and WITH client-to-server TLS encryption
+        helmChartFile="values_oauthTls.yaml"
+    fi
+elif [[ "${helmAuthMethod// }" == "none" ]]; then
+    # Basic helm chart with NO security feature enabled 
+    # - No authN, No authZ, No TLS encryption
+    helmChartFile="values_basic.yaml"    
+fi
+debugMsg "helmChartFile=${helmChartFile}"
 
 
 echo "============================================================== "
@@ -94,65 +99,65 @@ echo "= Helm chart file \"${helmChartFile}\" will be used to deploy the Pulsar c
 echo "= "
 
 
-if [[ "${helmSecEnabled}" == "true" ]]; then
-    certManagerEnabled=$(getDeployPropVal "tools.cert_manager.enabled")
-    if [[ "${certManagerEnabled}" == "true" ]]; then
-        cmGhRelUrlBase="https://github.com/cert-manager/cert-manager/releases"
-        cmVersion=$(chkGitHubLatestRelVer "${cmGhRelUrlBase}/latest")
-        debugMsg "certManagerVersion=${cmVersion}"
+certManagerEnabled=$(getDeployPropVal "tools.cert_manager.enabled")
+if [[ "${certManagerEnabled}" == "true" ]]; then
+    cmGhRelUrlBase="https://github.com/cert-manager/cert-manager/releases"
+    cmVersion=$(chkGitHubLatestRelVer "${cmGhRelUrlBase}/latest")
+    debugMsg "certManagerVersion=${cmVersion}"
 
-        echo
-        echo "--------------------------------------------------------------"
-        echo ">> Install \"cert_manager\" as required for a secured Pulsar cluster install ... "
-        helm repo add jetstack https://charts.jetstack.io
-        helm repo update jetstack
-        helm upgrade --install \
-             cert-manager jetstack/cert-manager \
-             --namespace cert-manager \
-             --create-namespace \
-             --version "v${cmVersion}" \
-             --set installCRDs=true
-    fi
+    echo
+    echo "--------------------------------------------------------------"
+    echo ">> Install \"cert_manager\" as required for a secured Pulsar cluster install ... "
+    kubectl apply -f "https://github.com/cert-manager/cert-manager/releases/download/v${cmVersion}/cert-manager.yaml"
 fi
-
 
 echo
 echo "--------------------------------------------------------------"
 echo ">> Add Pulsar helm to the local repository ... "
 helm repo add datastax-pulsar https://datastax.github.io/pulsar-helm-chart
-helmRepoUpdt=$(getDeployPropVal "helm.repo.update")
-if [[ "${helmRepoUpdt}" == "true" ]]; then
-    helm repo update datastax-pulsar
-fi
+helm repo update datastax-pulsar
 
 # Update the Helm chart file with the proper cluster name and docker image release version
 pulsarRelease=$(getDeployPropVal "pulsar.image")
 helmDepUpdt=$(getDeployPropVal "helm.dependency.update")
-if [[ "${helmDepUpdt}" == "true" ]]; then
-    source pulsar/update_helm.sh \
-        -depUpdt \
-        -file "${helmChartFile}" \
-        -clstrName "${clstrName}" \
-        -tgtRelease "${pulsarRelease}"
-else
-    source pulsar/update_helm.sh \
-        -file "${helmChartFile}" \
-        -clstrName "${clstrName}" \
-        -tgtRelease "${pulsarRelease}"
-fi
+source pulsar/update_helm.sh \
+    -depUpdt "${helmDepUpdt}" \
+    -file "${helmChartFile}" \
+    -clstrName "${clstrName}" \
+    -tgtRelease "${pulsarRelease}"
+cd ${curDir}
+
 
 echo
 echo "--------------------------------------------------------------"
-echo ">> Install a Pulsar cluster named \"${clstrName}\" in the current K8s cluster ... "
+echo ">> Install a Pulsar cluster named \"${clstrName}\" ... "
 helm upgrade --install "${clstrName}" -f "${helmChartHomeDir}/${helmChartFile}" datastax-pulsar/pulsar
 
+
 echo
 echo "--------------------------------------------------------------"
-echo ">> Wait for Proxy pod is ready and then do port forwarding on port 6650 ... "
-kubectl wait -n default --timeout=180s --for condition=Available=True deployment -l=component="proxy"
-kubectl port-forward $(kubectl get pods -l=component="proxy" -o name) 6650:6650 &
-kubectl port-forward $(kubectl get pods -l=component="proxy" -o name) 6651:6651 &
-kubectl port-forward $(kubectl get pods -l=component="proxy" -o name) 8080:8080 &
-kubectl port-forward $(kubectl get pods -l=component="proxy" -o name) 8843:8843 &
+echo ">> Wait for Proxy deployment is ready ... "
+## wati for Proxy deployment is ready (this approach doesn't work for K8s services)
+kubectl wait --timeout=600s --for condition=Available=True deployment -l=component="proxy"
+
+echo
+echo ">> Wait for Proxy service is ready ... "
+proxySvcName=$(kubectl get svc -l=component="proxy" -o name)
+debugMsg "proxySvcName=${proxySvcName}"
+## wait for Proxy service is assigned an external IP
+until [ -n "$(kubectl get ${proxySvcName} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" ]; do
+    sleep 2
+done
+
+if [[ -n "${proxySvcName// }" ]]; then
+    echo
+    echo "--------------------------------------------------------------"
+    echo ">> Forward Pulsar Proxy ports to localhost ... "
+    source k8s/forward_proxy_port.sh \
+        -act "start" \
+        -proxySvc "${proxySvcName}" \
+        -tlsEnabled "${helmTlsEnabled}"
+    cd ${curDir}
+fi
 
 echo

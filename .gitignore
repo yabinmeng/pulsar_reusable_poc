@@ -8,3 +8,4 @@ demo_code/java/client_apps/.idea
 demo_code/java/client_apps/*/target
 demo_code/java/client_apps/*/*/target
 demo_code/codes_from_old_repo/*
+logs/*

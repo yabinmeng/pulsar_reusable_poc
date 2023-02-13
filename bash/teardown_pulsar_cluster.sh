@@ -39,6 +39,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 echo
+curDir=$(pwd)
 
 helmExistence=$(chkSysSvcExistence helm)
 debugMsg "helmExistence=${helmExistence}"
@@ -56,22 +57,41 @@ if [[ -z ${clstrName// } ]]; then
 fi
 # Name must be lowercase
 clstrName=$(echo "${clstrName}" | tr '[:upper:]' '[:lower:]')
+debugMsg "clstrName=${clstrName}"
+
+proxySvcName=$(kubectl get svc -l=component="proxy" -o name)
+debugMsg "proxySvcName=${proxySvcName}"
+
+if [[ -n "${proxySvcName// }" ]]; then
+    echo
+    echo "--------------------------------------------------------------"
+    echo ">> Terminate the forwarded Pulsar Proxy ports ... "
+    source k8s/forward_proxy_port.sh \
+        -act "stop" \
+        -proxySvc "${proxySvcName}"
+    cd ${curDir}
+fi
 
 
 echo
 echo "--------------------------------------------------------------"
-echo ">> Uninstall a Pulsar cluster named \"${clstrName}\" in the current K8s cluster (if exists)... "
+echo ">> Uninstall the Pulsar cluster (\"${clstrName}\") from the K8s cluster ... "
 helmRepoExistence="$(chkHelmRepoExistence ${clstrName})"
 debugMsg "helmRepoExistence=${helmRepoExistence}"
-
 if [[ ${helmRepoExistence} -eq 1 ]]; then
-    helm uninstall "${clstrName}"
+    helm uninstall "${clstrName}" 
 fi
 
-# Terminate any previously forwarded port, if any
-termForwardedPort 6650
-termForwardedPort 6651
-termForwardedPort 8080
-termForwardedPort 8843
+# certManagerEnabled=$(getDeployPropVal "tools.cert_manager.enabled")
+# if [[ "${certManagerEnabled}" == "true" ]]; then
+#     cmGhRelUrlBase="https://github.com/cert-manager/cert-manager/releases"
+#     cmVersion=$(chkGitHubLatestRelVer "${cmGhRelUrlBase}/latest")
+#     debugMsg "certManagerVersion=${cmVersion}"
+
+#     echo
+#     echo "--------------------------------------------------------------"
+#     echo ">> Uninstall \"cert_manager\" as required for a secured Pulsar cluster install ... "
+#     kubectl delete -f "https://github.com/cert-manager/cert-manager/releases/download/v${cmVersion}/cert-manager.yaml"
+# fi
 
 echo
