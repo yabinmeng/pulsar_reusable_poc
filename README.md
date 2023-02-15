@@ -4,11 +4,10 @@
     - [2.1.1. IoT Use Case](#211-iot-use-case)
   - [2.2. Messaging and Processing Capabilities](#22-messaging-and-processing-capabilities)
 - [3. Develop and Deploy Applications](#3-develop-and-deploy-applications)
-- [4. Deploy the Infrastructure](#4-deploy-the-infrastructure)
-  - [4.1. Use Astra Streaming as the Infrastructure](#41-use-astra-streaming-as-the-infrastructure)
-  - [4.2. Use Luna Streaming as the Infrastructure](#42-use-luna-streaming-as-the-infrastructure)
-    - [4.2.1. Deploy K8s Cluster](#421-deploy-k8s-cluster)
-    - [4.2.2. Deploy the Pulsar cluster](#422-deploy-the-pulsar-cluster)
+- [4. Deploy the Infrastructure (Astra Streaming)](#4-deploy-the-infrastructure-astra-streaming)
+- [5. Deploy the Infrastructure (Luna Streaming)](#5-deploy-the-infrastructure-luna-streaming)
+  - [5.1. Deploy K8s Cluster](#51-deploy-k8s-cluster)
+  - [5.2. Deploy the Pulsar cluster](#52-deploy-the-pulsar-cluster)
 
 
 # 1. Overview
@@ -89,15 +88,13 @@ With the above use case, we want to demonstrate a comprehensive list of messagin
 # 3. Develop and Deploy Applications
 
 
-# 4. Deploy the Infrastructure
+# 4. Deploy the Infrastructure (Astra Streaming)
 
-## 4.1. Use Astra Streaming as the Infrastructure
+# 5. Deploy the Infrastructure (Luna Streaming)
 
-## 4.2. Use Luna Streaming as the Infrastructure
+## 5.1. Deploy K8s Cluster
 
-### 4.2.1. Deploy K8s Cluster
-
-### 4.2.2. Deploy the Pulsar cluster
+## 5.2. Deploy the Pulsar cluster
 
 
 
