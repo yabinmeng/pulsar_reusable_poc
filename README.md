@@ -1,4 +1,17 @@
-# Overview
+- [1. Overview](#1-overview)
+- [2. Demonstration Scenarios](#2-demonstration-scenarios)
+  - [2.1. Use Cases (Raw Data Sources)](#21-use-cases-raw-data-sources)
+    - [2.1.1. IoT Use Case](#211-iot-use-case)
+  - [2.2. Messaging and Processing Capabilities](#22-messaging-and-processing-capabilities)
+- [3. Develop and Deploy Applications](#3-develop-and-deploy-applications)
+- [4. Deploy the Infrastructure](#4-deploy-the-infrastructure)
+  - [4.1. Use Astra Streaming as the Infrastructure](#41-use-astra-streaming-as-the-infrastructure)
+  - [4.2. Use Luna Streaming as the Infrastructure](#42-use-luna-streaming-as-the-infrastructure)
+    - [4.2.1. Deploy K8s Cluster](#421-deploy-k8s-cluster)
+    - [4.2.2. Deploy the Pulsar cluster](#422-deploy-the-pulsar-cluster)
+
+
+# 1. Overview
 
 This workshop is a framework that aims to provide a much simplified, complete, end-to-end demo experience to showcase how to use Apache Pulsar as a powerful and unified messaging and streaming processing platform. 
 
@@ -6,9 +19,9 @@ This framework automates the entire deployment and configuration process that ra
 
 * Deploy the infrastructure. There are two choices here:
   
-  1) Use Astra Streaming as the managed infrastructure environment. This is the easy route and recommended.
+  1) Use [Astra Streaming](https://www.datastax.com/products/astra-streaming) as the managed infrastructure environment. This is the easy route and recommended.
          
-  2) Use Luna Streaming as the self-deployed infrastructure environment. This is the harder route but if needed, this framework supports the following deployment options:
+  2) Use [Luna Streaming](https://www.datastax.com/products/luna-streaming) as the self-deployed infrastructure environment. This is the harder route but if needed, this framework supports the following deployment options:
 
       * Deploy a K8s cluster of (any one of) the following types:
         * Kind
@@ -34,7 +47,7 @@ This framework automates the entire deployment and configuration process that ra
   
 * If the application demo requires Pulsar interaction with a 3rd party external system (e.g. Elasticsearch, C*, etc.), that system will be also deployed. This needs to be evaluated on case-by-case basis and will be automated as much as possible. 
 
-# Demonstration Scenarios
+# 2. Demonstration Scenarios
 
 From the user's perspective, this framework will be driven by pre-defined demo scenarios. All scenarios are defined in the **scenarios** folder and each one has its own sub-folder:
 * Each demo scenario has a global definition properties file, **demo_deploy.prop**, that determines how the demo (both infrastructure and application code) will be deployed. 
@@ -50,11 +63,13 @@ scenarios/
     └── term_demo.sh
 ```
 
-## IoT Use Case
+## 2.1. Use Cases (Raw Data Sources)
 
-All demo scenarios regardless of the underlying Pulsar deployment or the application API, are based on a typical IoT use case about environmental sensor telemetry data ([source link](https://www.kaggle.com/datasets/garystafford/environmental-sensor-data-132k)).
+All demo scenarios in this framework will be based on raw data sources that match actual use cases as much as possible. Currently, the following use cases are supported.
 
-The raw source data we're going to use in these demo scenarios represent the sensor data reading of the following types for a specific range of time (from 07/11/2020 to 07/18/2011). 
+### 2.1.1. IoT Use Case
+
+This use case (raw data source) represents the data reading of IoT devices that contain various types of senors for a specific range of time (e.g. 1 week). The available **Sensor Types** are listed as below. For more detailed description of this data source can be found from [here](https://www.kaggle.com/datasets/garystafford/environmental-sensor-data-132k).
 * Carbon monoxide 
 * Humidity (%)
 * Light detection
@@ -65,21 +80,24 @@ The raw source data we're going to use in these demo scenarios represent the sen
 
 A copy of this data can be found from [raw_data/sensor_telemetry.csv](raw_data/sensor_telemetry.csv)
 
-## Messaging and Processing Capabilities
+## 2.2. Messaging and Processing Capabilities
+
+With the above use case, we want to demonstrate a comprehensive list of messaging and streaming processing capabilities as listed below:
+
+* 
+
+# 3. Develop and Deploy Applications
 
 
-# Develop and Deploy Applications
+# 4. Deploy the Infrastructure
 
+## 4.1. Use Astra Streaming as the Infrastructure
 
-# Deploy the Infrastructure
+## 4.2. Use Luna Streaming as the Infrastructure
 
-## Use Astra Streaming as the Infrastructure
+### 4.2.1. Deploy K8s Cluster
 
-## Use Luna Streaming as the Infrastructure
-
-### Deploy K8s Cluster
-
-### Deploy the Pulsar cluster
+### 4.2.2. Deploy the Pulsar cluster
 
 
 
