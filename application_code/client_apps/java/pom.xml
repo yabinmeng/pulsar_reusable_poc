@@ -30,13 +30,23 @@
     </properties>
 
     <modules>
-        <module>nativeapi/producer-consumer</module>
-        <module>nativeapi/open-tracing-interceptor</module>
-        <module>s4j</module>
-        <module>s4k</module>
-        <module>s4r</module>
-        <module>spring-boot</module>
+        <!--
+        <module>_misc_/producer-consumer</module>
+        <module>_misc_/open-tracing-interceptor</module>
+        -->
         <module>common-resources</module>
+        <module>nat_prod</module>
+        <module>nat_cons</module>
+        <module>spb_prod</module>
+        <module>spb_cons</module>
+        <module>s4j_queu_send</module>
+        <module>s4j_queu_recv</module>
+        <module>s4j_topic_prod</module>
+        <module>s4j_topic_subs</module>
+        <module>s4k_prod</module>
+        <module>s4k_cons</module>
+        <module>s4r_queu_cons</module>
+        <module>s4r_queu_prod</module>
     </modules>
 
     <dependencies>

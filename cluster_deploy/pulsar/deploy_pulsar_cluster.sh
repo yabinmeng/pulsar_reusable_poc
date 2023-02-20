@@ -29,15 +29,17 @@ usage() {
    echo "                                -clstrName <cluster_name>"
    echo "                                -propFile <deployment_properties_file>"
    echo "                                [-upgrade]"
+   echo "                                [-genClntConfFile] <target_folder>"
    echo "       -h : Show usage info"
    echo "       -clstrName : Pulsar cluster name"
    echo "       -propFile  : Pulsar deployment properties file"
    echo "       -upgrade   : (Optional) Whether to upgrade the existing Pulsar cluster"
+   echo "       -genClntConfFile : (Optional) Generate \"client.conf\" file in the specified target folder"
    
    echo
 }
 
-if [[ $# -eq 0 || $# -gt 5 ]]; then
+if [[ $# -eq 0 || $# -gt 7 ]]; then
    usage
    errExit 20
 fi
@@ -49,6 +51,7 @@ while [[ "$#" -gt 0 ]]; do
       -clstrName) pulsarClstrName=$2; shift ;;
       -propFile) pulsarDeployPropFile=$2; shift ;;
       -upgrade) upgradeExistingCluster=1; ;;
+      -genClntConfFile) targetClntConfFileFolder=$2; shift ;;
       *) echo "[ERROR] Unknown parameter passed: $1"; exit 30 ;;
    esac
    shift
@@ -207,6 +210,31 @@ if [[ -n "${proxySvcName// }" ]]; then
         -act "start" \
         -proxySvc "${proxySvcName}" \
         -tlsEnabled "${helmTlsEnabled}"
+fi
+
+
+if [[ -d "${targetClntConfFileFolder}" ]]; then
+    echo
+    echo "--------------------------------------------------------------"
+    echo ">> Generate \"client.conf\" in the target folder ... "
+
+    clntConnFile="${targetClntConfFileFolder}/client.conf"
+    echo > ${clntConnFile}
+
+    if [[ "${helmTlsEnabled}" == "false" ]]; then
+        echo "webServiceUrl=http://localhost:8080" >> ${clntConnFile}
+        echo "brokerServiceUrl=pulsar://localhost:6650" >> ${clntConnFile}
+    else
+        echo "webServiceUrl=https://localhost:8443" >> ${clntConnFile}
+        echo "brokerServiceUrl=pulsar+ssl://localhost:6651" >> ${clntConnFile}
+    fi
+
+    if [[ -n "${helmAuthMethod}" && "${helmAuthMethod}" != "none" ]]; then
+        jwtTokenStr=$(kubectl get secrets token-superuser -o jsonpath="{.data['superuser\.jwt']}" | base64 --decode)
+        echo "authPlugin=org.apache.pulsar.client.impl.auth.AuthenticationToken" >> ${clntConnFile}
+        echo "authParams=token:${jwtTokenStr}" >> ${clntConnFile}
+    fi
+
 fi
 
 echo

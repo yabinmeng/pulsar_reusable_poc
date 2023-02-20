@@ -8,5 +8,6 @@ application_code/client_apps/java/*/target
 application_code/client_apps/java/*/*/target
 application_code/codes_from_old_repo/*
 scenarios/*.nohup
+scenarios/*/appexec/*
 scenarios/logs/*
 cluster_deploy/ext_tools/jaegar/jaeger_port_forward.nohup
