@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>s4r</artifactId>
+    <artifactId>s4k_prod</artifactId>
     <packaging>jar</packaging>
 
     <parent>
@@ -13,6 +13,6 @@
 
     <name>${project.artifactId}</name>
     <description>
-        Pulsar workshop for S4R (starlight for RabbitMQ) API.
+        Pulsar workshop for S4K (starlight for Kafka) API.
     </description>
 </project>
