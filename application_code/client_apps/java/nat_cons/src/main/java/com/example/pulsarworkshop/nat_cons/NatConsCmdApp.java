@@ -1,37 +1,35 @@
-package com.example.pulsarworkshop.nat_prod;
+package com.example.pulsarworkshop.nat_cons;
 
 import com.example.pulsarworkshop.common.PulsarWorkshopCmdApp;
-import com.example.pulsarworkshop.common.exception.CliOptProcRuntimeException;
 import com.example.pulsarworkshop.common.exception.HelpExitException;
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
-import com.example.pulsarworkshop.common.utils.PulsarClientCLIAppUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-
-import java.io.File;
-import java.io.IOException;
+import org.apache.pulsar.client.api.SubscriptionType;
 import java.io.PrintWriter;
 
-public class NatProdCmdApp extends PulsarWorkshopCmdApp {
+public class NatConsCmdApp extends PulsarWorkshopCmdApp {
 
-    private File srcWrkldFile;
-
-    // Default to publish 20 messages
-    // -1 means to read all data from the source workload file and publish as messages
+    // Default to consume 20 messages
+    // -1 means to consume all available messages (indefinitely)
     private int numMsg = 20;
+    private String subsriptionName;
+    private SubscriptionType subscriptionType = SubscriptionType.Exclusive;
 
-    public NatProdCmdApp(String[] inputParams) {
+    public NatConsCmdApp(String[] inputParams) {
         super(inputParams);
 
-        extraCliOptions.addOption(new Option("srcWrkldFile", false, "Data source workload file."));
         extraCliOptions.addOption(new Option("numMsg", true, "Number of message to produce."));
+        extraCliOptions.addOption(new Option("subType", false, "Pulsar subscription type."));
+        extraCliOptions.addOption(new Option("subName", false, "Pulsar subscription name."));
     }
 
     public static void main(String[] args) {
-        PulsarWorkshopCmdApp workshopApp = new NatProdCmdApp(args);
+        PulsarWorkshopCmdApp workshopApp = new NatConsCmdApp(args);
 
         try {
             workshopApp.processInputParams();
@@ -64,16 +62,6 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
             throw new InvalidParamException("Failed to parse extra CLI input parameters!");
         }
 
-        // CLI option for data source workload file
-        try {
-            String srcWrkldFileParam = extraCmdLine.getOptionValue("srcWrkldFile");
-            srcWrkldFile = new File(srcWrkldFileParam);
-            srcWrkldFile.getCanonicalPath();
-        }
-        catch (IOException ex) {
-            throw new InvalidParamException("Invalid source workload file path!");
-        }
-
         // CLI option for number of messages
         String msgNumParam = extraCmdLine.getOptionValue("numMsg");
         int intVal = NumberUtils.toInt(msgNumParam);
@@ -82,6 +70,23 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
         }
         else {
             throw new InvalidParamException("Message number must be a positive integer or -1 (all available raw input)!");
+        }
+
+        // Pulsar subscription name
+        subsriptionName = extraCmdLine.getOptionValue("subName");
+        if (StringUtils.isBlank(subsriptionName)) {
+            throw new InvalidParamException("Empty subscription name!");
+        }
+
+        // Pulsar subscription type, default Exclusive
+        String subTypeParam = extraCmdLine.getOptionValue("subType");
+        if ( ! StringUtils.isBlank(subTypeParam) ) {
+            try {
+                subscriptionType = SubscriptionType.valueOf(subTypeParam);
+            }
+            catch (IllegalArgumentException iae) {
+                subscriptionType = SubscriptionType.Exclusive;
+            }
         }
     }
 

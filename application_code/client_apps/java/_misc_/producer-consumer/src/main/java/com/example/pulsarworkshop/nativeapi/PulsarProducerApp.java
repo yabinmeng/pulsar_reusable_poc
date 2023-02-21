@@ -25,7 +25,7 @@ public class PulsarProducerApp extends PulsarClientCLIApp {
     public PulsarProducerApp() {
         super(true);
     }
-    public static void main(String[] args) {
+    ç
 
         PulsarProducerApp producerCmdApp = new PulsarProducerApp();
 

@@ -4,8 +4,13 @@
 cluster_deploy/pulsar/helm/charts/*
 cluster_deploy/pulsar/helm/Chart.lock
 application_code/client_apps/java/.idea
+application_code/client_apps/java/target
 application_code/client_apps/java/*/target
 application_code/client_apps/java/*/*/target
+application_code/client_apps/java/*/*.iml
+application_code/client_apps/java/dependency-reduced-pom.xml
+application_code/client_apps/java/*/dependency-reduced-pom.xml
+application_code/client_apps/java/*/*/dependency-reduced-pom.xml
 application_code/codes_from_old_repo/*
 scenarios/*.nohup
 scenarios/*/appexec/*

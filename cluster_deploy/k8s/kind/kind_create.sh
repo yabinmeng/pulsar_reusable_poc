@@ -1,12 +1,27 @@
 #! /bin/bash
 
-if [[ -z "${WORKSHOP_HOMEDIR// }" ]]; then
-    echo "Workshop home direcotry is not set! Please run \"deploy_k8s_cluster.sh\" instead and"
-    echo "   make sure the workshop home directory is properly set in \"_setenv.sh\" file."
-    errExit 100;
+###
+# Copyright DataStax, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
+
+if [[ -z "${PULSAR_WORKSHOP_HOMEDIR}" ]]; then
+    echo "Workshop home direcotry is not set; please first run \"source ../../../_bash_utils_/setenv.sh\" in the current directory!"
+    exit 10;
 fi
 
-source ${WORKSHOP_HOMEDIR}/bash/utilities.sh
+source "${PULSAR_WORKSHOP_HOMEDIR}/_bash_utils_/utilities.sh"
 
 ### 
 # This script is used to create a local Kind (K8s) cluster with

@@ -1,6 +1,27 @@
 #! /bin/bash
 
-source ./utilities.sh
+###
+# Copyright DataStax, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
+
+if [[ -z "${PULSAR_WORKSHOP_HOMEDIR}" ]]; then
+    echo "Workshop home direcotry is not set; please first run \"source ../../_bash_utils_/setenv.sh\" in the current directory!"
+    exit 10;
+fi
+
+source "${PULSAR_WORKSHOP_HOMEDIR}/_bash_utils_/utilities.sh"
 
 ### 
 # This script is used to tear down a K8s cluster that was created by
@@ -12,14 +33,6 @@ source ./utilities.sh
 # - aks
 # - eks
 # 
-
-if [[ -z "${WORKSHOP_HOMEDIR}" ]]; then
-    echo "Workshop home direcotry is not set! Please make sure it is set properly in \"_setenv.sh\"."
-    errExit 10;
-elif ! [[ -n "${DEPLOY_PROP_FILE}" && -f "${WORKSHOP_HOMEDIR}/${DEPLOY_PROP_FILE}" ]]; then
-    echo "[ERROR] Deployment properties file is not set or it can't be found!."
-    errExit 20;
-fi
 
 usage() {
    echo
@@ -46,15 +59,18 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 if [[ -z ${clstrName// } ]]; then
-    clstrName=$(getPropVal "k8s.cluster.name")
+    clstrName=$(getPropVal ${k8sDeployPropFile} "k8s.cluster.name")
     if [[ -z ${clstrName// } ]]; then
         echo "[ERROR] K8s cluster name cannot be empty! "
         errExit 50
     fi
 fi
 
+# TODO: make this as part of the input parameter
+k8sDeployPropFile="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/k8s/k8s.properties"
+
 if [[ -z ${k8sOpt// } ]]; then
-    k8sOpt=$(getPropVal "k8s.deploy.option")
+    k8sOpt=$(getPropVal ${k8sDeployPropFile} "k8s.deploy.option")
     if [[ -z ${k8sOpt// } ]]; then
         echo "[ERROR] A K8s deployment option must be provided!"
         errExit 60
@@ -81,14 +97,14 @@ read -r prompt
 if [[ "${prompt// }" == "yes" || "${prompt// }" == "y" ]]; then
     case ${k8sOpt} in
         kind)
-            source k8s/kind_delete.sh -clstrName  ${clstrName}
+            source kind/kind_delete.sh -clstrName  ${clstrName}
             ;;
 
         gke)
-            projectName=$(getPropVal "gke.project")
-            regOrZoneName=$(getPropVal "gke.reg_or_zone")
+            projectName=$(getPropVal ${k8sDeployPropFile} "gke.project")
+            regOrZoneName=$(getPropVal ${k8sDeployPropFile} "gke.reg_or_zone")
 
-            source k8s/gke_delete.sh \
+            source gke/gke_delete.sh \
                 -clstrName ${clstrName} \
                 -project ${projectName} \
                 -regOrZone ${regOrZoneName}

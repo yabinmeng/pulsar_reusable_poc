@@ -1,49 +1,96 @@
 package com.example.pulsarworkshop.common;
 
-import com.example.pulsarworkshop.common.exception.CliOptProcRuntimeException;
 import com.example.pulsarworkshop.common.exception.HelpExitException;
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
-import com.example.pulsarworkshop.common.utils.PulsarClientCLIAppUtil;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
 
-abstract public class PulsarWorkshopApp {
-    protected DefaultParser cmdParser = new DefaultParser();
-    protected CommandLine cmdLine = null;
+abstract public class PulsarWorkshopCmdApp {
+    protected String[] rawCmdInputParams;
+    protected String pulsarTopicName;
+    protected File clientConnfFile;
+    protected File extraCfgPropFile;
 
-    protected String pulsarTopic;
+    protected DefaultParser cmdParser;
+    protected Options basicCliOptions = new Options();
+    protected Options extraCliOptions = new Options();
 
-    protected File clientConfFile;
+    public PulsarWorkshopCmdApp(String[] inputParams) {
+        this.rawCmdInputParams = inputParams;
 
-    public PulsarWorkshopApp(String[] inputParams) {
+        // Basic Command line options
+        basicCliOptions.addOption(new Option("help", false, "Displays the usage method."));
+        basicCliOptions.addOption(new Option("topic", true, "Pulsar topic name."));
+        basicCliOptions.addOption(new Option("connFile", true, "\"client.conf\" file path."));
+        basicCliOptions.addOption(new Option("cfgFile", true, "Extra config properties file path."));
+    }
+
+    public String getPulsarTopicName() { return this.pulsarTopicName; }
+    public File getClientConnfFile() { return this.clientConnfFile; }
+    public File getExtraCfgPropFile() { return this.extraCfgPropFile; }
+
+    public void processInputParams() throws
+            HelpExitException, InvalidParamException {
+        cmdParser = new DefaultParser();
+        processBasicInputParams();
+        processExtraInputParams();
+    }
+    public void processBasicInputParams() throws HelpExitException, InvalidParamException {
+        CommandLine basicCmdLine = null;
+
         try {
-            cmdLine = cmdParser.parse(PulsarClientCLIAppUtil.cliOptions, inputParams);
+            basicCmdLine = cmdParser.parse(basicCliOptions, rawCmdInputParams);
         } catch (ParseException e) {
-            throw new InvalidParamException("Failed to parse the command line input parameters!");
+            throw new InvalidParamException("Failed to parse basic CLI input parameters!");
         }
-    }
 
-    public void setPulsarTopic(String topic) { this.pulsarTopic = topic; }
-    public String getPulsarTopic() { return this.pulsarTopic; }
+        // CLI option for help messages
+        if (basicCmdLine.hasOption("help")) {
+            throw new HelpExitException();
+        }
 
-    public void setClientConfFile(String clientConfFilePath) throws InvalidParamException {
+        // CLI option for Pulsar topic
+        pulsarTopicName = basicCmdLine.getOptionValue("topic");
+        if (StringUtils.isBlank(pulsarTopicName)) {
+            throw new InvalidParamException("Empty Pulsar topic name!");
+        }
+
+        // CLI option for client.conf file
         try {
-            this.clientConfFile = new File(clientConfFilePath);
-            this.clientConfFile.getCanonicalPath();
+            String clntConnFileParam = basicCmdLine.getOptionValue("connFile");
+            clientConnfFile = new File(clntConnFileParam);
+            clientConnfFile.getCanonicalPath();
         }
-        catch(IOException ioe) {
-            throw new InvalidParamException("Can't read the specified client.conf file!");
+        catch (IOException ex) {
+            throw new InvalidParamException("Invalid \"client.conf\" file path!");
+        }
+
+        // CLI option for extra config properties file
+        try {
+            String cfgFileParam = basicCmdLine.getOptionValue("cfgFile");
+            clientConnfFile = new File(cfgFileParam);
+            clientConnfFile.getCanonicalPath();
+        }
+        catch (IOException ex) {
+            throw new InvalidParamException("Invalid configuration properties file path!");
         }
     }
-    public File getClientConfFile() { return this.clientConfFile; }
 
-    public abstract void processInputParams(String[] inputParams) throws
-            HelpExitException, InvalidParamException;
+    public Options getCliOptions() {
+        Options options = new Options();
+        for (Option opt : basicCliOptions.getOptions()) {
+            options.addOption(opt);
+        }
+        for (Option opt : extraCliOptions.getOptions()) {
+            options.addOption(opt);
+        }
+        return options;
+    }
+
+    public abstract void processExtraInputParams() throws InvalidParamException;
     public abstract void runApp();
     public abstract void termApp();
     public abstract void usage();

@@ -1,15 +1,15 @@
 package com.example.pulsarworkshop.common.exception;
 
-public class InvalidCfgParamException extends RuntimeException {
+public class InvalidParamException extends RuntimeException {
 
     private String errorDescription;
 
-    public InvalidCfgParamException(String paramName, String errDesc) {
+    public InvalidParamException(String paramName, String errDesc) {
         super("Invalid setting for parameter (" + paramName + "): " + errDesc);
         this.errorDescription = "Invalid setting for parameter (" + paramName + "): " + errDesc;
     }
 
-    public InvalidCfgParamException(String fullErrDesc) {
+    public InvalidParamException(String fullErrDesc) {
         super(fullErrDesc);
         this.errorDescription = fullErrDesc;
     }

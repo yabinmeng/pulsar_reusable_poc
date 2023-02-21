@@ -1,6 +1,6 @@
 package com.example.pulsarworkshop.common;
 
-import com.example.pulsarworkshop.common.exception.InvalidCfgParamException;
+import com.example.pulsarworkshop.common.exception.InvalidParamException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.FileBasedConfiguration;
@@ -444,7 +444,7 @@ public class PulsarClientConf {
 
                     producerConfObjMap.put(confKeyName, compressionType);
                 } else {
-                    throw new InvalidCfgParamException(
+                    throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal,
                                     PulsarClientConf.CONF_CATEGORY.Producer.label, expectedVal));
                 }
@@ -513,7 +513,7 @@ public class PulsarClientConf {
                     }
 
                 } catch (Exception e) {
-                    throw new InvalidCfgParamException(
+                    throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal,
                                     PulsarClientConf.CONF_CATEGORY.Consumer.label, expectedVal));
                 }
@@ -534,7 +534,7 @@ public class PulsarClientConf {
                     consumerConfObjMap.put(confKeyName, subInitPos);
 
                 } catch (Exception e) {
-                    throw new InvalidCfgParamException(
+                    throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal, "consumer", expectedVal));
                 }
             }
@@ -554,7 +554,7 @@ public class PulsarClientConf {
                     consumerConfObjMap.put(confKeyName, regexSubscriptionMode);
 
                 } catch (Exception e) {
-                    throw new InvalidCfgParamException(
+                    throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal,
                                     PulsarClientConf.CONF_CATEGORY.Consumer.label, expectedVal));
                 }
@@ -618,13 +618,13 @@ public class PulsarClientConf {
                             DeadLetterPolicy deadLetterPolicy = builder.build();
                             consumerConfObjMap.put(confKeyName, deadLetterPolicy);
                         } else {
-                            throw new InvalidCfgParamException(
+                            throw new InvalidParamException(
                                     getInvalidConfValStr(confKeyName, confVal,
                                             PulsarClientConf.CONF_CATEGORY.Consumer.label, expectedVal));
                         }
                     }
                 } catch (Exception e) {
-                    throw new InvalidCfgParamException(
+                    throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal,
                                     PulsarClientConf.CONF_CATEGORY.Consumer.label, expectedVal));
                 }
@@ -682,14 +682,14 @@ public class PulsarClientConf {
                                 consumerConfObjMap.put(confKey, redeliveryBackoff);
 
                             } else {
-                                throw new InvalidCfgParamException(
+                                throw new InvalidParamException(
                                         getInvalidConfValStr(confKey, confVal,
                                                 PulsarClientConf.CONF_CATEGORY.Consumer.label, expectedVal));
                             }
                         }
 
                     } catch (Exception e) {
-                        throw new InvalidCfgParamException(
+                        throw new InvalidParamException(
                                 getInvalidConfValStr(confKey, confVal,
                                         PulsarClientConf.CONF_CATEGORY.Consumer.label, expectedVal));
                     }
