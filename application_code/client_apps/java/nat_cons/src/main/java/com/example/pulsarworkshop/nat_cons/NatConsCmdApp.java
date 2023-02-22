@@ -53,17 +53,19 @@ public class NatConsCmdApp extends PulsarWorkshopCmdApp {
     }
 
     @Override
-    public void processExtraInputParams() throws InvalidParamException {
-        CommandLine extraCmdLine = null;
+    public void processInputParams() throws InvalidParamException {
+        CommandLine commandLine = null;
 
         try {
-            extraCmdLine = cmdParser.parse(extraCliOptions, rawCmdInputParams);
+            commandLine = cmdParser.parse(getCliOptions(), rawCmdInputParams);
         } catch (ParseException e) {
             throw new InvalidParamException("Failed to parse extra CLI input parameters!");
         }
 
+        super.processBasicInputParams(commandLine);
+
         // CLI option for number of messages
-        String msgNumParam = extraCmdLine.getOptionValue("numMsg");
+        String msgNumParam = commandLine.getOptionValue("numMsg");
         int intVal = NumberUtils.toInt(msgNumParam);
         if ( (intVal > 0) || (intVal == -1) ) {
             numMsg = intVal;
@@ -73,13 +75,13 @@ public class NatConsCmdApp extends PulsarWorkshopCmdApp {
         }
 
         // Pulsar subscription name
-        subsriptionName = extraCmdLine.getOptionValue("subName");
+        subsriptionName = commandLine.getOptionValue("subName");
         if (StringUtils.isBlank(subsriptionName)) {
             throw new InvalidParamException("Empty subscription name!");
         }
 
         // Pulsar subscription type, default Exclusive
-        String subTypeParam = extraCmdLine.getOptionValue("subType");
+        String subTypeParam = commandLine.getOptionValue("subType");
         if ( ! StringUtils.isBlank(subTypeParam) ) {
             try {
                 subscriptionType = SubscriptionType.valueOf(subTypeParam);
