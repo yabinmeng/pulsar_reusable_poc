@@ -34,6 +34,9 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
     // -1 means to read all data from the source workload file and publish as messages
     private int numMsg = 20;
 
+    private PulsarClient pulsarClient;
+    private Producer pulsarProducer;
+
     public NatProdCmdApp(String[] inputParams) {
         super(inputParams);
 
@@ -124,15 +127,15 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
         }
 
         try {
-            PulsarClient pulsarClient = createNativePulsarClient(connCfgConf);
-            Producer producer = createPulsarProducer(pulsarTopicName, pulsarClient, extraCfgConf);
+            pulsarClient = createNativePulsarClient(connCfgConf);
+            pulsarProducer = createPulsarProducer(pulsarTopicName, pulsarClient, extraCfgConf);
 
             // TODO: right now the message is sent as byte[].
             //       add support for more complex types likes 'avro' or 'json' in the future.
             assert (srcWrkldFile != null);
 
             CsvFileLineScanner csvFileLineScanner = new CsvFileLineScanner(srcWrkldFile);
-            TypedMessageBuilder messageBuilder = producer.newMessage();
+            TypedMessageBuilder messageBuilder = pulsarProducer.newMessage();
 
             boolean isTitleLine = true;
             String titleLine = "";
@@ -186,6 +189,17 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
 
     @Override
     public void termApp() {
+        try {
+            if (pulsarProducer != null) {
+                pulsarProducer.close();
+            }
 
+            if (pulsarClient != null) {
+                pulsarClient.close();
+            }
+        }
+        catch (PulsarClientException pce) {
+            throw new WorkshopRuntimException("Failed to terminate Pulsar producer or client!");
+        }
     }
 }
