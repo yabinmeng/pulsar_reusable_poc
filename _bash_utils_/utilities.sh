@@ -2,6 +2,7 @@
 
 DEBUG=false
 
+echo "Running utilities"
 ##
 # Supported K8s deployment options
 # 
