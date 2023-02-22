@@ -20,7 +20,7 @@ echo
 
 PULSAR_WORKSHOP_HOMEDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-source "${PULSAR_WORKSHOP_HOMEDIR}/_bash_utils_/utilities.sh"
+source "${PULSAR_WORKSHOP_HOMEDIR}/../_bash_utils_/utilities.sh"
 
 usage() {
    echo
