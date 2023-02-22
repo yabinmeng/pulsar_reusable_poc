@@ -21,15 +21,14 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PulsarClientConf {
+public class PulsarExtraCfgConf {
 
-    private final static Logger logger = LoggerFactory.getLogger(PulsarClientConf.class);
+    private final static Logger logger = LoggerFactory.getLogger(PulsarExtraCfgConf.class);
 
     ///////
     // Valid configuration categories
     enum CONF_CATEGORY {
         Schema("schema"),
-        Client("client"),
         Producer("producer"),
         Consumer("consumer"),
         Reader("reader");
@@ -40,67 +39,42 @@ public class PulsarClientConf {
             this.label = label;
         }
     }
-    public static boolean isValidConnConfCategory(String item) {
-        return Arrays.stream(CONF_CATEGORY.values()).anyMatch(t -> t.label.equals(item));
-    }
-    public static String getValidConnConfCategoryList() {
-        return Arrays.stream(CONF_CATEGORY.values()).map(t -> t.label).collect(Collectors.joining(", "));
-    }
 
     private final Map<String, String> schemaConfMapRaw = new HashMap<>();
-
-    private final Map<String, String> clientConfMapRaw = new HashMap<>();
-    private final Map<String, Object> clientConfMapTgt = new HashMap<>();
-
     private final Map<String, String> producerConfMapRaw = new HashMap<>();
     private final Map<String, Object> producerConfMapTgt = new HashMap<>();
-
     private final Map<String, String> consumerConfMapRaw = new HashMap<>();
     private final Map<String, Object> consumerConfMapTgt = new HashMap<>();
-
     private final Map<String, String> readerConfMapRaw = new HashMap<>();
     private final Map<String, Object> readerConfMapTgt = new HashMap<>();
 
-    public PulsarClientConf(File cfgFile) {
+    public PulsarExtraCfgConf(File extraCfgFile) {
 
         //////////////////
         // Read related Pulsar client configuration settings from a file
-        readRawConfFromFile(cfgFile);
+        readRawCfgFromFile(extraCfgFile);
 
         //////////////////
         //  Convert the raw configuration map (<String,String>) to the required map (<String,Object>)
-        clientConfMapTgt.putAll(ConfConverter.convertStdRawClientConf(clientConfMapRaw));
         producerConfMapTgt.putAll(ConfConverter.convertStdRawProducerConf(producerConfMapRaw));
         consumerConfMapTgt.putAll(ConfConverter.convertStdRawConsumerConf(consumerConfMapRaw));
         // TODO: Reader API is not enabled at the moment. Revisit when needed
 
         //////////////////
-        // Ignores the following Pulsar client/producer/consumer configurations since
+        // Ignores the following Pulsar producer/consumer configurations since
         // they will be explicitly handled via CLI input parameters
-        clientConfMapTgt.remove("serviceUrl");
-        clientConfMapTgt.remove("authPluginClassName");
-        clientConfMapTgt.remove("authParams");
-        clientConfMapTgt.remove("enableTls");
-        clientConfMapTgt.remove("tlsTrustCertsFilePath");
-        clientConfMapTgt.remove("tlsHostnameVerificationEnable");
-        clientConfMapTgt.remove("tlsAllowInsecureConnection");
-
         producerConfMapTgt.remove("topicName");
-        producerConfMapTgt.remove("producerName");
 
         consumerConfMapTgt.remove("topicNames");
         consumerConfMapTgt.remove("topicsPattern");
-        consumerConfMapTgt.remove("subscriptionName");
-        consumerConfMapTgt.remove("subscriptionType");
-        consumerConfMapTgt.remove("consumerName");
     }
 
 
-    public void readRawConfFromFile(File cfgFile) {
+    public void readRawCfgFromFile(File extraCfgFile) {
         String canonicalFilePath = "";
 
         try {
-            canonicalFilePath = cfgFile.getCanonicalPath();
+            canonicalFilePath = extraCfgFile.getCanonicalPath();
 
             Parameters params = new Parameters();
 
@@ -120,11 +94,6 @@ public class PulsarClientConf {
                     // Get schema specific configuration settings, removing "schema." prefix
                     if (StringUtils.startsWith(confKey, CONF_CATEGORY.Schema.label)) {
                         schemaConfMapRaw.put(confKey.substring(CONF_CATEGORY.Schema.label.length() + 1), confVal);
-                    }
-                    // Get client connection specific configuration settings, removing "client." prefix
-                    // <<< https://pulsar.apache.org/docs/reference-configuration/#client >>>
-                    else if (StringUtils.startsWith(confKey, CONF_CATEGORY.Client.label)) {
-                        clientConfMapRaw.put(confKey.substring(CONF_CATEGORY.Client.label.length() + 1), confVal);
                     }
                     // Get producer specific configuration settings, removing "producer." prefix
                     // <<< https://pulsar.apache.org/docs/client-libraries-java/#configure-producer >>>
@@ -154,9 +123,6 @@ public class PulsarClientConf {
 
 
     public Map<String, String> getSchemaConfMapRaw() { return  this.schemaConfMapRaw; }
-    public Map<String, String> getClientConfMapRaw() { return this.clientConfMapRaw; }
-    public Map<String, Object> getClientConfMapTgt() { return this.clientConfMapTgt; }
-
     public Map<String, String> getProducerConfMapRaw() { return this.producerConfMapRaw; }
     public Map<String, Object> getProducerConfMapTgt() { return this.producerConfMapTgt; }
     public Map<String, String> getConsumerConfMapRaw() { return this.consumerConfMapRaw; }
@@ -168,7 +134,6 @@ public class PulsarClientConf {
     public String toString() {
         return new ToStringBuilder(this).
                 append("schemaConfMapRaw", schemaConfMapRaw.toString()).
-                append("clientConfMapRaw", clientConfMapRaw.toString()).
                 append("producerConfMapRaw", producerConfMapRaw.toString()).
                 append("consumerConfMapRaw", consumerConfMapRaw.toString()).
                 append("readerConfMapRaw", readerConfMapRaw.toString()).
@@ -194,27 +159,6 @@ public class PulsarClientConf {
             return "";
         }
     }
-
-    //////////////////
-    // Get Pulsar client related config
-    public boolean hasClientConfKey(String key) {
-        if (key.contains(CONF_CATEGORY.Client.label))
-            return clientConfMapRaw.containsKey(key.substring(CONF_CATEGORY.Client.label.length() + 1));
-        else
-            return clientConfMapRaw.containsKey(key);
-    }
-    public String getClientConfValueRaw(String key) {
-        if (hasClientConfKey(key)) {
-            if (key.contains(CONF_CATEGORY.Client.label))
-                return clientConfMapRaw.get(key.substring(CONF_CATEGORY.Client.label.length() + 1));
-            else
-                return clientConfMapRaw.get(key);
-        }
-        else {
-            return "";
-        }
-    }
-
 
     //////////////////
     // Get Pulsar producer related config
@@ -297,11 +241,11 @@ public class PulsarClientConf {
         }
 
         static boolean isValidCompressionType(String item) {
-            return Arrays.stream(ConfConverter.COMPRESSION_TYPE.values()).anyMatch(t -> t.label.equals(item));
+            return Arrays.stream(COMPRESSION_TYPE.values()).anyMatch(t -> t.label.equals(item));
         }
 
         static String getValidCompressionTypeList() {
-            return Arrays.stream(ConfConverter.COMPRESSION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
+            return Arrays.stream(COMPRESSION_TYPE.values()).map(t -> t.label).collect(Collectors.joining(", "));
         }
 
         enum SUBSCRIPTION_INITIAL_POSITION {
@@ -316,11 +260,11 @@ public class PulsarClientConf {
         }
 
         static boolean isValidSubscriptionInitialPosition(String item) {
-            return Arrays.stream(ConfConverter.SUBSCRIPTION_INITIAL_POSITION.values()).anyMatch(t -> t.label.equals(item));
+            return Arrays.stream(SUBSCRIPTION_INITIAL_POSITION.values()).anyMatch(t -> t.label.equals(item));
         }
 
         static String getValidSubscriptionInitialPositionList() {
-            return Arrays.stream(ConfConverter.SUBSCRIPTION_INITIAL_POSITION.values()).map(t -> t.label).collect(Collectors.joining(", "));
+            return Arrays.stream(SUBSCRIPTION_INITIAL_POSITION.values()).map(t -> t.label).collect(Collectors.joining(", "));
         }
 
         enum REGEX_SUBSCRIPTION_MODE {
@@ -336,11 +280,11 @@ public class PulsarClientConf {
         }
 
         static boolean isValidRegexSubscriptionMode(String item) {
-            return Arrays.stream(ConfConverter.REGEX_SUBSCRIPTION_MODE.values()).anyMatch(t -> t.label.equals(item));
+            return Arrays.stream(REGEX_SUBSCRIPTION_MODE.values()).anyMatch(t -> t.label.equals(item));
         }
 
         static String getValidRegexSubscriptionModeList() {
-            return Arrays.stream(ConfConverter.REGEX_SUBSCRIPTION_MODE.values()).map(t -> t.label).collect(Collectors.joining(", "));
+            return Arrays.stream(REGEX_SUBSCRIPTION_MODE.values()).map(t -> t.label).collect(Collectors.joining(", "));
         }
 
 
@@ -446,7 +390,7 @@ public class PulsarClientConf {
                 } else {
                     throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal,
-                                    PulsarClientConf.CONF_CATEGORY.Producer.label, expectedVal));
+                                    PulsarExtraCfgConf.CONF_CATEGORY.Producer.label, expectedVal));
                 }
             }
 
@@ -515,7 +459,7 @@ public class PulsarClientConf {
                 } catch (Exception e) {
                     throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal,
-                                    PulsarClientConf.CONF_CATEGORY.Consumer.label, expectedVal));
+                                    PulsarExtraCfgConf.CONF_CATEGORY.Consumer.label, expectedVal));
                 }
             }
 
@@ -556,7 +500,7 @@ public class PulsarClientConf {
                 } catch (Exception e) {
                     throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal,
-                                    PulsarClientConf.CONF_CATEGORY.Consumer.label, expectedVal));
+                                    PulsarExtraCfgConf.CONF_CATEGORY.Consumer.label, expectedVal));
                 }
             }
 
@@ -620,13 +564,13 @@ public class PulsarClientConf {
                         } else {
                             throw new InvalidParamException(
                                     getInvalidConfValStr(confKeyName, confVal,
-                                            PulsarClientConf.CONF_CATEGORY.Consumer.label, expectedVal));
+                                            PulsarExtraCfgConf.CONF_CATEGORY.Consumer.label, expectedVal));
                         }
                     }
                 } catch (Exception e) {
                     throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal,
-                                    PulsarClientConf.CONF_CATEGORY.Consumer.label, expectedVal));
+                                    PulsarExtraCfgConf.CONF_CATEGORY.Consumer.label, expectedVal));
                 }
             }
 
@@ -684,14 +628,14 @@ public class PulsarClientConf {
                             } else {
                                 throw new InvalidParamException(
                                         getInvalidConfValStr(confKey, confVal,
-                                                PulsarClientConf.CONF_CATEGORY.Consumer.label, expectedVal));
+                                                PulsarExtraCfgConf.CONF_CATEGORY.Consumer.label, expectedVal));
                             }
                         }
 
                     } catch (Exception e) {
                         throw new InvalidParamException(
                                 getInvalidConfValStr(confKey, confVal,
-                                        PulsarClientConf.CONF_CATEGORY.Consumer.label, expectedVal));
+                                        PulsarExtraCfgConf.CONF_CATEGORY.Consumer.label, expectedVal));
                     }
                 }
             }
