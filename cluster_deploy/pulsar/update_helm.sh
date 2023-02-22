@@ -16,12 +16,9 @@
 # limitations under the License.
 ###
 
-if [[ -z "${PULSAR_WORKSHOP_HOMEDIR}" ]]; then
-    echo "Workshop home direcotry is not set; please first run \"source ../_bash_utils_/setenv.sh\" in the current directory!"
-    exit 10;
-fi
+PULSAR_WORKSHOP_HOMEDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-source "${PULSAR_WORKSHOP_HOMEDIR}/_bash_utils_/utilities.sh"
+source "${PULSAR_WORKSHOP_HOMEDIR}/../../_bash_utils_/utilities.sh"
 
 
 ### 
