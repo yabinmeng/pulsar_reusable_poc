@@ -38,7 +38,7 @@ public class NatConsCmdApp extends PulsarWorkshopCmdApp {
             System.exit(0);
         }
         catch (HelpExitException hee) {
-            workshopApp.usage();
+            workshopApp.usage("NatConsCmdApp");
             System.exit(1);
         }
         catch (InvalidParamException ipe) {
@@ -98,18 +98,5 @@ public class NatConsCmdApp extends PulsarWorkshopCmdApp {
     @Override
     public void termApp() {
 
-    }
-
-    @Override
-    public void usage() {
-
-        PrintWriter printWriter = new PrintWriter(System.out, true);
-
-        HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp(printWriter, 150, "NatProdCmdApp",
-                "Command Line Options:",
-                getCliOptions(), 2, 1, "", true);
-
-        System.out.println();
     }
 }
