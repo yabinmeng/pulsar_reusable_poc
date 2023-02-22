@@ -28,8 +28,8 @@ source "${PULSAR_WORKSHOP_HOMEDIR}/_bash_utils_/utilities.sh"
 usage() {
    echo
    echo "Usage: deployScenario.sh [-h]"
-   echo "                        -scnName <scenario_name>"
-   echo "                        [-depAppOnly]"
+   echo "                         -scnName <scenario_name>"
+   echo "                         [-depAppOnly]"
    echo "       -h : Show usage info"
    echo "       -scnName : Demo scenario name."
    echo "       -depAppOnly : (Optional) Skip cluster deployment and only deploy applications."
