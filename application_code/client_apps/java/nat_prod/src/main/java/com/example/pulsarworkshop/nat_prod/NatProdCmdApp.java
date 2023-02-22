@@ -40,8 +40,8 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
     public NatProdCmdApp(String[] inputParams) {
         super(inputParams);
 
-        extraCliOptions.addOption(new Option("wrk","srcWrkldFile", true, "Data source workload file."));
         extraCliOptions.addOption(new Option("num","numMsg", true, "Number of message to produce."));
+        extraCliOptions.addOption(new Option("wrk","srcWrkldFile", true, "Data source workload file."));
     }
 
     public static void main(String[] args) {
@@ -80,12 +80,22 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
         try {
             commandLine = cmdParser.parse(getCliOptions(), rawCmdInputParams);
         } catch (ParseException e) {
-            throw new InvalidParamException("Failed to parse extra CLI input parameters!");
+            throw new InvalidParamException("Failed to parse application CLI input parameters!");
         }
 
         super.processBasicInputParams(commandLine);
 
-        // CLI option for data source workload file
+        // (Required) CLI option for number of messages
+        String msgNumParam = commandLine.getOptionValue("num");
+        int intVal = NumberUtils.toInt(msgNumParam);
+        if ( (intVal > 0) || (intVal == -1) ) {
+            numMsg = intVal;
+        }
+        else {
+            throw new InvalidParamException("Message number must be a positive integer or -1 (all available raw input)!");
+        }
+
+        // (Required) CLI option for data source workload file
         String srcWrkldFileParam = commandLine.getOptionValue("wrk");
         if (StringUtils.isBlank(srcWrkldFileParam)) {
             throw new InvalidParamException("Must specify the source workload file!");
@@ -97,16 +107,6 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
             } catch (IOException ex) {
                 throw new InvalidParamException("Invalid file path for the source workload file!");
             }
-        }
-
-        // CLI option for number of messages
-        String msgNumParam = commandLine.getOptionValue("num");
-        int intVal = NumberUtils.toInt(msgNumParam);
-        if ( (intVal > 0) || (intVal == -1) ) {
-            numMsg = intVal;
-        }
-        else {
-            throw new InvalidParamException("Message number must be a positive integer or -1 (all available raw input)!");
         }
     }
 
@@ -181,9 +181,11 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
             }
 
             msgSendFutureList.forEach(CompletableFuture::join);
-        }
-        catch (IOException ioException) {
-            throw new WorkshopRuntimException("Failed to read from the workload data source file");
+
+        } catch (PulsarClientException pce) {
+            throw new WorkshopRuntimException("Unexpected error when producing Pulsar messages!");
+        } catch (IOException ioException) {
+            throw new WorkshopRuntimException("Failed to read from the workload data source file!");
         }
     }
 

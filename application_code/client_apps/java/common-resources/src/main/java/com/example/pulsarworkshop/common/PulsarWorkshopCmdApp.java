@@ -166,4 +166,56 @@ abstract public class PulsarWorkshopCmdApp {
 
         return producerBuilder.create();
     }
+
+    public Consumer<?> createPulsarConsumer(String topicName,
+                                            PulsarClient pulsarClient,
+                                            PulsarExtraCfgConf pulsarExtraCfgConf,
+                                            String consumerSubscriptionName,
+                                            SubscriptionType consumerSubscriptionType)
+            throws PulsarClientException
+    {
+        ConsumerBuilder<?> consumerBuilder = pulsarClient.newConsumer();
+
+        Map consumerConfMap = new HashMap();
+        if (pulsarExtraCfgConf != null) {
+            consumerConfMap.putAll(pulsarExtraCfgConf.getConsumerConfMapTgt());
+
+            // Remove the following consumer conf parameters since they'll be
+            // handled explicitly outside "loadConf()"
+            consumerConfMap.remove("topicNames");
+            consumerConfMap.remove("topicsPattern");
+            consumerConfMap.remove("subscriptionName");
+            consumerConfMap.remove("subscriptionType");
+
+            // TODO: It looks like loadConf() method can't handle the following settings properly.
+            //       Do these settings manually for now
+            //       - deadLetterPolicy
+            //       - negativeAckRedeliveryBackoff
+            //       - ackTimeoutRedeliveryBackoff
+            consumerConfMap.remove("deadLetterPolicy");
+            consumerConfMap.remove("negativeAckRedeliveryBackoff");
+            consumerConfMap.remove("ackTimeoutRedeliveryBackoff");
+
+            consumerBuilder.loadConf(consumerConfMap);
+        }
+
+        consumerBuilder.topic(topicName);
+        consumerBuilder.subscriptionName(consumerSubscriptionName);
+        consumerBuilder.subscriptionType(consumerSubscriptionType);
+
+        if (consumerConfMap.containsKey("deadLetterPolicy")) {
+            consumerBuilder.deadLetterPolicy(
+                    (DeadLetterPolicy) consumerConfMap.get("deadLetterPolicy"));
+        }
+        if (consumerConfMap.containsKey("negativeAckRedeliveryBackoff")) {
+            consumerBuilder.negativeAckRedeliveryBackoff(
+                    (RedeliveryBackoff) consumerConfMap.get("negativeAckRedeliveryBackoff"));
+        }
+        if (consumerConfMap.containsKey("ackTimeoutRedeliveryBackoff")) {
+            consumerBuilder.ackTimeoutRedeliveryBackoff(
+                    (RedeliveryBackoff) consumerConfMap.get("ackTimeoutRedeliveryBackoff"));
+        }
+
+        return consumerBuilder.subscribe();
+    }
 }
