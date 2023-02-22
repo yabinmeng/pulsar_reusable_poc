@@ -3,6 +3,7 @@
 *.class
 cluster_deploy/pulsar/helm/charts/*
 cluster_deploy/pulsar/helm/Chart.lock
+application_code/__codes_from_old_repo
 application_code/client_apps/java/.idea
 application_code/client_apps/java/target
 application_code/client_apps/java/*/target
