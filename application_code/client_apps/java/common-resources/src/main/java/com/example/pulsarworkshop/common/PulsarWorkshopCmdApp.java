@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 abstract public class PulsarWorkshopCmdApp {
     protected String[] rawCmdInputParams;
@@ -52,13 +53,13 @@ abstract public class PulsarWorkshopCmdApp {
             throw new HelpExitException();
         }
 
-        // CLI option for Pulsar topic
+        // (Required) CLI option for Pulsar topic
         pulsarTopicName = basicCmdLine.getOptionValue("topic");
         if (StringUtils.isBlank(pulsarTopicName)) {
             throw new InvalidParamException("Empty Pulsar topic name!");
         }
 
-        // CLI option for client.conf file
+        // (Required) CLI option for client.conf file
         try {
             String clntConnFileParam = basicCmdLine.getOptionValue("connFile");
             clientConnfFile = new File(clntConnFileParam);
@@ -68,14 +69,15 @@ abstract public class PulsarWorkshopCmdApp {
             throw new InvalidParamException("Invalid \"client.conf\" file path!");
         }
 
-        // CLI option for extra config properties file
-        try {
-            String cfgFileParam = basicCmdLine.getOptionValue("cfgFile");
-            clientConnfFile = new File(cfgFileParam);
-            clientConnfFile.getCanonicalPath();
-        }
-        catch (IOException ex) {
-            throw new InvalidParamException("Invalid configuration properties file path!");
+        // (Optional) CLI option for extra config properties file
+        String cfgFileParam = basicCmdLine.getOptionValue("cfgFile");
+        if (StringUtils.isNotBlank(cfgFileParam)) {
+            try {
+                clientConnfFile = new File(cfgFileParam);
+                clientConnfFile.getCanonicalPath();
+            } catch (IOException ex) {
+                throw new InvalidParamException("Invalid configuration properties file path!");
+            }
         }
     }
 
@@ -90,8 +92,19 @@ abstract public class PulsarWorkshopCmdApp {
         return options;
     }
 
+    public void usage(String appNme) {
+
+        PrintWriter printWriter = new PrintWriter(System.out, true);
+
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp(printWriter, 150, "appNme",
+                "Command Line Options:",
+                getCliOptions(), 2, 1, "", true);
+
+        System.out.println();
+    }
+
     public abstract void processExtraInputParams() throws InvalidParamException;
     public abstract void runApp();
     public abstract void termApp();
-    public abstract void usage();
 }
