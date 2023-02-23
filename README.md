@@ -113,15 +113,27 @@ The deployment of a demo scenario is handled by the following bash scripts in th
 **`deployScenario.sh`**
 ```
 Usage: deployScenario.sh [-h]
-                        -scnName <scenario_name>
-                        [-depAppOnly]
-      -h : Show usage info
-      -scnName : Demo scenario name.
-      -depAppOnly : (Optional) Skip cluster deployment and only deploy applications.
+                         -scnName <scenario_name>
+                         -scnPropFile <scenario_property_file>
+                         [-k8sPropFile] <k8s_property_file>
+                         [-pulsarPropFile] <pulsar_property_file>
+                         [-depAppOnly]
+       -h : Show usage info
+       -scnName : Demo scenario name.
+       -scnPropFile : (Optional) Full file path to a scenario property file. Use default file if not specified.
+       -k8sPropFile : (Optional) Full file path to a K8s deployment property file (Luna Streaming only). Use default file if not specified.
+       -pulsarPropFile : (Optional) Full file path to a Pulsar deployment property file(Luna Streaming only). Use default file if not specified.
+       -depAppOnly : (Optional) Skip cluster deployment and only deploy applications.
 ```
 
-  * The parameter `-scnName` is mandatory, and it must match one of the demo scenario sub-folder names. Otherwise, the script will complain not being able to find a corresponding demo scenario.
-  * The parameter `-depAppOnly` is used when only example application deployments are needed and the deployment for the underlying K8s cluster and Pulsar cluster is not necessary.
+* The parameter `-scnName` is mandatory, and it must match one of the demo scenario sub-folder names. Otherwise, the script will complain not being able to find a corresponding demo scenario.
+* The parameter `-scnPropFile` is optional and used to specify a particular demo scenario property file.
+   * If not specified, the default file `scenarios/<scenario_name>/scenario.properties` will be used.
+* The parameter `-k8sPropFile` is optional and used to specify a particular K8s deployment property file. This is only relevant for Luna Streaming deployment.
+   * If not specified, the default file `cluster_deploy/k8s/k8s.properties` will be used.
+* The parameter `-pulsarPropFile` is optional and used to specify a particular Pulsar deployment property file. This is only relevant for Luna Streaming deployment.
+   * If not specified, the default file `cluster_deploy/pulsar/pulsar.properties` will be used.
+* The parameter `-depAppOnly` is optional and used when only example application deployment is needed and the deployment for the underlying K8s cluster and Pulsar cluster is not necessary.
 
 ### 2.2.1. Execute Scenario Deployment
 

@@ -18,22 +18,29 @@
 
 echo
 
-PULSAR_WORKSHOP_HOMEDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+CUR_SCRIPT_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+PULSAR_WORKSHOP_HOMEDIR=$( cd -- "${CUR_SCRIPT_FOLDER}/.." &> /dev/null && pwd )
 
-source "${PULSAR_WORKSHOP_HOMEDIR}/../_bash_utils_/utilities.sh"
+source "${PULSAR_WORKSHOP_HOMEDIR}/_bash_utils_/utilities.sh"
 
 usage() {
    echo
    echo "Usage: deployScenario.sh [-h]"
    echo "                         -scnName <scenario_name>"
+   echo "                         -scnPropFile <scenario_property_file>"
+   echo "                         [-k8sPropFile] <k8s_property_file>"
+   echo "                         [-pulsarPropFile] <pulsar_property_file>"
    echo "                         [-depAppOnly]"
    echo "       -h : Show usage info"
    echo "       -scnName : Demo scenario name."
+   echo "       -scnPropFile : (Optional) Full file path to a scenario property file. Use default if not specified."
+   echo "       -k8sPropFile : (Optional) Full file path to a K8s deployment property file (Luna Streaming only). Use default if not specified."
+   echo "       -pulsarPropFile : (Optional) Full file path to a Pulsar deployment property file(Luna Streaming only). Use default if not specified."
    echo "       -depAppOnly : (Optional) Skip cluster deployment and only deploy applications."
    echo
 }
 
-if [[ $# -eq 0 || $# -gt 3 ]]; then
+if [[ $# -eq 0 || $# -gt 9 ]]; then
    usage
    errExit 20
 fi
@@ -43,6 +50,9 @@ while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
       -scnName) scnName=$2; shift ;;
+      -scnPropFile) scnPropFile=$2; shift ;;
+      -k8sPropFile) k8sDeployPropFile=$2; shift ;;
+      -pulsarPropFile) pulsarDeployPropFile=$2; shift ;;
       -depAppOnly) depAppOnly=1; ;;
       *) echo "[ERROR] Unknown parameter passed: $1"; exit 30 ;;
    esac
@@ -51,12 +61,16 @@ done
 
 scnHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/scenarios/${scnName}"
 scnLogHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/scenarios/logs"
-scnPropFile="${scnHomeDir}/scenario.properties"
+dftScnPropFile="${scnHomeDir}/scenario.properties"
 scnPostDeployScript="${scnHomeDir}/post_deploy.sh"
 
 if ! [[ -n "${scnName}" && -d "${scnHomeDir}"  ]]; then
     echo "[ERROR] The specified scenario name doesn't exist!."
     errExit 40;
+fi
+
+if ! [[ -n "${scnPropFile}" && -f "${scnPropFile}" ]]; then
+   scnPropFile=${dftScnPropFile}
 fi
 
 startDate=$(date +'%Y-%m-%d')
@@ -125,9 +139,13 @@ if [[ ${depAppOnly} -eq 0 ]]; then
       #
       # Deploy a self-managed K8s cluster
       #
-      k8sDeployPropFile="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/k8s/k8s.properties"
+      dftK8sDeployPropFile="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/k8s/k8s.properties"
       k8sDeployScript="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/k8s/deploy_k8s_cluster.sh"
       k8sDeployExecLogFile="${depScnExecLogFileNoExt}_k8s_deploy.log"
+
+      if ! [[ -n "${k8sDeployPropFile}" && -f "${k8sDeployPropFile}" ]]; then
+         k8sDeployPropFile=${dftK8sDeployPropFile}
+      fi
       
       k8sClstrName=$(getPropVal ${k8sDeployPropFile} "k8s.cluster.name")
       if [[ -z ${k8sClstrName// } ]]; then
@@ -158,9 +176,13 @@ if [[ ${depAppOnly} -eq 0 ]]; then
       #
       # Deploy a Pulsar cluster on the K8s cluster just created
       #
-      pulsarDeployPropFile="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/pulsar/pulsar.properties"
+      dftPulsarDeployPropFile="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/pulsar/pulsar.properties"
       pulsarDeployScript="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/pulsar/deploy_pulsar_cluster.sh"
       pulsarDeployExecLogFile="${depScnExecLogFileNoExt}_pulsar_deploy.log"
+
+      if ! [[ -n "${pulsarDeployPropFile}" && -f "${pulsarDeployPropFile}" ]]; then
+         pulsarDeployPropFile=${dftPulsarDeployPropFile}
+      fi
 
       pulsarClstrName=$(getPropVal ${pulsarDeployPropFile} "pulsar.cluster.name")
       if [[ -z ${pulsarClstrName// } ]]; then

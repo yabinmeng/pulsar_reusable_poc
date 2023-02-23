@@ -16,9 +16,10 @@
 # limitations under the License.
 ###
 
-PULSAR_WORKSHOP_HOMEDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+CUR_SCRIPT_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+PULSAR_WORKSHOP_HOMEDIR=$( cd -- "${CUR_SCRIPT_FOLDER}/../../.." &> /dev/null && pwd )
 
-source "${PULSAR_WORKSHOP_HOMEDIR}/../../../_bash_utils_/utilities.sh"
+source "${PULSAR_WORKSHOP_HOMEDIR}/_bash_utils_/utilities.sh"
 
 ### 
 # This script is used to create a local Kind (K8s) cluster with
