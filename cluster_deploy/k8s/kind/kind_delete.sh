@@ -15,10 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-PULSAR_WORKSHOP_HOMEDIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-source "${PULSAR_WORKSHOP_HOMEDIR}/../../../_bash_utils_/utilities.sh"
+CUR_SCRIPT_FOLDER=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+PULSAR_WORKSHOP_HOMEDIR=$( cd -- "${CUR_SCRIPT_FOLDER}/../../.." &> /dev/null && pwd )
 
+source "${PULSAR_WORKSHOP_HOMEDIR}/_bash_utils_/utilities.sh"
 
 ### 
 # This script is used to delete a Kind (K8s) cluster that was created by 
