@@ -106,19 +106,11 @@ public class NatConsCmdApp extends PulsarWorkshopCmdApp {
 
     @Override
     public void runApp() {
-
-
-        PulsarExtraCfgConf extraCfgConf = null;
-        if (extraCfgConf != null) {
-            extraCfgConf = new PulsarExtraCfgConf(clientConfigFile);
-        }
-
         try {
             pulsarClient = createNativePulsarClient();
             pulsarConsumer = createPulsarConsumer(
                     pulsarTopicName,
                     pulsarClient,
-                    extraCfgConf,
                     subsriptionName,
                     subscriptionType);
 
