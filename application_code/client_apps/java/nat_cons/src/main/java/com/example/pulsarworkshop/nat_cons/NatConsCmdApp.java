@@ -106,14 +106,7 @@ public class NatConsCmdApp extends PulsarWorkshopCmdApp {
 
     @Override
     public void runApp() {
-        PulsarConnCfgConf connCfgConf = null;
-        if (clientConnfFile != null) {
-            connCfgConf = new PulsarConnCfgConf(clientConnfFile);
-        }
-        if (connCfgConf == null) {
-            throw new WorkshopRuntimException(
-                    "Can't properly read the Pulsar connection information from the \"client.conf\" file!");
-        }
+
 
         PulsarExtraCfgConf extraCfgConf = null;
         if (extraCfgConf != null) {
@@ -121,7 +114,7 @@ public class NatConsCmdApp extends PulsarWorkshopCmdApp {
         }
 
         try {
-            pulsarClient = createNativePulsarClient(connCfgConf);
+            pulsarClient = createNativePulsarClient();
             pulsarConsumer = createPulsarConsumer(
                     pulsarTopicName,
                     pulsarClient,
