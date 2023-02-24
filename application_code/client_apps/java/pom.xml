@@ -47,6 +47,7 @@
         <module>s4k_cons</module>
         <module>s4r_queu_cons</module>
         <module>s4r_queu_prod</module>
+        <module>native_simple_string_app</module>
     </modules>
 
     <build>

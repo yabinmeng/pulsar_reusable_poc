@@ -60,7 +60,9 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 scnHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/scenarios/${scnName}"
+echo "scnHomeDir is: ${scnHomeDir}"
 scnLogHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/scenarios/logs"
+echo "scnLogHomeDir is: ${scnLogHomeDir}"
 dftScnPropFile="${scnHomeDir}/scenario.properties"
 scnPostDeployScript="${scnHomeDir}/post_deploy.sh"
 
@@ -160,6 +162,8 @@ if [[ ${depAppOnly} -eq 0 ]]; then
          outputMsg "[ERROR] Can't find the K8s cluster deployment property file and/or script file" 6 ${depScnExecLogFile} true
          errExit 100
       else
+         echo "Running command: "
+         echo "${k8sDeployScript} -clstrName ${k8sClstrName} -propFile ${k8sDeployPropFile}"
          eval '"${k8sDeployScript}" -clstrName ${k8sClstrName} -propFile ${k8sDeployPropFile}' > ${k8sDeployExecLogFile} 2>&1
 
          k8sDeployScriptErrCode=$?
@@ -255,6 +259,9 @@ outputMsg "- Deploying demo applications ..." 3 ${depScnExecLogFile} true
 clntAppCodeHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/application_code"
 clntAppDeployHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/application_deploy"
 clntAppDefPropFile="${clntAppDeployHomeDir}/client_app_def.properties"
+echo "clntAppCodeHomeDir is $clntAppCodeHomeDir"
+echo "clntAppDeployHomeDir is $clntAppDeployHomeDir"
+echo "clntAppDefPropFile is $clntAppDefPropFile"
 if ! [[ -f "${clntAppDefPropFile}" ]]; then
    outputMsg "[ERROR] Can't find client application definition file or deploy properties file" 3 ${depScnExecLogFile} true
    errExit 300
@@ -271,6 +278,8 @@ for appId in "${scnAppIdArr[@]}"; do
    appDefStr=$(getPropVal ${clntAppDefPropFile} ${appId})
 
    validApp=1
+   echo "validApp is ${validApp}"
+   echo "appDefStr is ${appDefStr// }"
    if [[ ${validApp} -eq 1 && -z "${appDefStr// }" ]]; then
       validApp=0
       invalidMsg="Can't find corresponding appID (${appId}) in the client app definition file."
