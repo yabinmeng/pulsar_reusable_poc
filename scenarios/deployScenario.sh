@@ -282,6 +282,10 @@ for appId in "${scnAppIdArr[@]}"; do
    appClass=${appDefArr[2]}
    appParam=${appDefArr[3]}
 
+   if [[ "${useAstraStreaming}" == "yes" ]]; then
+      appParam="-as ${appParam}"
+   fi
+
    #
    # TBD: currently this only support java demo applications
    #      add support for other languages in the future

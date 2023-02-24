@@ -23,6 +23,7 @@ abstract public class PulsarWorkshopCmdApp {
     protected String pulsarTopicName;
     protected File clientConnfFile;
     protected File clientConfigFile;
+    protected boolean useAstraStreaming;
 
     protected DefaultParser cmdParser;
     protected Options basicCliOptions = new Options();
@@ -43,6 +44,7 @@ abstract public class PulsarWorkshopCmdApp {
         basicCliOptions.addOption(new Option("top", "topic", true, "Pulsar topic name."));
         basicCliOptions.addOption(new Option("con","connFile", true, "\"client.conf\" file path."));
         basicCliOptions.addOption(new Option("cfg", "cfgFile", true, "Extra config properties file path."));
+        basicCliOptions.addOption(new Option("as", "astra", false, "Whether to use Astra streaming."));
     }
 
     public String getPulsarTopicName() { return this.pulsarTopicName; }
@@ -85,6 +87,11 @@ abstract public class PulsarWorkshopCmdApp {
                 throw new InvalidParamException("Invalid file path for the client configuration properties file!");
             }
         }
+
+        // (Optional) Whether to use Astra Streaming
+        if (cmdLine.hasOption("as")) {
+            useAstraStreaming = true;
+        }
     }
 
     public Options getCliOptions() {
@@ -125,22 +132,23 @@ abstract public class PulsarWorkshopCmdApp {
             clientBuilder.authentication(authPluginClassName, authParams);
         }
 
-//        boolean useTls = StringUtils.contains(pulsarSvcUrl, "pulsar+ssl");
-//        if ( useTls ) {
-//            boolean tlsHostnameVerificationEnable = BooleanUtils.toBoolean(
-//                    clientConnMap.get("tlsEnableHostnameVerification"));
-//            clientBuilder.enableTlsHostnameVerification(tlsHostnameVerificationEnable);
-//
-//            String tlsTrustCertsFilePath =
-//                    clientConnMap.get("tlsTrustCertsFilePath");
-//            if (!StringUtils.isBlank(tlsTrustCertsFilePath)) {
-//                clientBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
-//            }
-//
-//            boolean tlsAllowInsecureConnection = BooleanUtils.toBoolean(
-//                    clientConnMap.get("tlsAllowInsecureConnection"));
-//            clientBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
-//        }
+        // For Astra streaming, there is no need for this section.
+        // But for Luna streaming, they're required if TLS is expected.
+        if ( !useAstraStreaming && StringUtils.contains(pulsarSvcUrl, "pulsar+ssl") ) {
+            boolean tlsHostnameVerificationEnable = BooleanUtils.toBoolean(
+                    clientConnMap.get("tlsEnableHostnameVerification"));
+            clientBuilder.enableTlsHostnameVerification(tlsHostnameVerificationEnable);
+
+            String tlsTrustCertsFilePath =
+                    clientConnMap.get("tlsTrustCertsFilePath");
+            if (!StringUtils.isBlank(tlsTrustCertsFilePath)) {
+                clientBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
+            }
+
+            boolean tlsAllowInsecureConnection = BooleanUtils.toBoolean(
+                    clientConnMap.get("tlsAllowInsecureConnection"));
+            clientBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
+        }
 
         return clientBuilder.build();
     }

@@ -233,6 +233,13 @@ if [[ -d "${targetClntConfFileFolder}" ]]; then
         echo "authParams=token:${jwtTokenStr}" >> ${clntConnFile}
     fi
 
+    if [[ "${helmTlsEnabled}" == "true" ]]; then
+        caCertStr=$(kubectl get secrets pulsar-tls -o jsonpath="{.data['ca\.crt']}" | base64 --decode)
+        caCertFile="${targetClntConfFileFolder}/ca.crt"
+        echo "${caCertStr}" > ${caCertFile}
+        echo "tlsTrustCertsFilePath=${caCertFile}" >> ${clntConnFile}
+    fi
+
 fi
 
 echo
