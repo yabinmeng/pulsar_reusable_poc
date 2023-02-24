@@ -130,10 +130,7 @@ abstract public class PulsarWorkshopCmdApp {
     }
 
     private PulsarExtraCfgConf getPulsarExtraCfgConf() {
-        PulsarExtraCfgConf extraCfgConf = null;
-        if (extraCfgConf != null) {
-            extraCfgConf = new PulsarExtraCfgConf(clientConfigFile);
-        }
+        PulsarExtraCfgConf extraCfgConf = new PulsarExtraCfgConf(clientConfigFile);
         return extraCfgConf;
     }
 

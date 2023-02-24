@@ -50,23 +50,25 @@ public class PulsarExtraCfgConf {
 
     public PulsarExtraCfgConf(File extraCfgFile) {
 
-        //////////////////
-        // Read related Pulsar client configuration settings from a file
-        readRawCfgFromFile(extraCfgFile);
+        if (extraCfgFile != null) {
+            //////////////////
+            // Read related Pulsar client configuration settings from a file
+            readRawCfgFromFile(extraCfgFile);
 
-        //////////////////
-        //  Convert the raw configuration map (<String,String>) to the required map (<String,Object>)
-        producerConfMapTgt.putAll(ConfConverter.convertStdRawProducerConf(producerConfMapRaw));
-        consumerConfMapTgt.putAll(ConfConverter.convertStdRawConsumerConf(consumerConfMapRaw));
-        // TODO: Reader API is not enabled at the moment. Revisit when needed
+            //////////////////
+            //  Convert the raw configuration map (<String,String>) to the required map (<String,Object>)
+            producerConfMapTgt.putAll(ConfConverter.convertStdRawProducerConf(producerConfMapRaw));
+            consumerConfMapTgt.putAll(ConfConverter.convertStdRawConsumerConf(consumerConfMapRaw));
+            // TODO: Reader API is not enabled at the moment. Revisit when needed
 
-        //////////////////
-        // Ignores the following Pulsar producer/consumer configurations since
-        // they will be explicitly handled via CLI input parameters
-        producerConfMapTgt.remove("topicName");
+            //////////////////
+            // Ignores the following Pulsar producer/consumer configurations since
+            // they will be explicitly handled via CLI input parameters
+            producerConfMapTgt.remove("topicName");
 
-        consumerConfMapTgt.remove("topicNames");
-        consumerConfMapTgt.remove("topicsPattern");
+            consumerConfMapTgt.remove("topicNames");
+            consumerConfMapTgt.remove("topicsPattern");
+        }
     }
 
 
