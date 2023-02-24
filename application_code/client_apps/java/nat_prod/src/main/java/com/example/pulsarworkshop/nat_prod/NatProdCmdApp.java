@@ -45,7 +45,6 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
     }
 
     public static void main(String[] args) {
-        //region args
         PulsarWorkshopCmdApp workshopApp = new NatProdCmdApp(args);
 
         int exitCode = 0;
@@ -70,7 +69,6 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
         finally {
             workshopApp.termApp();
         }
-        //endregion
         System.exit(exitCode);
     }
 
