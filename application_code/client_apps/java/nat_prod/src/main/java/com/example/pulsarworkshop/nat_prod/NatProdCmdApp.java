@@ -112,14 +112,6 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
 
     @Override
     public void runApp() throws WorkshopRuntimException {
-        PulsarConnCfgConf connCfgConf = null;
-        if (clientConnfFile != null) {
-            connCfgConf = new PulsarConnCfgConf(clientConnfFile);
-        }
-        if (connCfgConf == null) {
-            throw new WorkshopRuntimException(
-                    "Can't properly read the Pulsar connection information from the \"client.conf\" file!");
-        }
 
         PulsarExtraCfgConf extraCfgConf = null;
         if (extraCfgConf != null) {
@@ -127,7 +119,7 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
         }
 
         try {
-            pulsarClient = createNativePulsarClient(connCfgConf);
+            pulsarClient = createNativePulsarClient();
             pulsarProducer = createPulsarProducer(pulsarTopicName, pulsarClient, extraCfgConf);
 
             // TODO: right now the message is sent as byte[].
