@@ -89,15 +89,9 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
 
     @Override
     public void runApp() throws WorkshopRuntimException {
-
-        PulsarExtraCfgConf extraCfgConf = null;
-        if (extraCfgConf != null) {
-            extraCfgConf = new PulsarExtraCfgConf(clientConfigFile);
-        }
-
         try {
             pulsarClient = createNativePulsarClient();
-            pulsarProducer = createPulsarProducer(pulsarTopicName, pulsarClient, extraCfgConf);
+            pulsarProducer = createPulsarProducer(pulsarTopicName, pulsarClient);
 
             // TODO: right now the message is sent as byte[].
             //       add support for more complex types likes 'avro' or 'json' in the future.

@@ -3,8 +3,8 @@ package com.example.pulsarworkshop.common;
 import com.example.pulsarworkshop.common.exception.HelpExitException;
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
 import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
-
 import org.apache.commons.cli.*;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pulsar.client.api.*;
 import org.slf4j.Logger;
@@ -24,6 +24,7 @@ abstract public class PulsarWorkshopCmdApp {
     protected String pulsarTopicName;
     protected File clientConnfFile;
     protected File clientConfigFile;
+    protected boolean useAstraStreaming;
 
     protected DefaultParser cmdParser;
     protected Options basicCliOptions = new Options();
@@ -43,6 +44,7 @@ abstract public class PulsarWorkshopCmdApp {
         basicCliOptions.addOption(new Option("top", "topic", true, "Pulsar topic name."));
         basicCliOptions.addOption(new Option("con","connFile", true, "\"client.conf\" file path."));
         basicCliOptions.addOption(new Option("cfg", "cfgFile", true, "Extra config properties file path."));
+        basicCliOptions.addOption(new Option("as", "astra", false, "Whether to use Astra streaming."));
     }
 
     public int run(String appName) {
@@ -112,6 +114,11 @@ abstract public class PulsarWorkshopCmdApp {
                 throw new InvalidParamException("Invalid file path for the client configuration properties file!");
             }
         }
+
+        // (Optional) Whether to use Astra Streaming
+        if (cmdLine.hasOption("as")) {
+            useAstraStreaming = true;
+        }
     }
 
     public Options getCliOptions() {
@@ -126,7 +133,6 @@ abstract public class PulsarWorkshopCmdApp {
     }
 
     public void usage(String appNme) {
-
         PrintWriter printWriter = new PrintWriter(System.out, true);
 
         HelpFormatter formatter = new HelpFormatter();
@@ -137,24 +143,33 @@ abstract public class PulsarWorkshopCmdApp {
         System.out.println();
     }
 
-    private Map<String, String> getClientConfMap() {
-	    PulsarConnCfgConf connCfgConf = null;
-	    if (clientConnfFile != null) {
-	        connCfgConf = new PulsarConnCfgConf(clientConnfFile);
-	    }
-	    if (connCfgConf == null) {
-	        throw new WorkshopRuntimException(
-	                "Can't properly read the Pulsar connection information from the \"client.conf\" file!");
-	    }
-	    
-	    return connCfgConf.getClientConfMap();
+    private PulsarConnCfgConf getPulsarConnCfgConf() {
+        PulsarConnCfgConf connCfgConf = null;
+        if (clientConnfFile != null) {
+            connCfgConf = new PulsarConnCfgConf(clientConnfFile);
+        }
+        if (connCfgConf == null) {
+            throw new WorkshopRuntimException(
+                    "Can't properly read the Pulsar connection information from the \"client.conf\" file!");
+        }
+        return connCfgConf;
     }
-    
+
+    private PulsarExtraCfgConf getPulsarExtraCfgConf() {
+        PulsarExtraCfgConf extraCfgConf = null;
+        if (extraCfgConf != null) {
+            extraCfgConf = new PulsarExtraCfgConf(clientConfigFile);
+        }
+        return extraCfgConf;
+    }
+
+
     protected PulsarClient createNativePulsarClient()
     throws PulsarClientException {
         ClientBuilder clientBuilder = PulsarClient.builder();
 
-        Map<String, String> clientConnMap = getClientConfMap();
+        PulsarConnCfgConf connCfgConf = getPulsarConnCfgConf();
+        Map<String, String> clientConnMap = connCfgConf.getClientConfMap();
 
         String pulsarSvcUrl = clientConnMap.get("brokerServiceUrl");
         clientBuilder.serviceUrl(pulsarSvcUrl);
@@ -165,31 +180,32 @@ abstract public class PulsarWorkshopCmdApp {
             clientBuilder.authentication(authPluginClassName, authParams);
         }
 
-//        boolean useTls = StringUtils.contains(pulsarSvcUrl, "pulsar+ssl");
-//        if ( useTls ) {
-//            boolean tlsHostnameVerificationEnable = BooleanUtils.toBoolean(
-//                    clientConnMap.get("tlsEnableHostnameVerification"));
-//            clientBuilder.enableTlsHostnameVerification(tlsHostnameVerificationEnable);
-//
-//            String tlsTrustCertsFilePath =
-//                    clientConnMap.get("tlsTrustCertsFilePath");
-//            if (!StringUtils.isBlank(tlsTrustCertsFilePath)) {
-//                clientBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
-//            }
-//
-//            boolean tlsAllowInsecureConnection = BooleanUtils.toBoolean(
-//                    clientConnMap.get("tlsAllowInsecureConnection"));
-//            clientBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
-//        }
+        // For Astra streaming, there is no need for this section.
+        // But for Luna streaming, they're required if TLS is expected.
+        if ( !useAstraStreaming && StringUtils.contains(pulsarSvcUrl, "pulsar+ssl") ) {
+            boolean tlsHostnameVerificationEnable = BooleanUtils.toBoolean(
+                    clientConnMap.get("tlsEnableHostnameVerification"));
+            clientBuilder.enableTlsHostnameVerification(tlsHostnameVerificationEnable);
+
+            String tlsTrustCertsFilePath =
+                    clientConnMap.get("tlsTrustCertsFilePath");
+            if (!StringUtils.isBlank(tlsTrustCertsFilePath)) {
+                clientBuilder.tlsTrustCertsFilePath(tlsTrustCertsFilePath);
+            }
+
+            boolean tlsAllowInsecureConnection = BooleanUtils.toBoolean(
+                    clientConnMap.get("tlsAllowInsecureConnection"));
+            clientBuilder.allowTlsInsecureConnection(tlsAllowInsecureConnection);
+        }
 
         return clientBuilder.build();
     }
 
     protected Producer createPulsarProducer(String topicName,
-                                            PulsarClient pulsarClient,
-                                            PulsarExtraCfgConf pulsarExtraCfgConf)
-            throws PulsarClientException {
+                                            PulsarClient pulsarClient)
+    throws PulsarClientException {
         ProducerBuilder producerBuilder = pulsarClient.newProducer();
+        PulsarExtraCfgConf pulsarExtraCfgConf = getPulsarExtraCfgConf();
 
         if (pulsarExtraCfgConf != null) {
             Map producerConfMap = new HashMap();
@@ -209,12 +225,12 @@ abstract public class PulsarWorkshopCmdApp {
 
     public Consumer<?> createPulsarConsumer(String topicName,
                                             PulsarClient pulsarClient,
-                                            PulsarExtraCfgConf pulsarExtraCfgConf,
                                             String consumerSubscriptionName,
                                             SubscriptionType consumerSubscriptionType)
             throws PulsarClientException
     {
         ConsumerBuilder<?> consumerBuilder = pulsarClient.newConsumer();
+        PulsarExtraCfgConf pulsarExtraCfgConf = getPulsarExtraCfgConf();
 
         Map consumerConfMap = new HashMap();
         if (pulsarExtraCfgConf != null) {
