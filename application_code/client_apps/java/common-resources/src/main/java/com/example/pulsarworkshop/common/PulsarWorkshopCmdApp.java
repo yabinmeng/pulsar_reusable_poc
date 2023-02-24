@@ -28,8 +28,7 @@ abstract public class PulsarWorkshopCmdApp {
     protected DefaultParser cmdParser;
     protected Options basicCliOptions = new Options();
     protected Options extraCliOptions = new Options();
-
-
+    
     public abstract void processInputParams() throws InvalidParamException;
     public abstract void runApp();
     public abstract void termApp();
@@ -46,6 +45,33 @@ abstract public class PulsarWorkshopCmdApp {
         basicCliOptions.addOption(new Option("cfg", "cfgFile", true, "Extra config properties file path."));
     }
 
+    public int run(String appName) {
+        int exitCode = 0;
+        try {
+            this.processInputParams();
+            this.runApp();
+        }
+        catch (HelpExitException hee) {
+            this.usage(appName);
+            exitCode = 1;
+        }
+        catch (InvalidParamException ipe) {
+            System.out.println("\n[ERROR] Invalid input value(s) detected!");
+            ipe.printStackTrace();
+            exitCode = 2;
+        }
+        catch (WorkshopRuntimException wre) {
+            System.out.println("\n[ERROR] Unexpected runtime error detected!");
+            wre.printStackTrace();
+            exitCode = 3;
+        }
+        finally {
+            this.termApp();
+        }
+        
+        return exitCode;
+    }
+    
     public String getPulsarTopicName() { return this.pulsarTopicName; }
     public File getClientConnfFile() { return this.clientConnfFile; }
     public File getClientConfigFile() { return this.clientConfigFile; }

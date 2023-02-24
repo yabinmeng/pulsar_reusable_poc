@@ -1,9 +1,7 @@
 package com.example.pulsarworkshop.nat_prod;
 
-import com.example.pulsarworkshop.common.PulsarConnCfgConf;
 import com.example.pulsarworkshop.common.PulsarExtraCfgConf;
 import com.example.pulsarworkshop.common.PulsarWorkshopCmdApp;
-import com.example.pulsarworkshop.common.exception.HelpExitException;
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
 import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
 import com.example.pulsarworkshop.common.utils.CommonUtils;
@@ -47,28 +45,7 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
     public static void main(String[] args) {
         PulsarWorkshopCmdApp workshopApp = new NatProdCmdApp(args);
 
-        int exitCode = 0;
-        try {
-            workshopApp.processInputParams();
-            workshopApp.runApp();
-        }
-        catch (HelpExitException hee) {
-            workshopApp.usage("NatProdCmdApp");
-            exitCode = 1;
-        }
-        catch (InvalidParamException ipe) {
-            System.out.println("\n[ERROR] Invalid input value(s) detected!");
-            ipe.printStackTrace();
-            exitCode = 2;
-        }
-        catch (WorkshopRuntimException wre) {
-            System.out.println("\n[ERROR] Unexpected runtime error detected!");
-            wre.printStackTrace();
-            exitCode = 3;
-        }
-        finally {
-            workshopApp.termApp();
-        }
+        int exitCode = workshopApp.run("NatProdCmdApp");
 
         System.exit(exitCode);
     }

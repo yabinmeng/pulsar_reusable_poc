@@ -1,11 +1,10 @@
 package com.example.pulsarworkshop.nat_cons;
 
-import com.example.pulsarworkshop.common.PulsarConnCfgConf;
 import com.example.pulsarworkshop.common.PulsarExtraCfgConf;
 import com.example.pulsarworkshop.common.PulsarWorkshopCmdApp;
-import com.example.pulsarworkshop.common.exception.HelpExitException;
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
 import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
@@ -43,25 +42,9 @@ public class NatConsCmdApp extends PulsarWorkshopCmdApp {
     public static void main(String[] args) {
         PulsarWorkshopCmdApp workshopApp = new NatConsCmdApp(args);
 
-        try {
-            workshopApp.processInputParams();
-            workshopApp.runApp();
+        int exitCode = workshopApp.run("NatConsCmdApp");
 
-            System.exit(0);
-        }
-        catch (HelpExitException hee) {
-            workshopApp.usage("NatConsCmdApp");
-            System.exit(1);
-        }
-        catch (InvalidParamException ipe) {
-            System.out.println("\n[ERROR] Invalid input value(s) detected ...");
-            System.out.println("\n        Error message: " + ipe.getErrorDescription());
-            System.out.println("---------------------------------------------");
-            ipe.printStackTrace();
-        }
-        finally {
-            workshopApp.termApp();
-        }
+        System.exit(exitCode);
     }
 
     @Override
