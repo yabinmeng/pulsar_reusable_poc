@@ -2,8 +2,9 @@ package com.example.pulsarworkshop.common;
 
 import com.example.pulsarworkshop.common.exception.HelpExitException;
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
+import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
+
 import org.apache.commons.cli.*;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pulsar.client.api.*;
 import org.slf4j.Logger;
@@ -110,11 +111,24 @@ abstract public class PulsarWorkshopCmdApp {
         System.out.println();
     }
 
-    protected PulsarClient createNativePulsarClient(PulsarConnCfgConf connCfgConf)
+    private Map<String, String> getClientConfMap() {
+	    PulsarConnCfgConf connCfgConf = null;
+	    if (clientConnfFile != null) {
+	        connCfgConf = new PulsarConnCfgConf(clientConnfFile);
+	    }
+	    if (connCfgConf == null) {
+	        throw new WorkshopRuntimException(
+	                "Can't properly read the Pulsar connection information from the \"client.conf\" file!");
+	    }
+	    
+	    return connCfgConf.getClientConfMap();
+    }
+    
+    protected PulsarClient createNativePulsarClient()
     throws PulsarClientException {
         ClientBuilder clientBuilder = PulsarClient.builder();
 
-        Map<String, String> clientConnMap = connCfgConf.getClientConfMap();
+        Map<String, String> clientConnMap = getClientConfMap();
 
         String pulsarSvcUrl = clientConnMap.get("brokerServiceUrl");
         clientBuilder.serviceUrl(pulsarSvcUrl);
