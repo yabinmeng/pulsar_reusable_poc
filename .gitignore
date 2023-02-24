@@ -17,4 +17,5 @@ scenarios/*.nohup
 scenarios/*/appexec/*
 scenarios/logs/*
 cluster_deploy/ext_tools/jaegar/jaeger_port_forward.nohup
-scenarios/*/client.conf
+scenarios/*/*.conf
+scenarios/*/*.crt
