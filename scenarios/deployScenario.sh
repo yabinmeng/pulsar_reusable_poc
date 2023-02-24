@@ -276,7 +276,7 @@ for appId in "${scnAppIdArr[@]}"; do
       invalidMsg="Can't find corresponding appID (${appId}) in the client app definition file."
    fi
    
-   IFS=', ' read -r -a appDefArr <<< "${appDefStr}"
+   IFS=',' read -r -a appDefArr <<< "${appDefStr}"
    appLanguage=${appDefArr[0]}
    appPath=${appDefArr[1]}
    appClass=${appDefArr[2]}
