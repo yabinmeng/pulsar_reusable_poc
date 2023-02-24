@@ -69,6 +69,7 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
         finally {
             workshopApp.termApp();
         }
+        
         System.exit(exitCode);
     }
 
