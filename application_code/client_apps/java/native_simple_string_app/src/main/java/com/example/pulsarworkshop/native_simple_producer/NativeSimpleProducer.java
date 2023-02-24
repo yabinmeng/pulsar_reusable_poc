@@ -36,7 +36,6 @@ public class NativeSimpleProducer extends PulsarWorkshopCmdApp {
     }
 
     public static void main(String[] args) throws PulsarClientException {
-        //region args
         PulsarWorkshopCmdApp workshopApp = new NativeSimpleProducer(args);
         workshopApp.processInputParams();
         workshopApp.runApp();

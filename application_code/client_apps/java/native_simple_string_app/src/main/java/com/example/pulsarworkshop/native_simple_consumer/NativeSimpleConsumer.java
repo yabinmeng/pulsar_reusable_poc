@@ -25,7 +25,6 @@ public class NativeSimpleConsumer extends PulsarWorkshopCmdApp {
     }
 
     public static void main(String[] args) throws PulsarClientException {
-        //region args
         PulsarWorkshopCmdApp workshopApp = new NativeSimpleConsumer(args);
         workshopApp.processInputParams();
         workshopApp.runApp();
