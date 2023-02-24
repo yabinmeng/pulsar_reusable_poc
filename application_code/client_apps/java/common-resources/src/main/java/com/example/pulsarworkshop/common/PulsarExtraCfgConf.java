@@ -1,6 +1,7 @@
 package com.example.pulsarworkshop.common;
 
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
+import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.FileBasedConfiguration;
@@ -48,7 +49,7 @@ public class PulsarExtraCfgConf {
     private final Map<String, String> readerConfMapRaw = new HashMap<>();
     private final Map<String, Object> readerConfMapTgt = new HashMap<>();
 
-    public PulsarExtraCfgConf(File extraCfgFile) {
+    public PulsarExtraCfgConf(File extraCfgFile) throws WorkshopRuntimException {
 
         if (extraCfgFile != null) {
             //////////////////
@@ -72,7 +73,9 @@ public class PulsarExtraCfgConf {
     }
 
 
-    public void readRawCfgFromFile(File extraCfgFile) {
+    public void readRawCfgFromFile(File extraCfgFile)
+    throws WorkshopRuntimException
+    {
         String canonicalFilePath = "";
 
         try {
@@ -115,11 +118,10 @@ public class PulsarExtraCfgConf {
                 }
             }
         } catch (IOException ioe) {
-            logger.error("Can't read the specified config properties file!");
-            ioe.printStackTrace();
+            throw new WorkshopRuntimException("Can't read the specified properties file!");
         } catch (ConfigurationException cex) {
-            logger.error("Error loading configuration items from the specified config properties file: " + canonicalFilePath);
-            cex.printStackTrace();
+            throw new WorkshopRuntimException(
+                    "Error loading configuration items from the specified properties file: " + canonicalFilePath);
         }
     }
 

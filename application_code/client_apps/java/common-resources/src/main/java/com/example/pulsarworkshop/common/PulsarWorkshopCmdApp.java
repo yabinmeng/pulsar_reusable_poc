@@ -82,8 +82,8 @@ abstract public class PulsarWorkshopCmdApp {
         String cfgFileParam = cmdLine.getOptionValue("cfg");
         if (StringUtils.isNotBlank(cfgFileParam)) {
             try {
-                clientConnfFile = new File(cfgFileParam);
-                clientConnfFile.getCanonicalPath();
+                clientConfigFile = new File(cfgFileParam);
+                clientConfigFile.getCanonicalPath();
             } catch (IOException ex) {
                 throw new InvalidParamException("Invalid file path for the client configuration properties file!");
             }
