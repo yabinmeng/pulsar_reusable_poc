@@ -50,6 +50,7 @@
         <module>s4k_kafka_consumer</module>
         <module>s4r_rabbitmq_queue_consumer</module>
         <module>s4r_rabbitmq_queue_producer</module>
+        <module>function_astradb_v1</module>
     </modules>
 
     <build>
