@@ -160,11 +160,11 @@ fi
 echo
 echo "--------------------------------------------------------------"
 echo ">> Check if the Pulsar cluster named \"${pulsarClstrName}\" already exists ... "
-clusterExistence=$(helm status ${pulsarClstrName} | grep STATUS | awk -F': ' '{print $2}')
+clusterExistence=$(helm status ${pulsarClstrName} 2>/dev/null | grep STATUS | awk -F': ' '{print $2}')
 echo "   clusterExistence=${clusterExistence}; upgradeExistingCluster=${upgradeExistingCluster}"
 
 # There is no existing Pulsar cluster with the same name
-if [[ "${clusterExistence}" != "deployed" ]]; then
+if [[ -z "${clusterExistence}" ]]; then
     echo
     echo "--------------------------------------------------------------"
     echo ">> Install a Pulsar cluster named \"${pulsarClstrName}\" ... "

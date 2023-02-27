@@ -42,7 +42,7 @@ usage() {
 
 if [[ $# -eq 0 || $# -gt 6 ]]; then
    usage
-   exit 210
+   exit 10
 fi
 
 echo
@@ -96,7 +96,7 @@ echo ">> Delete the GKE cluster with the name \"${clstrName}\" ..."
 
 clusterExistence=$(gcloud beta container clusters list 2>&1 | grep "${clstrName}")
 if [[ -n "${clusterExistence// }" ]]; then
-    gcloud beta container clusters delete ${clstrName}
+    echo "Y" > gcloud beta container clusters delete ${clstrName}
     if [[ $? -ne 0 ]]; then
         echo "   [ERROR] Cluster deletion failed!"
         errExit 230

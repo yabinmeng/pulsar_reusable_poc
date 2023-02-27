@@ -25,27 +25,32 @@ usage() {
    echo
    echo "Usage: teardown_pulsar_cluster.sh [-h]"
    echo "                                  -clstrName <cluster_name>"
+   echo "                                  -propFile <deployment_properties_file>"
    echo "       -h : Show usage info"
    echo "       -clstrName : Pulsar cluster name."
+   echo "       -propFile  : Pulsar deployment properties file"
    echo
 }
 
-if [[ $# -gt 2 ]]; then
+if [[ $# -gt 4 ]]; then
    usage
-   errExit 30
+   errExit 20
 fi
 
 while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
-      -clstrName) clstrName=$2; shift ;;
-      *) echo "[ERROR] Unknown parameter passed: $1"; exit 40 ;;
+      -clstrName) pulsarClstrName=$2; shift ;;
+      -propFile) pulsarPropFile=$2; shift ;;
+      *) echo "[ERROR] Unknown parameter passed: $1"; exit 30 ;;
    esac
    shift
 done
 
-echo
-curDir=$(pwd)
+if ! [[ -f ${pulsarPropFile// } ]]; then
+    echo "[ERROR] Can't find the provided Pulsar termination properties file: \"${pulsarPropFile}\"!"
+    errExit 40; 
+fi
 
 helmExistence=$(chkSysSvcExistence helm)
 debugMsg "helmExistence=${helmExistence}"
@@ -54,16 +59,22 @@ if [[ ${helmExistence} -eq 0 ]]; then
     errExit 50;
 fi
 
-if [[ -z ${clstrName// } ]]; then
-    clstrName=$(getPropVal "pulsar.cluster.name")
-    if [[ -z ${clstrName// } ]]; then
+if [[ -z ${pulsarClstrName// } ]]; then
+    pulsarClstrName=$(getPropVal "pulsar.cluster.name")
+    if [[ -z ${pulsarClstrName// } ]]; then
         echo "[ERROR] Pulsar cluster name cannot be empty! "
         errExit 60
     fi
 fi
 # Name must be lowercase
-clstrName=$(echo "${clstrName}" | tr '[:upper:]' '[:lower:]')
-debugMsg "clstrName=${clstrName}"
+pulsarClstrName=$(echo "${pulsarClstrName}" | tr '[:upper:]' '[:lower:]')
+debugMsg "pulsarClstrName=${pulsarClstrName}"
+
+pulsarDeployHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/pulsar"
+helmChartHomeDir="${pulsarDeployHomeDir}/helm"
+
+helmTlsEnabled=$(getPropVal ${pulsarPropFile} "helm.tls.enabled")
+debugMsg "helmTlsEnabled=${helmTlsEnabled}"
 
 proxySvcName=$(kubectl get svc -l=component="proxy" -o name)
 debugMsg "proxySvcName=${proxySvcName}"
@@ -72,32 +83,36 @@ if [[ -n "${proxySvcName// }" ]]; then
     echo
     echo "--------------------------------------------------------------"
     echo ">> Terminate the forwarded Pulsar Proxy ports ... "
-    source forward_proxy_port.sh \
+    source ${pulsarDeployHomeDir}/forward_pulsar_proxy_port.sh \
         -act "stop" \
-        -proxySvc "${proxySvcName}"
+        -proxySvc "${proxySvcName}" \
+        -tlsEnabled "${helmTlsEnabled}"
     cd ${curDir}
+
+    echo
+    echo "--------------------------------------------------------------"
+    echo ">> Uninstall the Pulsar cluster (\"${pulsarClstrName}\") from the K8s cluster ... "
+    helmRepoExistence="$(chkHelmRepoExistence ${pulsarClstrName})"
+    debugMsg "helmRepoExistence=${helmRepoExistence}"
+    if [[ ${helmRepoExistence} -eq 1 ]]; then
+        helm uninstall "${pulsarClstrName}" --wait
+    fi
+else
+    echo
+    echo "--------------------------------------------------------------"
+    echo "[WARN] Doesn't detect Pulsar Proxy service. Likely there is no Pulsar cluster (\"${pulsarClstrName}\") deployed!"
 fi
 
+certManagerEnabled=$(getPropVal ${pulsarPropFile} "pulsar.teardown.cert.manager")
+if [[ "${certManagerEnabled}" == "true" ]]; then
+    cmGhRelUrlBase="https://github.com/cert-manager/cert-manager/releases"
+    cmVersion=$(chkGitHubLatestRelVer "${cmGhRelUrlBase}/latest")
+    debugMsg "certManagerVersion=${cmVersion}"
 
-echo
-echo "--------------------------------------------------------------"
-echo ">> Uninstall the Pulsar cluster (\"${clstrName}\") from the K8s cluster ... "
-helmRepoExistence="$(chkHelmRepoExistence ${clstrName})"
-debugMsg "helmRepoExistence=${helmRepoExistence}"
-if [[ ${helmRepoExistence} -eq 1 ]]; then
-    helm uninstall "${clstrName}" 
+    echo
+    echo "--------------------------------------------------------------"
+    echo ">> Uninstall \"cert_manager\" as required for a secured Pulsar cluster install ... "
+    kubectl delete -f "https://github.com/cert-manager/cert-manager/releases/download/v${cmVersion}/cert-manager.yaml"
 fi
-
-# certManagerEnabled=$(getPropVal "tools.cert_manager.enabled")
-# if [[ "${certManagerEnabled}" == "true" ]]; then
-#     cmGhRelUrlBase="https://github.com/cert-manager/cert-manager/releases"
-#     cmVersion=$(chkGitHubLatestRelVer "${cmGhRelUrlBase}/latest")
-#     debugMsg "certManagerVersion=${cmVersion}"
-
-#     echo
-#     echo "--------------------------------------------------------------"
-#     echo ">> Uninstall \"cert_manager\" as required for a secured Pulsar cluster install ... "
-#     kubectl delete -f "https://github.com/cert-manager/cert-manager/releases/download/v${cmVersion}/cert-manager.yaml"
-# fi
 
 echo
