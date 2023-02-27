@@ -150,7 +150,7 @@ esac
 ks8OptClusterCreationErrCode=$?
 if [[ "${ks8OptClusterCreationErrCode}" -ne 0 ]]; then
     echo "[ERROR] Failed to create the K8s clsuter !"
-    errExit ks8OptClusterCreationErrCode; 
+    errExit 200; 
 fi
 
 nginxIngressEnabled=$(getPropVal ${k8sDeployPropFile} "k8s.nginx.ingress")
