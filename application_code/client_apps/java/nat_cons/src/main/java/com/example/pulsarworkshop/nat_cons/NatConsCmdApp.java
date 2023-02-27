@@ -1,6 +1,5 @@
 package com.example.pulsarworkshop.nat_cons;
 
-import com.example.pulsarworkshop.common.PulsarExtraCfgConf;
 import com.example.pulsarworkshop.common.PulsarWorkshopCmdApp;
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
 import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
@@ -8,9 +7,8 @@ import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.pulsar.client.api.*;
+import org.apache.pulsar.shade.org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +32,9 @@ public class NatConsCmdApp extends PulsarWorkshopCmdApp {
     public NatConsCmdApp(String[] inputParams) {
         super(inputParams);
 
-        extraCliOptions.addOption(new Option("num","numMsg", true, "Number of message to produce."));
-        extraCliOptions.addOption(new Option("sbt","subType", true, "Pulsar subscription type."));
-        extraCliOptions.addOption(new Option("sbn", "subName", true, "Pulsar subscription name."));
+        cliOptions.addOption(new Option("num","numMsg", true, "Number of message to produce."));
+        cliOptions.addOption(new Option("sbt","subType", true, "Pulsar subscription type."));
+        cliOptions.addOption(new Option("sbn", "subName", true, "Pulsar subscription name."));
     }
 
     public static void main(String[] args) {
@@ -52,38 +50,29 @@ public class NatConsCmdApp extends PulsarWorkshopCmdApp {
         CommandLine commandLine = null;
 
         try {
-            commandLine = cmdParser.parse(getCliOptions(), rawCmdInputParams);
+            commandLine = cmdParser.parse(cliOptions, rawCmdInputParams);
         } catch (ParseException e) {
-            throw new InvalidParamException("Failed to parse application CLI input parameters!");
+            throw new InvalidParamException("Failed to parse application CLI input parameters: " + e.getMessage());
         }
 
         super.processBasicInputParams(commandLine);
 
         // (Required) CLI option for number of messages
-        String msgNumParam = commandLine.getOptionValue("num");
-        int intVal = NumberUtils.toInt(msgNumParam);
-        if ( (intVal > 0) || (intVal == -1) ) {
-            numMsg = intVal;
-        }
-        else {
-            throw new InvalidParamException("Message number must be a positive integer or -1 (all available raw input)!");
-        }
+        numMsg = processIntegerInputParam(commandLine, "num");
+    	if ( (numMsg <= 0) && (numMsg != -1) ) {
+    		throw new InvalidParamException("Message number must be a positive integer or -1 (all available raw input)!");
+    	}    	
 
         // (Required) Pulsar subscription name
-        subsriptionName = commandLine.getOptionValue("subName");
-        if (StringUtils.isBlank(subsriptionName)) {
-            throw new InvalidParamException("Empty subscription name!");
-        }
-
-        // (Optional) Pulsar subscription type. Default to Exclusive
-        String subTypeParam = commandLine.getOptionValue("subType");
-        if ( ! StringUtils.isBlank(subTypeParam) ) {
-            try {
-                subscriptionType = SubscriptionType.valueOf(subTypeParam);
-            }
-            catch (IllegalArgumentException iae) {
-                subscriptionType = SubscriptionType.Exclusive;
-            }
+        subsriptionName = processStringInputParam(commandLine, "subName");
+        String subType = processStringInputParam(commandLine, "subType");
+        if (!StringUtils.isBlank(subType)) {
+        try {
+	            subscriptionType = SubscriptionType.valueOf(subType);
+	        }
+	        catch (IllegalArgumentException iae) {
+	            subscriptionType = SubscriptionType.Exclusive;
+	        }
         }
     }
 
