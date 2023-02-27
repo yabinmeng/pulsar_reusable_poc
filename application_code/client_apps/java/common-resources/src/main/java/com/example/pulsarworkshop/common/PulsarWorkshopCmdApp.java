@@ -42,13 +42,6 @@ abstract public class PulsarWorkshopCmdApp {
         this.rawCmdInputParams = inputParams;
         this.cmdParser = new DefaultParser();
 
-        // Basic Command line options
-//        basicCliOptions.addOption(new Option("h", "help", false, "Displays the usage method."));
-//        basicCliOptions.addOption(new Option("top", "topic", true, "Pulsar topic name."));
-//        basicCliOptions.addOption(new Option("con","connFile", true, "\"client.conf\" file path."));
-//        basicCliOptions.addOption(new Option("cfg", "cfgFile", true, "Extra config properties file path."));
-//        basicCliOptions.addOption(new Option("as", "astra", false, "Whether to use Astra streaming."));
-
         addCommandLineOption(new Option("h", "help", false, "Displays the usage method."));
         addCommandLineOption(new Option("top", "topic", true, "Pulsar topic name."));
         addCommandLineOption(new Option("con","connFile", true, "\"client.conf\" file path."));
