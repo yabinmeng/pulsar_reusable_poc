@@ -1,14 +1,16 @@
 package com.example.pulsarworkshop.common;
 
-import com.example.pulsarworkshop.common.exception.HelpExitException;
-import com.example.pulsarworkshop.common.exception.InvalidParamException;
-import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.pulsar.client.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.example.pulsarworkshop.common.exception.HelpExitException;
+import com.example.pulsarworkshop.common.exception.InvalidParamException;
+import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,8 +31,8 @@ abstract public class PulsarWorkshopCmdApp {
     protected DefaultParser cmdParser;
     protected Options basicCliOptions = new Options();
     protected Options extraCliOptions = new Options();
-
-
+    protected Options cliOptions = new Options();
+    
     public abstract void processInputParams() throws InvalidParamException;
     public abstract void runApp();
     public abstract void termApp();
@@ -40,14 +42,45 @@ abstract public class PulsarWorkshopCmdApp {
         this.rawCmdInputParams = inputParams;
         this.cmdParser = new DefaultParser();
 
-        // Basic Command line options
-        basicCliOptions.addOption(new Option("h", "help", false, "Displays the usage method."));
-        basicCliOptions.addOption(new Option("top", "topic", true, "Pulsar topic name."));
-        basicCliOptions.addOption(new Option("con","connFile", true, "\"client.conf\" file path."));
-        basicCliOptions.addOption(new Option("cfg", "cfgFile", true, "Extra config properties file path."));
-        basicCliOptions.addOption(new Option("as", "astra", false, "Whether to use Astra streaming."));
+        addCommandLineOption(new Option("h", "help", false, "Displays the usage method."));
+        addCommandLineOption(new Option("top", "topic", true, "Pulsar topic name."));
+        addCommandLineOption(new Option("con","connFile", true, "\"client.conf\" file path."));
+        addCommandLineOption(new Option("cfg", "cfgFile", true, "Extra config properties file path."));
+        addCommandLineOption(new Option("as", "astra", false, "Whether to use Astra streaming."));
+
     }
 
+    protected void addCommandLineOption(Option option) {
+    	cliOptions.addOption(option);
+    }
+    
+    public int run(String appName) {
+        int exitCode = 0;
+        try {
+            this.processInputParams();
+            this.runApp();
+        }
+        catch (HelpExitException hee) {
+            this.usage(appName);
+            exitCode = 1;
+        }
+        catch (InvalidParamException ipe) {
+            System.out.println("\n[ERROR] Invalid input value(s) detected!");
+            ipe.printStackTrace();
+            exitCode = 2;
+        }
+        catch (WorkshopRuntimException wre) {
+            System.out.println("\n[ERROR] Unexpected runtime error detected!");
+            wre.printStackTrace();
+            exitCode = 3;
+        }
+        finally {
+            this.termApp();
+        }
+        
+        return exitCode;
+    }
+    
     public String getPulsarTopicName() { return this.pulsarTopicName; }
     public File getClientConnfFile() { return this.clientConnfFile; }
     public File getClientConfigFile() { return this.clientConfigFile; }
@@ -59,60 +92,74 @@ abstract public class PulsarWorkshopCmdApp {
         }
 
         // (Required) CLI option for Pulsar topic
-        pulsarTopicName = cmdLine.getOptionValue("top");
-        if (StringUtils.isBlank(pulsarTopicName)) {
-            throw new InvalidParamException("Empty Pulsar topic name!");
-        }
+        pulsarTopicName = processStringInputParam(cmdLine, "top");
 
-        // (Required) CLI option for client.conf file
-        String clntConnFileParam = cmdLine.getOptionValue("con");
-        if (StringUtils.isBlank(clntConnFileParam)) {
-            throw new InvalidParamException("Must specify the \"client.conf\" file!");
-        }
-        else {
-            try {
-                clientConnfFile = new File(clntConnFileParam);
-                clientConnfFile.getCanonicalPath();
-            } catch (IOException ex) {
-                throw new InvalidParamException("Invalid file path for the \"client.conf\" file!");
-            }
-        }
+        // (Optional) CLI option for client.conf file
+        clientConnfFile = processFileInputParam(cmdLine, "con");
 
         // (Optional) CLI option for extra config properties file
-        String cfgFileParam = cmdLine.getOptionValue("cfg");
-        if (StringUtils.isNotBlank(cfgFileParam)) {
-            try {
-                clientConfigFile = new File(cfgFileParam);
-                clientConfigFile.getCanonicalPath();
-            } catch (IOException ex) {
-                throw new InvalidParamException("Invalid file path for the client configuration properties file!");
-            }
-        }
+        clientConfigFile = processFileInputParam(cmdLine, "cfg");
 
-        // (Optional) Whether to use Astra Streaming
+        		// (Optional) Whether to use Astra Streaming
         if (cmdLine.hasOption("as")) {
             useAstraStreaming = true;
         }
     }
 
-    public Options getCliOptions() {
-        Options options = new Options();
-        for (Option opt : basicCliOptions.getOptions()) {
-            options.addOption(opt);
-        }
-        for (Option opt : extraCliOptions.getOptions()) {
-            options.addOption(opt);
-        }
-        return options;
-    }
+    public Integer processIntegerInputParam(CommandLine cmdLine, String optionName) {
+        Option option = cliOptions.getOption(optionName);
+        int intVal = 0;
 
+        if (option.isRequired() &&
+        	cmdLine.getOptionValue(option) == null) {
+                throw new InvalidParamException("Empty value for argument '" + optionName +"'");
+        }
+        else if (cmdLine.getOptionValue(option) != null) {    	
+
+        	String msgNumParam = cmdLine.getOptionValue(option.getOpt());        	
+        	intVal = NumberUtils.toInt(msgNumParam);
+        }
+        
+        return Integer.valueOf(intVal);
+    }
+    
+    public String processStringInputParam(CommandLine cmdLine, String optionName) {
+
+    	Option option = cliOptions.getOption(optionName);
+        String value = cmdLine.getOptionValue(option);
+
+        if (option.isRequired() &&
+        	cmdLine.getOptionValue(option) == null) {
+            throw new InvalidParamException("Empty value for argument '" + optionName +"'");
+        }
+
+        return value;
+    }
+    
+    public File processFileInputParam(CommandLine cmdLine, String optionName) {
+        File file = null;
+        Option option = cliOptions.getOption(optionName);
+        if (cmdLine.getOptionValue(option) != null) {
+
+        	String path = cmdLine.getOptionValue(option.getOpt());    	
+	        try {
+	            file = new File(path);
+	            file.getCanonicalPath();
+	        } catch (IOException ex) {
+	        	throw new InvalidParamException("Invalid file path for param '" + optionName + "': " + path);
+	        }
+    	}
+
+        return file;
+    }    
+    
     public void usage(String appNme) {
         PrintWriter printWriter = new PrintWriter(System.out, true);
 
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp(printWriter, 150, "appNme",
                 "Command Line Options:",
-                getCliOptions(), 2, 1, "", true);
+                cliOptions, 2, 1, "", true);
 
         System.out.println();
     }
