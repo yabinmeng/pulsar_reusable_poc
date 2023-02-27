@@ -31,7 +31,7 @@ usage() {
    echo
    echo "Usage: gke_delete.sh [-h]"
    echo "                     -clstrName <cluster_name>"
-   echo "                     [-project <gcp_project_name>]"
+   echo "                     [-project] <gcp_project_name>"
    echo "                     [-regOrZone] <region_or_zone_name>"
    echo "       -h : Show usage info"
    echo "       -clstrName : (Optional) Custom Kind cluster name."
@@ -42,10 +42,8 @@ usage() {
 
 if [[ $# -eq 0 || $# -gt 6 ]]; then
    usage
-   exit 10
+   exit 20
 fi
-
-echo
 
 isRegional=0
 setActiveSvcAcct=0
@@ -55,7 +53,7 @@ while [[ "$#" -gt 0 ]]; do
       -clstrName) clstrName=$2; shift ;;
       -regOrZone) regOrZoneName=$2; shift ;;
       -project) projectName=$2; shift ;;
-      *) echo "[ERROR] Unknown parameter passed: $1"; exit 220 ;;
+      *) echo "[ERROR] Unknown parameter passed: $1"; exit 30 ;;
    esac
    shift
 done
@@ -68,7 +66,7 @@ gcloudExistence=$(chkSysSvcExistence gcloud)
 debugMsg "gcloudExistence=${gcloudExistence}"
 if [[ ${gcloudExistence} -eq 0 ]]; then
     echo "[ERROR] gcloud isn't installed on the local machine yet; please install it first!"
-    errExit 230;
+    errExit 40;
 fi
 
 validRegOrZoneParam=0
@@ -87,19 +85,34 @@ if [[ -n "${regOrZoneName// }" ]]; then
 fi
 if [[ ${validRegOrZoneParam} -eq 0 ]]; then
     echo "[ERROR] Invalid region or zone name string. It must be in format \"region:<region_name>\" or \"zone:<zone_name>\"!"
-    errExit 240;
+    errExit 50;
 fi
 
 echo
 echo "--------------------------------------------------------------"
 echo ">> Delete the GKE cluster with the name \"${clstrName}\" ..."
 
-clusterExistence=$(gcloud beta container clusters list 2>&1 | grep "${clstrName}")
-if [[ -n "${clusterExistence// }" ]]; then
+clusterExistence=$(gcloud beta container clusters list 2>&1 | tail -2 | awk '{print $1}' | grep -w "${clstrName}")
+debugMsg "clusterExistence=${clusterExistence}"
+
+if [[ -n "${clusterExistence}" ]]; then
+    if [[ "${regOrZoneTypeStr}" == "region" ]]; then
+        gcloud beta container clusters delete ${clstrName} \
+            --project ${projectName}  \
+            --region ${regOrZoneNameStr}
+    else
+        gcloud beta container clusters delete ${clstrName} \
+            --project ${projectName}  \
+            --zone ${regOrZoneNameStr}
+    fi
+
     echo "Y" > gcloud beta container clusters delete ${clstrName}
     if [[ $? -ne 0 ]]; then
         echo "   [ERROR] Cluster deletion failed!"
-        errExit 230
+        errExit 60
+    else
+        echo "   Cluster deletion succeeded!"
+        echo
     fi
 else
     echo "   [WARN] The GKE cluster with the spcified name does not exist!"

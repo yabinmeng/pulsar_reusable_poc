@@ -47,7 +47,7 @@ while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
       -clstrName) pulsarClstrName=$2; shift ;;
-      -propFile) pulsarDeployPropFile=$2; shift ;;
+      -propFile) pulsarPropFile=$2; shift ;;
       -upgrade) upgradeExistingCluster=1; ;;
       -genClntConfFile) targetClntConfFileFolder=$2; shift ;;
       *) echo "[ERROR] Unknown parameter passed: $1"; exit 30 ;;
@@ -55,8 +55,8 @@ while [[ "$#" -gt 0 ]]; do
    shift
 done
 
-if ! [[ -f ${pulsarDeployPropFile// } ]]; then
-    echo "[ERROR] Can't find the provided Pulsar deployment properties file: \"${pulsarDeployPropFile}\"!"
+if ! [[ -f ${pulsarPropFile// } ]]; then
+    echo "[ERROR] Can't find the provided Pulsar deployment properties file: \"${pulsarPropFile}\"!"
     errExit 40; 
 fi
 
@@ -68,7 +68,7 @@ if [[ ${helmExistence} -eq 0 ]]; then
 fi
 
 if [[ -z ${pulsarClstrName// } ]]; then
-    dftClstrName=$(getPropVal ${pulsarDeployPropFile} "pulsar.cluster.name")
+    dftClstrName=$(getPropVal ${pulsarPropFile} "pulsar.cluster.name")
     if [[ -z ${dftClstrName// } ]]; then
         echo "[ERROR] Pulsar cluster name cannot be empty! "
         errExit 60
@@ -79,11 +79,12 @@ fi
 # Name must be lowercase
 pulsarClstrName=$(echo "${pulsarClstrName}" | tr '[:upper:]' '[:lower:]')
 
+
 pulsarDeployHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/pulsar"
 helmChartHomeDir="${pulsarDeployHomeDir}/helm"
 
-helmAuthMethod=$(getPropVal ${pulsarDeployPropFile} "helm.auth.method")
-helmTlsEnabled=$(getPropVal ${pulsarDeployPropFile} "helm.tls.enabled")
+helmAuthMethod=$(getPropVal ${pulsarPropFile} "helm.auth.method")
+helmTlsEnabled=$(getPropVal ${pulsarPropFile} "helm.tls.enabled")
 debugMsg "helmAuthMethod=${helmAuthMethod}"
 debugMsg "helmTlsEnabled=${helmTlsEnabled}"
 
@@ -144,8 +145,8 @@ helm repo add datastax-pulsar https://datastax.github.io/pulsar-helm-chart
 helm repo update datastax-pulsar
 
 # Update the Helm chart file with the proper cluster name and docker image release version
-pulsarRelease=$(getPropVal ${pulsarDeployPropFile} "pulsar.image")
-helmDepUpdt=$(getPropVal ${pulsarDeployPropFile} "helm.dependency.update")
+pulsarRelease=$(getPropVal ${pulsarPropFile} "pulsar.image")
+helmDepUpdt=$(getPropVal ${pulsarPropFile} "helm.dependency.update")
 source ${pulsarDeployHomeDir}/update_helm.sh \
     -depUpdt "${helmDepUpdt}" \
     -file "${helmChartFile}" \

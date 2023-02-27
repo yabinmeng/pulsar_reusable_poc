@@ -104,7 +104,8 @@ echo "--------------------------------------------------------------"
 echo ">> Create the GKE cluster with the name \"${clstrName}\" ..."
 
 # "grep '-w' for exact whole word matching"
-clusterExistence=$(gcloud beta container clusters list 2>&1 | grep -w "${clstrName}")
+clusterExistence=$(gcloud beta container clusters list 2>&1 | tail -2 | awk '{print $1}' | grep -w "${clstrName}")
+debugMsg "clusterExistence=${clusterExistence}"
 
 if [[ -z "${clusterExistence}" ]]; then
     if [[ "${regOrZoneTypeStr}" == "region" ]]; then

@@ -21,6 +21,8 @@ PULSAR_WORKSHOP_HOMEDIR=$( cd -- "${CUR_SCRIPT_FOLDER}/../.." &> /dev/null && pw
 
 source "${PULSAR_WORKSHOP_HOMEDIR}/_bash_utils_/utilities.sh"
 
+echo
+
 usage() {
    echo
    echo "Usage: teardown_pulsar_cluster.sh [-h]"
@@ -47,6 +49,11 @@ while [[ "$#" -gt 0 ]]; do
    shift
 done
 
+dftPulsarPropFile="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/pulsar/pulsar.properties"
+if ! [[ -n "${pulsarPropFile}" && -f "${pulsarPropFile}" ]]; then
+    pulsarPropFile=${dftPulsarPropFile}
+fi
+
 if ! [[ -f ${pulsarPropFile// } ]]; then
     echo "[ERROR] Can't find the provided Pulsar termination properties file: \"${pulsarPropFile}\"!"
     errExit 40; 
@@ -60,7 +67,7 @@ if [[ ${helmExistence} -eq 0 ]]; then
 fi
 
 if [[ -z ${pulsarClstrName// } ]]; then
-    pulsarClstrName=$(getPropVal "pulsar.cluster.name")
+    pulsarClstrName=$(getPropVal ${pulsarPropFile} "pulsar.cluster.name")
     if [[ -z ${pulsarClstrName// } ]]; then
         echo "[ERROR] Pulsar cluster name cannot be empty! "
         errExit 60
@@ -69,6 +76,12 @@ fi
 # Name must be lowercase
 pulsarClstrName=$(echo "${pulsarClstrName}" | tr '[:upper:]' '[:lower:]')
 debugMsg "pulsarClstrName=${pulsarClstrName}"
+
+echo "============================================================== "
+echo "= "
+echo "= A Pulsar cluster with name \"${pulsarClstrName}\" will be deleted ...  "
+echo "= "
+echo
 
 pulsarDeployHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/pulsar"
 helmChartHomeDir="${pulsarDeployHomeDir}/helm"

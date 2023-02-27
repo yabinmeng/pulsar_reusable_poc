@@ -52,14 +52,14 @@ while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
       -clstrName) k8sClstrName=$2; shift ;;
-      -propFile) k8sDeployPropFile=$2; shift ;;
+      -propFile) k8sPropFile=$2; shift ;;
       *) echo "[ERROR] Unknown parameter passed: $1"; errExit 30 ;;
    esac
    shift
 done
 
-if ! [[ -f ${k8sDeployPropFile// } ]]; then
-    echo "[ERROR] Can't find the provided K8s deployment properties file: \"${k8sDeployPropFile}\"!"
+if ! [[ -f ${k8sPropFile// } ]]; then
+    echo "[ERROR] Can't find the provided K8s deployment properties file: \"${k8sPropFile}\"!"
     errExit 40; 
 fi
 
@@ -71,7 +71,7 @@ if [[ ${kubeCtlExistence} -eq 0 ]]; then
 fi
 
 if [[ -z ${k8sClstrName// } ]]; then
-    dftClstrName=$(getPropVal ${k8sDeployPropFile} "k8s.cluster.name")
+    dftClstrName=$(getPropVal ${k8sPropFile} "k8s.cluster.name")
     if [[ -z ${dftClstrName// } ]]; then
         echo "[ERROR] K8s cluster name can't be empty! "
         errExit 60
@@ -80,7 +80,7 @@ if [[ -z ${k8sClstrName// } ]]; then
     fi
 fi
 
-k8sOpt=$(getPropVal ${k8sDeployPropFile} "k8s.deploy.option")
+k8sOpt=$(getPropVal ${k8sPropFile} "k8s.deploy.option")
 if [[ -z ${k8sOpt// } ]]; then
     echo "[ERROR] A K8s deployment option must be provided!"
     errExit 70
@@ -107,9 +107,9 @@ case ${k8sOpt} in
             errExit 90; 
         fi
 
-        preLoadImage=$(getPropVal ${k8sDeployPropFile} "kind.image.preload")
+        preLoadImage=$(getPropVal ${k8sPropFile} "kind.image.preload")
         if [[ "${preLoadImage}" == "true" ]]; then
-            pulsarImage=$(getPropVal ${k8sDeployPropFile} "kind.pulsar.image")
+            pulsarImage=$(getPropVal ${k8sPropFile} "kind.pulsar.image")
             source ${k8sOptDeployHomeDir}/kind_create.sh -clstrName ${k8sClstrName} -preLoadImage ${pulsarImage}
         else
             source ${k8sOptDeployHomeDir}/kind_create.sh -clstrName ${k8sClstrName}
@@ -122,10 +122,10 @@ case ${k8sOpt} in
             errExit 100; 
         fi
 
-        projectName=$(getPropVal ${k8sDeployPropFile} "gke.project")
-        regOrZoneName=$(getPropVal ${k8sDeployPropFile} "gke.reg_or_zone")
-        nodeType=$(getPropVal ${k8sDeployPropFile} "gke.node_typ")
-        nodeCnt=$(getPropVal ${k8sDeployPropFile} "gke.node_num")
+        projectName=$(getPropVal ${k8sPropFile} "gke.project")
+        regOrZoneName=$(getPropVal ${k8sPropFile} "gke.reg_or_zone")
+        nodeType=$(getPropVal ${k8sPropFile} "gke.node_typ")
+        nodeCnt=$(getPropVal ${k8sPropFile} "gke.node_num")
 
         source ${k8sOptDeployHomeDir}/gke_create.sh \
             -clstrName ${k8sClstrName} \
@@ -153,7 +153,7 @@ if [[ "${ks8OptClusterCreationErrCode}" -ne 0 ]]; then
     errExit 200; 
 fi
 
-nginxIngressEnabled=$(getPropVal ${k8sDeployPropFile} "k8s.nginx.ingress")
+nginxIngressEnabled=$(getPropVal ${k8sPropFile} "k8s.nginx.ingress")
 if [[ "${nginxIngressEnabled}" == "true" ]]; then
     echo
     echo "--------------------------------------------------------------"

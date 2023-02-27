@@ -24,6 +24,13 @@ PULSAR_WORKSHOP_HOMEDIR=$( cd -- "${CUR_SCRIPT_FOLDER}/.." &> /dev/null && pwd )
 source "${PULSAR_WORKSHOP_HOMEDIR}/_bash_utils_/utilities.sh"
 
 
+echo "Call \"../cluster_deploy/pulsar/teardown_pulsar_cluster.sh\" directly to terminate the Pulsar cluster"
+echo "Call \"../cluster_deploy/k8s/teardown_k8s_cluster.sh\" directly to terminate the K8s cluster" 
+echo
+
+exit
+
+
 usage() {
    echo
    echo "Usage: terminateScenario.sh [-h]"

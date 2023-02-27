@@ -32,6 +32,8 @@ source "${PULSAR_WORKSHOP_HOMEDIR}/_bash_utils_/utilities.sh"
 # - eks
 # 
 
+echo
+
 usage() {
    echo
    echo "Usage: teardown_k8s_cluster.sh [-h]"
@@ -51,15 +53,20 @@ fi
 while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
-      -clstrName) clstrName=$2; shift ;;
-      -propFile) k8sDeployPropFile=$2; shift ;;
+      -clstrName) k8sClstrName=$2; shift ;;
+      -propFile) k8sPropFile=$2; shift ;;
       *) echo "[ERROR] Unknown parameter passed: $1"; exit 30 ;;
    esac
    shift
 done
 
-if ! [[ -f ${k8sDeployPropFile// } ]]; then
-    echo "[ERROR] Can't find the provided K8s deployment properties file: \"${k8sDeployPropFile}\"!"
+dftK8sPropFile="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/k8s/k8s.properties"
+if ! [[ -n "${k8sPropFile}" && -f "${k8sPropFile}" ]]; then
+    k8sPropFile=${dftK8sPropFile}
+fi
+
+if ! [[ -f ${k8sPropFile// } ]]; then
+    echo "[ERROR] Can't find the provided K8s deployment properties file: \"${k8sPropFile}\"!"
     errExit 40; 
 fi
 
@@ -71,16 +78,14 @@ if [[ ${kubeCtlExistence} -eq 0 ]]; then
 fi
 
 if [[ -z ${k8sClstrName// } ]]; then
-    dftClstrName=$(getPropVal ${k8sDeployPropFile} "k8s.cluster.name")
-    if [[ -z ${dftClstrName// } ]]; then
-        echo "[ERROR] K8s cluster name can't be empty! "
+    k8sClstrName=$(getPropVal ${k8sPropFile} "k8s.cluster.name")
+    if [[ -z ${k8sClstrName// } ]]; then
+        echo "[ERROR] K8s cluster name cannot be empty! "
         errExit 60
-    else
-        k8sClstrName=${dftClstrName}
     fi
 fi
 
-k8sOpt=$(getPropVal ${k8sDeployPropFile} "k8s.deploy.option")
+k8sOpt=$(getPropVal ${k8sPropFile} "k8s.deploy.option")
 if [[ -z ${k8sOpt// } ]]; then
     echo "[ERROR] A K8s deployment option must be provided!"
     errExit 70
@@ -96,7 +101,7 @@ k8sOptDeployHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/k8s/${k8sOpt}"
 
 echo "============================================================== "
 echo "= "
-echo "= A \"${k8sOpt}\" based K8s cluster with name \"${clstrName}\" will be deleted ...  "
+echo "= A \"${k8sOpt}\" based K8s cluster with name \"${k8sClstrName}\" will be deleted ...  "
 echo "= "
 echo
 
@@ -107,7 +112,7 @@ case ${k8sOpt} in
             errExit 90; 
         fi
 
-        source ${k8sOptDeployHomeDir}/kind_delete.sh -clstrName  ${clstrName}
+        source ${k8sOptDeployHomeDir}/kind_delete.sh -clstrName  ${k8sClstrName}
         ;;
 
     gke)
@@ -116,11 +121,10 @@ case ${k8sOpt} in
             errExit 100; 
         fi
         
-        projectName=$(getPropVal ${k8sDeployPropFile} "gke.project")
-        regOrZoneName=$(getPropVal ${k8sDeployPropFile} "gke.reg_or_zone")
-
+        projectName=$(getPropVal ${k8sPropFile} "gke.project")
+        regOrZoneName=$(getPropVal ${k8sPropFile} "gke.reg_or_zone")
         source ${k8sOptDeployHomeDir}/gke_delete.sh \
-            -clstrName ${clstrName} \
+            -clstrName ${k8sClstrName} \
             -project ${projectName} \
             -regOrZone ${regOrZoneName}
         ;;
