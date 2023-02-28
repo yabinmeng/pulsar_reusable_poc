@@ -10,12 +10,17 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>s4j_topic_subs</artifactId>
+    <artifactId>nat_cons</artifactId>
     <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <name>${project.artifactId}</name>
     <description>
-        Pulsar workshop demo application - S4J API for a message subscriber to a JMS topic.
+        Pulsar workshop demo application - Pulsar consumer with native client API.
     </description>
 
     <build>
@@ -42,9 +47,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>common-resources</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.apache.pulsar</groupId>
+            <artifactId>pulsar-client</artifactId>
+            <version>${pulsar.version}</version>
         </dependency>
     </dependencies>
 

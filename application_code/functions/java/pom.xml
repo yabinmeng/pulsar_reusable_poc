@@ -5,14 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>pulsar-workshop</artifactId>
+    <artifactId>pulsar-workshop-func</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
     <description>
-        Pulsar workshop is used to showcase Pulsar client API, starlight APIs, and Pulsar functions.
-        This module is the parent module for Pulsar workshop Maven submodules.
+        This module is used to showcase how Pulsar functions (of different functionalities) are implemented.
     </description>
 
     <licenses>
@@ -23,31 +22,12 @@
     </licenses>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>17</maven.compiler.release>
         <pulsar.version>2.10.3</pulsar.version>
-        <slf4j.version>2.0.6</slf4j.version>
     </properties>
 
     <modules>
-        <!--
-        <module>_misc_/producer-consumer</module>
-        <module>_misc_/open-tracing-interceptor</module>
-        -->
-        <module>common-resources</module>
-        <module>nat_prod</module>
-        <module>nat_cons</module>
-        <module>spb_prod</module>
-        <module>spb_cons</module>
-        <module>s4j_queu_send</module>
-        <module>s4j_queu_recv</module>
-        <module>s4j_topic_prod</module>
-        <module>s4j_topic_subs</module>
-        <module>s4k_prod</module>
-        <module>s4k_cons</module>
-        <module>s4r_queu_cons</module>
-        <module>s4r_queu_prod</module>
+        <module>func_add_metadata</module>
     </modules>
 
     <build>
@@ -63,7 +43,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <minimizeJar>true</minimizeJar>
+                            <!--                            <minimizeJar>true</minimizeJar>-->
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -82,34 +62,6 @@
     </build>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
-        <dependency>
-            <groupId>commons-cli</groupId>
-            <artifactId>commons-cli</artifactId>
-            <version>1.5.0</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.9.4</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-configuration2 -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-configuration2</artifactId>
-            <version>2.8.0</version>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
