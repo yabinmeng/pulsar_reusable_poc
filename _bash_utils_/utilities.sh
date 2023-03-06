@@ -18,6 +18,9 @@ PULSAR_PROXY_PORTS=(6650 8080 9092 8081)
 # 8081: Kafka schema registry TLS port
 PULSAR_PROXY_PORTS_TLS=(6651 8443 9093)
 
+##
+# Supported infrastructure deployment options
+SCN_DEPLOY_MODES=("astra" "luna_existing" "luna_new")
 
 ##
 # Show debug message 
@@ -101,7 +104,8 @@ startProxyPortForward() {
     local proxySvcName=${1}
     local tlsEnabled=${2}
     local nohupOutFile=${3}
-    touch ${nohupOutFile}
+
+    echo > ${nohupOutFile}
     
     echo "   forwarding non-TLS ports (${PULSAR_PROXY_PORTS[@]}) ..."
     for port in "${PULSAR_PROXY_PORTS[@]}"; do

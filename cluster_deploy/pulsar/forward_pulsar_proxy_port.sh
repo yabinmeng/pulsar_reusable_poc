@@ -49,6 +49,9 @@ while [[ "$#" -gt 0 ]]; do
    esac
    shift
 done
+debugMsg "actTerm=${actTerm}"
+debugMsg "proxySvcName=${proxySvcName}"
+debugMsg "tlsEnabled=${tlsEnabled}"
 
 if ! [[ "${actTerm}" == "start" || "${actTerm}" == "stop" ]]; then
     echo "[ERROR] Invalid value for '-act' option; must be either 'start' or 'stop'!"
