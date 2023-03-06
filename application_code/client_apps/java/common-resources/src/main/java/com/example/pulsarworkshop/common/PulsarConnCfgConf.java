@@ -1,5 +1,6 @@
 package com.example.pulsarworkshop.common;
 
+import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.FileBasedConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -20,7 +21,7 @@ public class PulsarConnCfgConf {
     private final static Logger logger = LoggerFactory.getLogger(PulsarConnCfgConf.class);
 
     private final Map<String, String> clientConfMap = new HashMap<>();
-    public PulsarConnCfgConf(File clientConnFile) {
+    public PulsarConnCfgConf(File clientConnFile) throws WorkshopRuntimException {
         String canonicalFilePath = "";
 
         try {
@@ -44,11 +45,10 @@ public class PulsarConnCfgConf {
                 }
             }
         } catch (IOException ioe) {
-            logger.error("Can't read the specified config properties file!");
-            ioe.printStackTrace();
+            throw new WorkshopRuntimException("Can't read the specified properties file!");
         } catch (ConfigurationException cex) {
-            logger.error("Error loading configuration items from the specified config properties file: " + canonicalFilePath);
-            cex.printStackTrace();
+            throw new WorkshopRuntimException(
+                    "Error loading configuration items from the specified properties file: " + canonicalFilePath);
         }
     }
 

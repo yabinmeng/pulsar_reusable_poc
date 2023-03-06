@@ -27,7 +27,7 @@ usage() {
    echo
    echo "Usage: deployScenario.sh [-h]"
    echo "                         -scnName <scenario_name>"
-   echo "                         -scnPropFile <scenario_property_file>"
+   echo "                         [-scnPropFile] <scenario_property_file>"
    echo "                         [-k8sPropFile] <k8s_property_file>"
    echo "                         [-pulsarPropFile] <pulsar_property_file>"
    echo "                         [-depAppOnly]"
@@ -51,8 +51,8 @@ while [[ "$#" -gt 0 ]]; do
       -h) usage; exit 0 ;;
       -scnName) scnName=$2; shift ;;
       -scnPropFile) scnPropFile=$2; shift ;;
-      -k8sPropFile) k8sDeployPropFile=$2; shift ;;
-      -pulsarPropFile) pulsarDeployPropFile=$2; shift ;;
+      -k8sPropFile) k8sPropFile=$2; shift ;;
+      -pulsarPropFile) pulsarPropFile=$2; shift ;;
       -depAppOnly) depAppOnly=1; ;;
       *) echo "[ERROR] Unknown parameter passed: $1"; exit 30 ;;
    esac
@@ -83,16 +83,16 @@ startTime=$(date +'%Y-%m-%d %T')
 # 20230218092525
 startTime2=${startTime//[: -]/}
 
-depScnExecLogFileNoExt="${scnLogHomeDir}/deploy_${scnName}_${startDate2}"
-# depScnExecLogFileNoExt="${scnLogHomeDir}/deploy_${scnName}_${startTime2}"
-depScnExecLogFile="${depScnExecLogFileNoExt}_main.log"
-depScnExecPostDeployLogFile="${depScnExecLogFileNoExt}_post_deploy.log"
+scnExecMainLogFileNoExt="${scnLogHomeDir}/deploy_${scnName}_${startDate2}"
+# scnExecMainLogFileNoExt="${scnLogHomeDir}/deploy_${scnName}_${startTime2}"
+scnExecLogFile="${scnExecMainLogFileNoExt}_main.log"
+scnExecPostDeployLogFile="${scnExecMainLogFileNoExt}_post_deploy.log"
 
-echo > ${depScnExecLogFile}
+echo > ${scnExecLogFile}
 
-outputMsg ">>> Starting demo scenario deployment [name: ${scnName}, time: ${startTime}, application only: ${depAppOnly}]" 0 ${depScnExecLogFile} true
-outputMsg "** Main execution log file  : ${depScnExecLogFile}" 4 ${depScnExecLogFile} true
-outputMsg "** Scenario properties file : ${scnPropFile}" 4 ${depScnExecLogFile} true
+outputMsg ">>> Starting demo scenario deployment [name: ${scnName}, time: ${startTime}, application only: ${depAppOnly}]" 0 ${scnExecLogFile} true
+outputMsg "** Main execution log file  : ${scnExecLogFile}" 4 ${scnExecLogFile} true
+outputMsg "** Scenario properties file : ${scnPropFile}" 4 ${scnExecLogFile} true
 
 
 ##
@@ -104,12 +104,12 @@ outputMsg "** Scenario properties file : ${scnPropFile}" 4 ${depScnExecLogFile} 
 # - Check what type of Pulsar infrastructure to use: Astra Streaming or Luna Streaming
 useAstraStreaming=$(getPropVal ${scnPropFile} "scenario.use_astra_streaming")
 
-outputMsg "" 0 ${depScnExecLogFile} true
+outputMsg "" 0 ${scnExecLogFile} true
 if [[ "${useAstraStreaming}" == "yes" ]]; then
    # Astra Streaming
-   outputMsg ">>> Use \"Astra Streaming\" as the demo Pulsar cluster." 0 ${depScnExecLogFile} true
+   outputMsg ">>> Use \"Astra Streaming\" as the demo Pulsar cluster." 0 ${scnExecLogFile} true
 else 
-   outputMsg ">>> Use \"Luna Streaming\" as the demo Pulsar cluster" 0 ${depScnExecLogFile} true
+   outputMsg ">>> Use \"Luna Streaming\" as the demo Pulsar cluster" 0 ${scnExecLogFile} true
 fi
 
 
@@ -141,99 +141,99 @@ if [[ ${depAppOnly} -eq 0 ]]; then
       #
       # Deploy a self-managed K8s cluster
       #
-      dftK8sDeployPropFile="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/k8s/k8s.properties"
+      dftK8sPropFile="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/k8s/k8s.properties"
       k8sDeployScript="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/k8s/deploy_k8s_cluster.sh"
-      k8sDeployExecLogFile="${depScnExecLogFileNoExt}_k8s_deploy.log"
+      k8sDeployExecLogFile="${scnExecMainLogFileNoExt}_k8s.log"
 
-      if ! [[ -n "${k8sDeployPropFile}" && -f "${k8sDeployPropFile}" ]]; then
-         k8sDeployPropFile=${dftK8sDeployPropFile}
+      if ! [[ -n "${k8sPropFile}" && -f "${k8sPropFile}" ]]; then
+         k8sPropFile=${dftK8sPropFile}
       fi
       
-      k8sClstrName=$(getPropVal ${k8sDeployPropFile} "k8s.cluster.name")
+      k8sClstrName=$(getPropVal ${k8sPropFile} "k8s.cluster.name")
       if [[ -z ${k8sClstrName// } ]]; then
          k8sClstrName=$(getPropVal ${scnPropFile} "scenario.id")
       fi
 
-      outputMsg "- Deploying a K8s clsuter named \"${k8sClstrName}\" ..." 4 ${depScnExecLogFile} true
-      outputMsg "* K8s deployment log file        : ${k8sDeployExecLogFile}" 6 ${depScnExecLogFile} true
-      outputMsg "* K8s deployment properties file : ${k8sDeployPropFile}" 6 ${depScnExecLogFile} true
+      outputMsg "- Deploying a K8s clsuter named \"${k8sClstrName}\" ..." 4 ${scnExecLogFile} true
+      outputMsg "* K8s deployment log file : ${k8sDeployExecLogFile}" 6 ${scnExecLogFile} true
+      outputMsg "* K8s properties file     : ${k8sPropFile}" 6 ${scnExecLogFile} true
 
-      if ! [[ -f "${k8sDeployPropFile}" && -f "${k8sDeployScript}" ]]; then
-         outputMsg "[ERROR] Can't find the K8s cluster deployment property file and/or script file" 6 ${depScnExecLogFile} true
+      if ! [[ -f "${k8sPropFile}" && -f "${k8sDeployScript}" ]]; then
+         outputMsg "[ERROR] Can't find the K8s cluster deployment property file and/or script file" 6 ${scnExecLogFile} true
          errExit 100
       else
          echo "Running command: "
-         echo "${k8sDeployScript} -clstrName ${k8sClstrName} -propFile ${k8sDeployPropFile}"
-         eval '"${k8sDeployScript}" -clstrName ${k8sClstrName} -propFile ${k8sDeployPropFile}' > ${k8sDeployExecLogFile} 2>&1
+         echo "${k8sDeployScript} -clstrName ${k8sClstrName} -propFile ${k8sPropFile}"
+         eval '"${k8sDeployScript}" -clstrName ${k8sClstrName} -propFile ${k8sPropFile}' > ${k8sDeployExecLogFile} 2>&1
 
          k8sDeployScriptErrCode=$?
          if [[ ${k8sDeployScriptErrCode} -ne 0 ]]; then
-            outputMsg "[ERROR] Failed to execute K8s cluster deployment script (error code: ${k8sDeployScriptErrCode})!" 6 ${depScnExecLogFile} true
+            outputMsg "[ERROR] Failed to execute K8s cluster deployment script (error code: ${k8sDeployScriptErrCode})!" 6 ${scnExecLogFile} true
             errExit 110
          else
-            outputMsg "[SUCCESS]" 6 ${depScnExecLogFile} true
+            outputMsg "[SUCCESS]" 6 ${scnExecLogFile} true
          fi
       fi
 
-      outputMsg "" 0 ${depScnExecLogFile} true
+      outputMsg "" 0 ${scnExecLogFile} true
 
       #
       # Deploy a Pulsar cluster on the K8s cluster just created
       #
-      dftPulsarDeployPropFile="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/pulsar/pulsar.properties"
+      dftPulsarPropFile="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/pulsar/pulsar.properties"
       pulsarDeployScript="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/pulsar/deploy_pulsar_cluster.sh"
-      pulsarDeployExecLogFile="${depScnExecLogFileNoExt}_pulsar_deploy.log"
+      pulsarDeployExecLogFile="${scnExecMainLogFileNoExt}_pulsar.log"
 
-      if ! [[ -n "${pulsarDeployPropFile}" && -f "${pulsarDeployPropFile}" ]]; then
-         pulsarDeployPropFile=${dftPulsarDeployPropFile}
+      if ! [[ -n "${pulsarPropFile}" && -f "${pulsarPropFile}" ]]; then
+         pulsarPropFile=${dftPulsarPropFile}
       fi
 
-      pulsarClstrName=$(getPropVal ${pulsarDeployPropFile} "pulsar.cluster.name")
+      pulsarClstrName=$(getPropVal ${pulsarPropFile} "pulsar.cluster.name")
       if [[ -z ${pulsarClstrName// } ]]; then
          pulsarClstrName=$(getPropVal ${scnPropFile} "scenario.id")
       fi
 
-      outputMsg "- Deploying a Pulsar cluster named \"${pulsarClstrName}\" ..." 4 ${depScnExecLogFile} true
-      outputMsg "** Pulsar deployment log file        : ${pulsarDeployExecLogFile}" 6 ${depScnExecLogFile} true
-      outputMsg "** Pulsar deployment properties file : ${pulsarDeployPropFile}" 6 ${depScnExecLogFile} true
+      outputMsg "- Deploying a Pulsar cluster named \"${pulsarClstrName}\" ..." 4 ${scnExecLogFile} true
+      outputMsg "** Pulsar deployment log file  : ${pulsarDeployExecLogFile}" 6 ${scnExecLogFile} true
+      outputMsg "** Pulsar properties file      : ${pulsarPropFile}" 6 ${scnExecLogFile} true
 
-      if ! [[ -f "${pulsarDeployPropFile}" && -f "${pulsarDeployScript}" ]]; then
-         outputMsg "[ERROR] Can't find the Pulsar cluster deployment property file and/or script file" 6 ${depScnExecLogFile} true
+      if ! [[ -f "${pulsarPropFile}" && -f "${pulsarDeployScript}" ]]; then
+         outputMsg "[ERROR] Can't find the Pulsar cluster deployment property file and/or script file" 6 ${scnExecLogFile} true
          errExit 200
       else
          upgradeExistingPulsar=$(getPropVal ${scnPropFile} "ls.upgrade.existing.pulsar")
          if [[ "${upgradeExistingPulsar}" == "false" ]]; then
-            eval '"${pulsarDeployScript}" -clstrName ${pulsarClstrName} -propFile ${pulsarDeployPropFile} -genClntConfFile ${scnHomeDir}' > \
+            eval '"${pulsarDeployScript}" -clstrName ${pulsarClstrName} -propFile ${pulsarPropFile} -genClntConfFile ${scnHomeDir}' > \
                ${pulsarDeployExecLogFile} 2>&1
          else
-            eval '"${pulsarDeployScript}" -clstrName ${pulsarClstrName} -propFile ${pulsarDeployPropFile} -upgrade -genClntConfFile ${scnHomeDir}' > \
+            eval '"${pulsarDeployScript}" -clstrName ${pulsarClstrName} -propFile ${pulsarPropFile} -upgrade -genClntConfFile ${scnHomeDir}' > \
                ${pulsarDeployExecLogFile} 2>&1
          fi
 
          pulsarDeployScriptErrCode=$?
          if [[ ${pulsarDeployScriptErrCode} -ne 0 ]]; then
-            outputMsg "[ERROR] Failed to execute Pulsar cluster deployment script (error code: ${pulsarDeployScriptErrCode})!" 6 ${depScnExecLogFile} true
+            outputMsg "[ERROR] Failed to execute Pulsar cluster deployment script (error code: ${pulsarDeployScriptErrCode})!" 6 ${scnExecLogFile} true
             errExit 210
          else
-            outputMsg "[SUCCESS]" 6 ${depScnExecLogFile} true
+            outputMsg "[SUCCESS]" 6 ${scnExecLogFile} true
          fi
       fi
 
-      outputMsg "" 0 ${depScnExecLogFile} true
+      outputMsg "" 0 ${scnExecLogFile} true
 
       #
       # Forward Pulsar Proxy service ports to localhost
       #
       k8sProxyPortForwardScript="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/pulsar/forward_pulsar_proxy_port.sh"
-      k8sProxyPortForwardLogFile="${depScnExecLogFileNoExt}_port_forward.log"
+      k8sProxyPortForwardLogFile="${scnExecMainLogFileNoExt}_port_forward.log"
 
-      outputMsg "- Forward Pulsar Proxy service ports to localhost ..." 4 ${depScnExecLogFile} true
-      outputMsg "** Port forwarding log file : ${k8sProxyPortForwardLogFile}" 6 ${depScnExecLogFile} true
+      outputMsg "- Forward Pulsar Proxy service ports to localhost ..." 4 ${scnExecLogFile} true
+      outputMsg "** Port forwarding log file : ${k8sProxyPortForwardLogFile}" 6 ${scnExecLogFile} true
       
-      outputMsg "> Wait for Proxy deployment is ready ..." 6 ${depScnExecLogFile} true
-      kubectl wait --timeout=600s --for condition=Available=True deployment -l=component="proxy" >> ${depScnExecLogFile}
+      outputMsg "> Wait for Proxy deployment is ready ..." 6 ${scnExecLogFile} true
+      kubectl wait --timeout=600s --for condition=Available=True deployment -l=component="proxy" >> ${scnExecLogFile}
 
-      outputMsg "> Wait for Proxy service is ready ..." 6 ${depScnExecLogFile} true
+      outputMsg "> Wait for Proxy service is ready ..." 6 ${scnExecLogFile} true
       proxySvcName=$(kubectl get svc -l=component="proxy" -o name)
       debugMsg "proxySvcName=${proxySvcName}"
       ## wait for Proxy service is assigned an external IP
@@ -243,7 +243,7 @@ if [[ ${depAppOnly} -eq 0 ]]; then
 
       # Start port forwarding for Pulsar Proxy service
       if [[ -n "${proxySvcName// }" ]]; then
-         helmTlsEnabled=$(getPropVal ${pulsarDeployPropFile} "helm.tls.enabled")
+         helmTlsEnabled=$(getPropVal ${pulsarPropFile} "helm.tls.enabled")
          eval '"${k8sProxyPortForwardScript}" -act start -proxySvc ${proxySvcName} -tlsEnabled ${helmTlsEnabled}' > ${k8sProxyPortForwardLogFile} 2>&1
       fi
    fi
@@ -253,8 +253,8 @@ fi
 ##
 # Deploy the demo applications to be used in this scenario 
 # -----------------------------------------
-outputMsg "" 0 ${depScnExecLogFile} true
-outputMsg "- Deploying demo applications ..." 3 ${depScnExecLogFile} true
+outputMsg "" 0 ${scnExecLogFile} true
+outputMsg "- Deploying demo applications ..." 3 ${scnExecLogFile} true
 
 clntAppCodeHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/application_code"
 clntAppDeployHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/application_deploy"
@@ -263,7 +263,7 @@ echo "clntAppCodeHomeDir is $clntAppCodeHomeDir"
 echo "clntAppDeployHomeDir is $clntAppDeployHomeDir"
 echo "clntAppDefPropFile is $clntAppDefPropFile"
 if ! [[ -f "${clntAppDefPropFile}" ]]; then
-   outputMsg "[ERROR] Can't find client application definition file or deploy properties file" 3 ${depScnExecLogFile} true
+   outputMsg "[ERROR] Can't find client application definition file or deploy properties file" 3 ${scnExecLogFile} true
    errExit 300
 fi
 
@@ -315,7 +315,7 @@ for appId in "${scnAppIdArr[@]}"; do
    fi
 
    if [[ ${validApp} -eq 1 ]]; then
-      outputMsg "> Generating the execution script for application: ${appId}" 5 ${depScnExecLogFile} true
+      outputMsg "> Generating the execution script for application: ${appId}" 5 ${scnExecLogFile} true
 
       appExcFile="${scnHomeDir}/appexec/run_${appId}.sh"
       echo > "${appExcFile}"
@@ -339,7 +339,7 @@ for appId in "${scnAppIdArr[@]}"; do
 
       chmod +x "${appExcFile}"
    else
-      outputMsg "[WARN] ${invalidMsg}" 5 ${depScnExecLogFile} true
+      outputMsg "[WARN] ${invalidMsg}" 5 ${scnExecLogFile} true
    fi
 done
 
@@ -351,16 +351,16 @@ done
 #   a bash script to create the required tenants/namespaces/topics/subscriptions
 #   that are going to be used in the demo
 if [[ -f "${scnPostDeployScript// }"  ]]; then
-   outputMsg "" 0 ${depScnExecLogFile} true
-   outputMsg ">> Post deployment script file is detected: ${scnPostDeployScript}" 0 ${depScnExecLogFile} true
-   outputMsg "   - log file : ${depScnExecPostDeployLogFile}" 0 ${depScnExecLogFile} true
+   outputMsg "" 0 ${scnExecLogFile} true
+   outputMsg ">> Post deployment script file is detected: ${scnPostDeployScript}" 0 ${scnExecLogFile} true
+   outputMsg "   - log file : ${scnExecPostDeployLogFile}" 0 ${scnExecLogFile} true
 
-   eval '"${scnPostDeployScript}" ${scnName}' > ${depScnExecPostDeployLogFile} 2>&1
+   eval '"${scnPostDeployScript}" ${scnName}' > ${scnExecPostDeployLogFile} 2>&1
 fi
 
 # 2022-08-19 11:40:23
-outputMsg "" 0 ${depScnExecLogFile} true
+outputMsg "" 0 ${scnExecLogFile} true
 endTime=$(date +'%Y-%m-%d %T')
-outputMsg ">> Finishing demo scenario deployment [name: ${scnName}, time: ${endTime}]" 0 ${depScnExecLogFile} true
+outputMsg ">> Finishing demo scenario deployment [name: ${scnName}, time: ${endTime}]" 0 ${scnExecLogFile} true
 
 echo

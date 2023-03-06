@@ -1,9 +1,7 @@
 package com.example.pulsarworkshop.nat_prod;
 
-import com.example.pulsarworkshop.common.PulsarConnCfgConf;
 import com.example.pulsarworkshop.common.PulsarExtraCfgConf;
 import com.example.pulsarworkshop.common.PulsarWorkshopCmdApp;
-import com.example.pulsarworkshop.common.exception.HelpExitException;
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
 import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
 import com.example.pulsarworkshop.common.utils.CommonUtils;
@@ -32,7 +30,7 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
 
     // Default to publish 20 messages
     // -1 means to read all data from the source workload file and publish as messages
-    private int numMsg = 20;
+    private Integer numMsg = 20;
 
     private PulsarClient pulsarClient;
     private Producer pulsarProducer;
@@ -40,35 +38,14 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
     public NatProdCmdApp(String[] inputParams) {
         super(inputParams);
 
-        extraCliOptions.addOption(new Option("num","numMsg", true, "Number of message to produce."));
-        extraCliOptions.addOption(new Option("wrk","srcWrkldFile", true, "Data source workload file."));
+        addCommandLineOption(new Option("num","numMsg", true, "Number of message to produce."));
+        addCommandLineOption(new Option("wrk","srcWrkldFile", true, "Data source workload file."));
     }
 
     public static void main(String[] args) {
         PulsarWorkshopCmdApp workshopApp = new NatProdCmdApp(args);
 
-        int exitCode = 0;
-        try {
-            workshopApp.processInputParams();
-            workshopApp.runApp();
-        }
-        catch (HelpExitException hee) {
-            workshopApp.usage("NatProdCmdApp");
-            exitCode = 1;
-        }
-        catch (InvalidParamException ipe) {
-            System.out.println("\n[ERROR] Invalid input value(s) detected!");
-            ipe.printStackTrace();
-            exitCode = 2;
-        }
-        catch (WorkshopRuntimException wre) {
-            System.out.println("\n[ERROR] Unexpected runtime error detected!");
-            wre.printStackTrace();
-            exitCode = 3;
-        }
-        finally {
-            workshopApp.termApp();
-        }
+        int exitCode = workshopApp.run("NatProdCmdApp");
 
         System.exit(exitCode);
     }
@@ -78,36 +55,19 @@ public class NatProdCmdApp extends PulsarWorkshopCmdApp {
         CommandLine commandLine = null;
 
         try {
-            commandLine = cmdParser.parse(getCliOptions(), rawCmdInputParams);
+            commandLine = cmdParser.parse(cliOptions, rawCmdInputParams);
         } catch (ParseException e) {
-            throw new InvalidParamException("Failed to parse application CLI input parameters!");
+            throw new InvalidParamException("Failed to parse application CLI input parameters: " + e.getMessage());
         }
 
         super.processBasicInputParams(commandLine);
 
         // (Required) CLI option for number of messages
-        String msgNumParam = commandLine.getOptionValue("num");
-        int intVal = NumberUtils.toInt(msgNumParam);
-        if ( (intVal > 0) || (intVal == -1) ) {
-            numMsg = intVal;
-        }
-        else {
-            throw new InvalidParamException("Message number must be a positive integer or -1 (all available raw input)!");
-        }
+        numMsg = processIntegerInputParam(commandLine, "num");
 
         // (Required) CLI option for data source workload file
-        String srcWrkldFileParam = commandLine.getOptionValue("wrk");
-        if (StringUtils.isBlank(srcWrkldFileParam)) {
-            throw new InvalidParamException("Must specify the source workload file!");
-        }
-        else {
-            try {
-                srcWrkldFile = new File(srcWrkldFileParam);
-                srcWrkldFile.getCanonicalPath();
-            } catch (IOException ex) {
-                throw new InvalidParamException("Invalid file path for the source workload file!");
-            }
-        }
+        srcWrkldFile = processFileInputParam(commandLine, "wrk");
+        
     }
 
     @Override
