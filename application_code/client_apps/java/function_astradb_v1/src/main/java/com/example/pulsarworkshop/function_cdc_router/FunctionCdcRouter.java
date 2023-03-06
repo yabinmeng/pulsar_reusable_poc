@@ -16,6 +16,7 @@ import org.apache.pulsar.common.schema.KeyValue;
 import org.apache.pulsar.functions.api.Context;
 import org.apache.pulsar.functions.api.Function;
 import org.slf4j.Logger;
+import com.example.pulsarworkshop.function_astradb_v1.DeliveryChange;
 
 public class FunctionCdcRouter implements Function<GenericObject, DeliveryChange> {
     private String pulsarNamespace;
@@ -103,7 +104,7 @@ public class FunctionCdcRouter implements Function<GenericObject, DeliveryChange
     }
     public void setConfigs(Context context){
         // Next step would be to use a function config instead of this properties file.
-        try (InputStream input = AstraChangeWriter.class.getResourceAsStream("/config.properties")) {
+        try (InputStream input = FunctionCdcRouter.class.getResourceAsStream("/config.properties")) {
             Properties prop = new Properties();
             prop.load(input);
             this.pulsarNamespace = prop.getProperty("PULSAR_NAMESPACE");
