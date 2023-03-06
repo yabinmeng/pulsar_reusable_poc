@@ -10,18 +10,12 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>native_simple_string_app</artifactId>
+    <artifactId>springboot_consumer_simple</artifactId>
     <packaging>jar</packaging>
-
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <name>${project.artifactId}</name>
     <description>
-        Pulsar workshop demo application - Pulsar producer and consumer with simple string message.
+        Pulsar workshop demo application - Pulsar consumer with Spring Boot.
     </description>
 
     <build>
@@ -52,12 +46,5 @@
             <artifactId>common-resources</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.pulsar</groupId>
-            <artifactId>pulsar-client</artifactId>
-            <version>${pulsar.version}</version>
-        </dependency>
     </dependencies>
-
 </project>

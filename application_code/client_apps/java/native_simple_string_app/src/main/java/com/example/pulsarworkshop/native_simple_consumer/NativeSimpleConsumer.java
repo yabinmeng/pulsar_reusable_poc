@@ -6,8 +6,6 @@ import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.SubscriptionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.example.pulsarworkshop.common.PulsarConnCfgConf;
-import com.example.pulsarworkshop.common.PulsarExtraCfgConf;
 import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
@@ -57,7 +55,7 @@ public class NativeSimpleConsumer extends PulsarWorkshopCmdApp {
         CommandLine commandLine = null;
 
         try {
-            commandLine = cmdParser.parse(getCliOptions(), rawCmdInputParams);
+            commandLine = cmdParser.parse(cliOptions, rawCmdInputParams);
         } catch (ParseException e) {
             throw new InvalidParamException("Failed to parse application CLI input parameters!");
         }

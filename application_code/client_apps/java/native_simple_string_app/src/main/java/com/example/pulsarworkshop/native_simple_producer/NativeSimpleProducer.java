@@ -62,7 +62,7 @@ public class NativeSimpleProducer extends PulsarWorkshopCmdApp {
         CommandLine commandLine = null;
 
         try {
-            commandLine = cmdParser.parse(getCliOptions(), rawCmdInputParams);
+            commandLine = cmdParser.parse(cliOptions, rawCmdInputParams);
         } catch (ParseException e) {
             throw new InvalidParamException("Failed to parse application CLI input parameters!");
         }

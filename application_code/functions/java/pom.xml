@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>pulsar-workshop-func</artifactId>
+    <artifactId>pulsarworkshop-func</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
@@ -22,12 +22,17 @@
     </licenses>
 
     <properties>
-        <maven.compiler.release>17</maven.compiler.release>
+        <!-- NOTE: for Pulsar function on AS, JDK 11 is needed. JDK17 is not working yet -->
+        <java.version>11</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <pulsar.version>2.10.3</pulsar.version>
+        <slf4j.version>2.0.6</slf4j.version>
     </properties>
 
     <modules>
-        <module>func_add_metadata</module>
+        <module>add-metadata</module>
     </modules>
 
     <build>
@@ -43,15 +48,9 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <!--                            <minimizeJar>true</minimizeJar>-->
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
                                 </filter>
                             </filters>
                         </configuration>
@@ -62,7 +61,12 @@
     </build>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+        <dependency>
+            <groupId>org.apache.pulsar</groupId>
+            <artifactId>pulsar-functions-api</artifactId>
+            <version>${pulsar.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>

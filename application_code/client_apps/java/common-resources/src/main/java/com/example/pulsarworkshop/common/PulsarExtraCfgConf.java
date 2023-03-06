@@ -394,7 +394,7 @@ public class PulsarExtraCfgConf {
                 } else {
                     throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal,
-                                    PulsarExtraCfgConf.CONF_CATEGORY.Producer.label, expectedVal));
+                                    CONF_CATEGORY.Producer.label, expectedVal));
                 }
             }
 
@@ -463,7 +463,7 @@ public class PulsarExtraCfgConf {
                 } catch (Exception e) {
                     throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal,
-                                    PulsarExtraCfgConf.CONF_CATEGORY.Consumer.label, expectedVal));
+                                    CONF_CATEGORY.Consumer.label, expectedVal));
                 }
             }
 
@@ -504,7 +504,7 @@ public class PulsarExtraCfgConf {
                 } catch (Exception e) {
                     throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal,
-                                    PulsarExtraCfgConf.CONF_CATEGORY.Consumer.label, expectedVal));
+                                    CONF_CATEGORY.Consumer.label, expectedVal));
                 }
             }
 
@@ -568,13 +568,13 @@ public class PulsarExtraCfgConf {
                         } else {
                             throw new InvalidParamException(
                                     getInvalidConfValStr(confKeyName, confVal,
-                                            PulsarExtraCfgConf.CONF_CATEGORY.Consumer.label, expectedVal));
+                                            CONF_CATEGORY.Consumer.label, expectedVal));
                         }
                     }
                 } catch (Exception e) {
                     throw new InvalidParamException(
                             getInvalidConfValStr(confKeyName, confVal,
-                                    PulsarExtraCfgConf.CONF_CATEGORY.Consumer.label, expectedVal));
+                                    CONF_CATEGORY.Consumer.label, expectedVal));
                 }
             }
 
@@ -632,14 +632,14 @@ public class PulsarExtraCfgConf {
                             } else {
                                 throw new InvalidParamException(
                                         getInvalidConfValStr(confKey, confVal,
-                                                PulsarExtraCfgConf.CONF_CATEGORY.Consumer.label, expectedVal));
+                                                CONF_CATEGORY.Consumer.label, expectedVal));
                             }
                         }
 
                     } catch (Exception e) {
                         throw new InvalidParamException(
                                 getInvalidConfValStr(confKey, confVal,
-                                        PulsarExtraCfgConf.CONF_CATEGORY.Consumer.label, expectedVal));
+                                        CONF_CATEGORY.Consumer.label, expectedVal));
                     }
                 }
             }

@@ -10,18 +10,12 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>native_simple_string_app</artifactId>
+    <artifactId>nativeapi_producer_full_config</artifactId>
     <packaging>jar</packaging>
-
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <name>${project.artifactId}</name>
     <description>
-        Pulsar workshop demo application - Pulsar producer and consumer with simple string message.
+        Pulsar workshop demo application - Comprehensive Pulsar producer with native client API.
     </description>
 
     <build>

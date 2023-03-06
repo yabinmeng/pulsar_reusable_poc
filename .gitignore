@@ -12,6 +12,14 @@ application_code/client_apps/java/*/*.iml
 application_code/client_apps/java/dependency-reduced-pom.xml
 application_code/client_apps/java/*/dependency-reduced-pom.xml
 application_code/client_apps/java/*/*/dependency-reduced-pom.xml
+application_code/functions/java/.idea
+application_code/functions/java/target
+application_code/functions/java/*/target
+application_code/functions/java/*/*/target
+application_code/functions/java/*/*.iml
+application_code/functions/java/dependency-reduced-pom.xml
+application_code/functions/java/*/dependency-reduced-pom.xml
+application_code/functions/java/*/*/dependency-reduced-pom.xml
 application_code/codes_from_old_repo/*
 scenarios/*.nohup
 scenarios/*/appexec/*
