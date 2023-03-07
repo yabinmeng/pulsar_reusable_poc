@@ -1,4 +1,4 @@
-package com.example.pulsarworkshop.function_astradb_v1;
+package com.example.pulsarworkshop.function-astradb-v1;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.BoundStatement;

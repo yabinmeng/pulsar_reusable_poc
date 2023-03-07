@@ -113,7 +113,7 @@ if ! [[ -n "${scnPropFile}" && -f "${scnPropFile}" ]]; then
       scnPropFile=${dftScnPropFile}
    fi
 fi
-
+echo "scnHomeDir is ${scnHomeDir}"
 outputMsg ">>> Starting demo scenario deployment [name: ${scnName}, time: ${startTime}, application only: ${depAppOnly}]" 0 ${scnExecMainLogFile} true
 if ! [[ -n "${scnName}" && -d "${scnHomeDir}"  ]]; then
     outputMsg "[ERROR] The specified scenario name doesn't exist!" 4 ${scnExecMainLogFile} true

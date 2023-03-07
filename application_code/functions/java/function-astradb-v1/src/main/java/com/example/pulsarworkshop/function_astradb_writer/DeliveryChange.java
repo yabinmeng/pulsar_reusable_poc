@@ -1,4 +1,4 @@
-package com.example.pulsarworkshop.function_astradb_v1;
+package com.example.pulsarworkshop.function-astradb-v1;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

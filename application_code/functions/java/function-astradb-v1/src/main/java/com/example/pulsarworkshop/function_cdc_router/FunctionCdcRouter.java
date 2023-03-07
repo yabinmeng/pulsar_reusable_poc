@@ -16,7 +16,7 @@ import org.apache.pulsar.common.schema.KeyValue;
 import org.apache.pulsar.functions.api.Context;
 import org.apache.pulsar.functions.api.Function;
 import org.slf4j.Logger;
-import com.example.pulsarworkshop.function_astradb_v1.DeliveryChange;
+import com.example.pulsarworkshop.function-astradb-v1.DeliveryChange;
 
 public class FunctionCdcRouter implements Function<GenericObject, DeliveryChange> {
     private String pulsarNamespace;
