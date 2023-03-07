@@ -28,12 +28,12 @@ usage() {
    echo "                                -propFile <deployment_properties_file>"
    echo "                                [-upgrade]"
    echo "                                [-genClntConfFile] <target_folder>"
-   echo "       -h : Show usage info"
-   echo "       -clstrName : Pulsar cluster name"
-   echo "       -propFile  : Pulsar deployment properties file"
-   echo "       -upgrade   : (Optional) Whether to upgrade the existing Pulsar cluster"
+   echo ""
+   echo "       -h               : Show usage info"
+   echo "       -clstrName       : Pulsar cluster name"
+   echo "       -propFile        : Pulsar deployment properties file"
+   echo "       -upgrade         : (Optional) Whether to upgrade the existing Pulsar cluster"
    echo "       -genClntConfFile : (Optional) Generate \"client.conf\" file in the specified target folder"
-   
    echo
 }
 

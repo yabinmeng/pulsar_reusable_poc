@@ -91,7 +91,7 @@ if ! [[ " ${K8S_DEPLOY_OPTIONS[@]} " =~ " ${k8sOpt} " ]]; then
     echo "        Must be one of the following values: \"${K8S_DEPLOY_OPTIONS[@]}\""
     errExit 80
 fi
-echo "PULSAR_WORKSHOP_HOMEDIR is: ${PULSAR_WORKSHOP_HOMEDIR}"
+
 k8sOptDeployHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/k8s/${k8sOpt}"
 
 echo "============================================================== "
@@ -117,7 +117,6 @@ case ${k8sOpt} in
         ;;
 
     gke)
-        echo "Deploying GKE cluster via script: $k8sOptDeployHomeDir"
         if ! [[ -f "${k8sOptDeployHomeDir}/gke_create.sh" ]]; then
             echo "[ERROR] Can't find the script file to deploy a 'gke' K8s clsuter!"
             errExit 100; 

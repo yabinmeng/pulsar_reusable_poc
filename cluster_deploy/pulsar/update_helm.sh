@@ -21,7 +21,7 @@ PULSAR_WORKSHOP_HOMEDIR=$( cd -- "${CUR_SCRIPT_FOLDER}/../.." &> /dev/null && pw
 
 source "${PULSAR_WORKSHOP_HOMEDIR}/_bash_utils_/utilities.sh"
 
-echo "Running update_helm.sh"
+
 ### 
 # This script is used to update Pulsar helm chart templates for
 # 1) Chart dependency update
