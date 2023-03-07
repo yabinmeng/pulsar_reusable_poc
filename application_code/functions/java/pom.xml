@@ -33,7 +33,7 @@
 
     <modules>
         <module>add-metadata</module>
-        <module>function-astradb-v1</module>
+        <module>function_astradb_v1</module>
     </modules>
 
     <build>

@@ -134,17 +134,18 @@ genExecScript_Func() {
             if [[ -z "${tenantName}" || -z "${namespaceName}" || ${#inputTopicArr[@]} -eq 0 ]]; then
                 echo "[ERROR] Must specify tenant', namespace, and input topic(s) for a Pulsar function."
             else
-                sed -i "s/<tenant_name>/${tenantName}/g" ${funcCfgJsonFileTgt}
-                sed -i "s/<namespace_name>/${namespaceName}/g" ${funcCfgJsonFileTgt}
-                sed -i "s/<func_nam>/${appId}/g" ${funcCfgJsonFileTgt}
+            echo "funcCfgJsonFileTgt is  ${funcCfgJsonFileTgt}"
+                sed -i '' "s/<tenant_name>/${tenantName}/g" ${funcCfgJsonFileTgt}
+                sed -i '' "s/<namespace_name>/${namespaceName}/g" ${funcCfgJsonFileTgt}
+                sed -i '' "s/<func_nam>/${appId}/g" ${funcCfgJsonFileTgt}
                 # inputTopicList may contain '/'
                 inputTopicList2=$(echo ${inputTopicList} | sed 's/\//\\\//g')
-                sed -i "s/<input_topic_list>/${inputTopicList2}/g" ${funcCfgJsonFileTgt}
+                sed -i '' "s/<input_topic_list>/${inputTopicList2}/g" ${funcCfgJsonFileTgt}
                 # outputTopic may contain '/'
                 outputTopic2=$(echo ${outputTopic} | sed 's/\//\\\//g')
-                sed -i "s/<output_topic>/${outputTopic2}/g" ${funcCfgJsonFileTgt}
-                sed -i "s/<auto_ack>/${autoAck}/g" ${funcCfgJsonFileTgt}
-                sed -i "s/<class_name>/${funcClassName}/g" ${funcCfgJsonFileTgt}
+                sed -i '' "s/<output_topic>/${outputTopic2}/g" ${funcCfgJsonFileTgt}
+                sed -i '' "s/<auto_ack>/${autoAck}/g" ${funcCfgJsonFileTgt}
+                sed -i '' "s/<class_name>/${funcClassName}/g" ${funcCfgJsonFileTgt}
 
                 local curlCmd_CrtFunc="curl -v -k -X POST \\
     --write-out '%{http_code}' \\

@@ -1,13 +1,7 @@
-package com.example.pulsarworkshop.function_cdc_router;
+package com.example.pulsarworkshop;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
-import org.apache.pulsar.client.api.AuthenticationFactory;
-import org.apache.pulsar.client.api.Producer;
-import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.Schema;
 import org.apache.pulsar.client.api.schema.GenericObject;
@@ -16,7 +10,6 @@ import org.apache.pulsar.common.schema.KeyValue;
 import org.apache.pulsar.functions.api.Context;
 import org.apache.pulsar.functions.api.Function;
 import org.slf4j.Logger;
-import com.example.pulsarworkshop.function-astradb-v1.DeliveryChange;
 
 public class FunctionCdcRouter implements Function<GenericObject, DeliveryChange> {
     private String pulsarNamespace;

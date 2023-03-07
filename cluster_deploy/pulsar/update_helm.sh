@@ -116,7 +116,7 @@ function updatePulsarHelmChart() {
    debugMsg "tgtRelVer=${tgtRelVer}"
 
    # Update Pulsar cluster name
-   sed -i "s/fullnameOverride:.*/fullnameOverride: ${clstrName}/g" $1 
+   sed -i '' "s/fullnameOverride:.*/fullnameOverride: ${clstrName}/g" $1 
 
    # Update image name
    curNameArr=()
@@ -127,7 +127,7 @@ function updatePulsarHelmChart() {
       if [[ "${curName}" != "${tgtRelName}"  ]]; then
          echo "   - replacing release name \"${curName}\" with \"${tgtRelName}\""
          # use '#' as separater because release name contains special character '/'
-         sed -i "s#repository: ${curName}#repository: ${tgtRelName}#g" $1 
+         sed -i '' "s#repository: ${curName}#repository: ${tgtRelName}#g" $1 
       fi
    done
 
@@ -140,7 +140,7 @@ function updatePulsarHelmChart() {
    for curVer in "${curVerArr[@]}"; do
       if [[ "${curVer}" != "${tgtRelVer}"  ]]; then
          echo "   - replacing release version \"${curVer}\" with \"${tgtRelVer}\""
-         sed -i "s/tag: ${curVer}/tag: ${tgtRelVer}/g" $1 
+         sed -i '' "s/tag: ${curVer}/tag: ${tgtRelVer}/g" $1 
       fi
    done
 }

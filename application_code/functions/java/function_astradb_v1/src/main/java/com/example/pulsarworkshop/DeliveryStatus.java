@@ -1,3 +1,5 @@
+package com.example.pulsarworkshop;
+
 import lombok.Data;
 import lombok.NonNull;
 
