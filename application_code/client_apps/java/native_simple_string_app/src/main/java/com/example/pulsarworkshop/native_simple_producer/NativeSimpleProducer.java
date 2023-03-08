@@ -1,33 +1,11 @@
 package com.example.pulsarworkshop.native_simple_producer;
 
-import com.example.pulsarworkshop.common.PulsarConnCfgConf;
-import com.example.pulsarworkshop.common.PulsarExtraCfgConf;
 import com.example.pulsarworkshop.common.PulsarWorkshopCmdApp;
-import com.example.pulsarworkshop.common.exception.HelpExitException;
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
 import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
-import com.example.pulsarworkshop.common.utils.CommonUtils;
-import com.example.pulsarworkshop.common.utils.CsvFileLineScanner;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.pulsar.client.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
 import org.apache.pulsar.client.api.*;
 
 public class NativeSimpleProducer extends PulsarWorkshopCmdApp {
-    private final static Logger logger = LoggerFactory.getLogger(NativeSimpleProducer.class);
 
     private PulsarClient pulsarClient;
     private Producer pulsarProducer;
@@ -59,15 +37,7 @@ public class NativeSimpleProducer extends PulsarWorkshopCmdApp {
     }
     @Override
     public void processInputParams() throws InvalidParamException {
-        CommandLine commandLine = null;
-
-        try {
-            commandLine = cmdParser.parse(cliOptions, rawCmdInputParams);
-        } catch (ParseException e) {
-            throw new InvalidParamException("Failed to parse application CLI input parameters!");
-        }
-
-        super.processBasicInputParams(commandLine);
+    	// No additional params needed for this client
     }
     public void setupProducer() {
         try {

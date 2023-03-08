@@ -1,21 +1,15 @@
 package com.example.pulsarworkshop.native_simple_consumer;
+
 import com.example.pulsarworkshop.common.PulsarWorkshopCmdApp;
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.pulsar.client.api.PulsarClient;
-import org.apache.pulsar.client.api.SubscriptionType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
 import org.apache.pulsar.client.api.*;
 
 public class NativeSimpleConsumer extends PulsarWorkshopCmdApp {
-    private final static Logger logger = LoggerFactory.getLogger(NativeSimpleConsumer.class);
 
     private PulsarClient pulsarClient;
-    private Consumer pulsarConsumer;
+    private Consumer<?> pulsarConsumer;
 
     private String subscriptionName;
     public NativeSimpleConsumer(String[] inputParams) {
@@ -34,7 +28,7 @@ public class NativeSimpleConsumer extends PulsarWorkshopCmdApp {
             setupConsumer();
             // Consume messages from the topic
             while (true) {
-                Message<String> message = pulsarConsumer.receive();
+                Message<?> message = pulsarConsumer.receive();
                 System.out.println("Received message: " + message.getValue());
                 pulsarConsumer.acknowledge(message);
             }
@@ -52,20 +46,9 @@ public class NativeSimpleConsumer extends PulsarWorkshopCmdApp {
     }
     @Override
     public void processInputParams() throws InvalidParamException {
-        CommandLine commandLine = null;
-
-        try {
-            commandLine = cmdParser.parse(cliOptions, rawCmdInputParams);
-        } catch (ParseException e) {
-            throw new InvalidParamException("Failed to parse application CLI input parameters!");
-        }
-
-        super.processBasicInputParams(commandLine);
         // (Required) Pulsar subscription name
-        subscriptionName = commandLine.getOptionValue("subName");
-        if (StringUtils.isBlank(subscriptionName)) {
-            throw new InvalidParamException("Empty subscription name!");
-        }
+        subscriptionName = processStringInputParam("subName");
+
     }
     public void setupConsumer() {
         try {

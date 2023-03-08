@@ -5,8 +5,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.pulsar.client.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.example.pulsarworkshop.common.exception.HelpExitException;
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
@@ -20,18 +18,19 @@ import java.util.Map;
 
 abstract public class PulsarWorkshopCmdApp {
 
-    private final static Logger logger = LoggerFactory.getLogger(PulsarWorkshopCmdApp.class);
-
     protected String[] rawCmdInputParams;
     protected String pulsarTopicName;
     protected File clientConnfFile;
     protected File clientConfigFile;
     protected boolean useAstraStreaming;
 
-    protected DefaultParser cmdParser;
-    protected Options basicCliOptions = new Options();
-    protected Options extraCliOptions = new Options();
-    protected Options cliOptions = new Options();
+    // Default to consume 20 messages
+    // -1 means to consume all available messages (indefinitely)    
+    protected Integer numMsg = 20;
+
+    private CommandLine commandLine;
+    private DefaultParser commandParser;
+    private Options cliOptions = new Options();
     
     public abstract void processInputParams() throws InvalidParamException;
     public abstract void runApp();
@@ -40,9 +39,10 @@ abstract public class PulsarWorkshopCmdApp {
 
     public PulsarWorkshopCmdApp(String[] inputParams) {
         this.rawCmdInputParams = inputParams;
-        this.cmdParser = new DefaultParser();
+        this.commandParser = new DefaultParser();
 
         addCommandLineOption(new Option("h", "help", false, "Displays the usage method."));
+        addCommandLineOption(new Option("num","numMsg", true, "Number of message to produce."));
         addCommandLineOption(new Option("top", "topic", true, "Pulsar topic name."));
         addCommandLineOption(new Option("con","connFile", true, "\"client.conf\" file path."));
         addCommandLineOption(new Option("cfg", "cfgFile", true, "Extra config properties file path."));
@@ -57,7 +57,7 @@ abstract public class PulsarWorkshopCmdApp {
     public int run(String appName) {
         int exitCode = 0;
         try {
-            this.processInputParams();
+            this.processBasicInputParams();
             this.runApp();
         }
         catch (HelpExitException hee) {
@@ -81,67 +81,81 @@ abstract public class PulsarWorkshopCmdApp {
         return exitCode;
     }
     
-    public String getPulsarTopicName() { return this.pulsarTopicName; }
-    public File getClientConnfFile() { return this.clientConnfFile; }
-    public File getClientConfigFile() { return this.clientConfigFile; }
+    protected String getPulsarTopicName() { return this.pulsarTopicName; }
+    
+    public void processBasicInputParams() throws HelpExitException, InvalidParamException {
 
-    public void processBasicInputParams(CommandLine cmdLine) throws HelpExitException, InvalidParamException {
-        // CLI option for help messages
-        if (cmdLine.hasOption("help")) {
+    	if (commandLine == null) {
+            try {
+                commandLine = commandParser.parse(cliOptions, rawCmdInputParams);
+            } catch (ParseException e) {
+                throw new InvalidParamException("Failed to parse application CLI input parameters: " + e.getMessage());
+            }
+    	}
+    	
+    	// CLI option for help messages
+        if (commandLine.hasOption("help")) {
             throw new HelpExitException();
         }
 
+        // (Required) CLI option for number of messages
+        numMsg = processIntegerInputParam("num");
+    	if ( (numMsg <= 0) && (numMsg != -1) ) {
+    		throw new InvalidParamException("Message number must be a positive integer or -1 (all available raw input)!");
+    	}    	
+
         // (Required) CLI option for Pulsar topic
-        pulsarTopicName = processStringInputParam(cmdLine, "top");
+        pulsarTopicName = processStringInputParam("top");
 
         // (Optional) CLI option for client.conf file
-        clientConnfFile = processFileInputParam(cmdLine, "con");
+        clientConnfFile = processFileInputParam("con");
 
         // (Optional) CLI option for extra config properties file
-        clientConfigFile = processFileInputParam(cmdLine, "cfg");
+        clientConfigFile = processFileInputParam("cfg");
 
         		// (Optional) Whether to use Astra Streaming
-        if (cmdLine.hasOption("as")) {
+        if (commandLine.hasOption("as")) {
             useAstraStreaming = true;
         }
+        
+        processInputParams();
     }
 
-    public Integer processIntegerInputParam(CommandLine cmdLine, String optionName) {
+    public Integer processIntegerInputParam(String optionName) {
         Option option = cliOptions.getOption(optionName);
-        int intVal = 0;
+        
+        // Default value if not present on command line
+        Integer intVal = 0;
+    	String value = commandLine.getOptionValue(option.getOpt());        	
 
         if (option.isRequired() &&
-        	cmdLine.getOptionValue(option) == null) {
+        		commandLine.getOptionValue(option) == null) {
                 throw new InvalidParamException("Empty value for argument '" + optionName +"'");
         }
-        else if (cmdLine.getOptionValue(option) != null) {    	
-
-        	String msgNumParam = cmdLine.getOptionValue(option.getOpt());        	
-        	intVal = NumberUtils.toInt(msgNumParam);
-        }
+    	intVal = NumberUtils.toInt(value);
+System.out.println("int cl option " + optionName + "=" + intVal);
         
-        return Integer.valueOf(intVal);
+        return intVal;
     }
     
-    public String processStringInputParam(CommandLine cmdLine, String optionName) {
+    public String processStringInputParam(String optionName) {
 
     	Option option = cliOptions.getOption(optionName);
-        String value = cmdLine.getOptionValue(option);
+        String value = commandLine.getOptionValue(option);
 
-        if (option.isRequired() &&
-        	cmdLine.getOptionValue(option) == null) {
+        if (option.isRequired() && value == null) {
             throw new InvalidParamException("Empty value for argument '" + optionName +"'");
         }
 
         return value;
     }
     
-    public File processFileInputParam(CommandLine cmdLine, String optionName) {
+    public File processFileInputParam(String optionName) {
         File file = null;
         Option option = cliOptions.getOption(optionName);
-        if (cmdLine.getOptionValue(option) != null) {
+        if (commandLine.getOptionValue(option) != null) {
 
-        	String path = cmdLine.getOptionValue(option.getOpt());    	
+        	String path = commandLine.getOptionValue(option.getOpt());    	
 	        try {
 	            file = new File(path);
 	            file.getCanonicalPath();
@@ -219,14 +233,14 @@ abstract public class PulsarWorkshopCmdApp {
         return clientBuilder.build();
     }
 
-    protected Producer createPulsarProducer(String topicName,
+    protected Producer<?> createPulsarProducer(String topicName,
                                             PulsarClient pulsarClient)
     throws PulsarClientException {
-        ProducerBuilder producerBuilder = pulsarClient.newProducer();
+        ProducerBuilder<?> producerBuilder = pulsarClient.newProducer();
         PulsarExtraCfgConf pulsarExtraCfgConf = getPulsarExtraCfgConf();
 
         if (pulsarExtraCfgConf != null) {
-            Map producerConfMap = new HashMap();
+            Map<String, Object> producerConfMap = new HashMap<String, Object>();
             producerConfMap.putAll(pulsarExtraCfgConf.getProducerConfMapTgt());
 
             // Remove the following producer conf parameters since they'll be
@@ -250,7 +264,7 @@ abstract public class PulsarWorkshopCmdApp {
         ConsumerBuilder<?> consumerBuilder = pulsarClient.newConsumer();
         PulsarExtraCfgConf pulsarExtraCfgConf = getPulsarExtraCfgConf();
 
-        Map consumerConfMap = new HashMap();
+        Map<String, Object> consumerConfMap = new HashMap<String, Object>();
         if (pulsarExtraCfgConf != null) {
             consumerConfMap.putAll(pulsarExtraCfgConf.getConsumerConfMapTgt());
 
