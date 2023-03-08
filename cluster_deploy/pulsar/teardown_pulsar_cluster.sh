@@ -39,7 +39,7 @@ if [[ $# -gt 4 ]]; then
    errExit 20
 fi
 
-while [[ "$#" -gt 0 ]]; do
+while [[ $# -eq 0 || "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
       -clstrName) pulsarClstrName=$2; shift ;;

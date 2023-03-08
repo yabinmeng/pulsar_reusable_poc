@@ -26,14 +26,14 @@ usage() {
    echo
    echo "Usage: deploy_demo_apps.sh [-h]"
    echo "                           -scnName <scenario_name>"
-   echo "                           -appIdList <app_id_list>"
+   echo "                           -appIdArr <app_id_arrayt>"
    echo "                           -appDefFile <app_definition_file>"
    echo "                           -buildRepo <1_or_0>"
    echo "                           -useAstra <1_or_0>"
    echo ""
    echo "       -h          : Show usage info"
    echo "       -scnName    : Demo scenario name."
-   echo "       -appIdList  : Comma separated demo application Id list."
+   echo "       -appIdArr   : Demo application Id array."
    echo "       -appDefFile : Full file path to a application defintion file."
    echo "       -buildRepo  : Whether to build application repository (1: yes, 0: no)."
    echo "       -useAstra   : Whether to use Astra streaming as the underlying infra (1: yes, 0: no)."
@@ -49,7 +49,7 @@ while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
       -scnName) scnName=$2; shift ;;
-      -appIdList) appIdList=$2; shift ;;
+      -appIdArr) appIdList=$2; shift ;;
       -appDefFile) appDefFile=$2; shift ;;
       -buildRepo) buildRepo=$2; shift ;;
       -useAstra) useAstra=$2; shift ;;
@@ -58,7 +58,7 @@ while [[ "$#" -gt 0 ]]; do
    shift
 done
 debugMsg "scnName=${scnName}"
-debugMsg "appIdList=${appIdList}"
+debugMsg "appIdArr=${appIdArr}"
 debugMsg "appDefFile=${appDefFile}"
 debugMsg "buildRepo=${buildRepo}"
 debugMsg "useAstra=${useAstra}"
@@ -211,8 +211,6 @@ if [[ -n "${appIdList// }" ]]; then
     echo "--------------------------------------------------------------"
     echo ">> Generating the execution scripts for the specified demo applications ..."
 
-    IFS=',' read -r -a scnAppIdArr <<< "${appIdList}"
-
     if ! [[ -d "${scnHomeDir}/appexec/package" ]]; then
         mkdir -p "${scnHomeDir}/appexec/package"
     fi
@@ -250,6 +248,11 @@ if [[ -n "${appIdList// }" ]]; then
         if [[ ${validApp} -eq 1 && -z "${appClass}" ]]; then
             validApp=0
             invalidMsg="Unspecified classname for appID (${appId})."
+        fi
+
+        if [[ ${validApp} -eq 1 && -z "${appParam}" ]]; then
+            validApp=0
+            invalidMsg="Unspecified application parameter list for appID (${appId})."
         fi
 
         if [[ ${validApp} -eq 1 ]]; then

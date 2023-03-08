@@ -40,11 +40,11 @@ usage() {
    echo "       -scnName        : Demo scenario name."
    echo "       -scnPropFile    : (Optional) Full file path to a scenario property file. Use default if not specified."
    echo "       -depAppOnly     : (Optional) Skip infrastructure deployment and only deploy applications."
-   echo "       -rebuildApp     : (Optional) Whether to rebuild application repository."
-   echo "       -appDefFile     : (Optional) Full file path to a application defintion file."
+   echo "       -rebuildApp     : (Optional) Whether to rebuild the application repository."
+   echo "       -appDefFile     : (Optional) Full file path to an application definition file."
    echo " ----------------------------------------------------------------------------------"
    echo " The following options are only relevant when "
-   echo "   scenario.infra_deploy_mode=='luna_new'. Otherwise, they're no-op even if specified!"
+   echo "   scenario.infra_mode=='luna_new'. Otherwise, they're no-op even if specified!"
    echo " ----------------------------------------------------------------------------------"
    echo "       -k8sClstrName   : (Optional) K8s cluster name. Use default if not specified."
    echo "       -k8sPropFile    : (Optional) Full file path to a K8s deployment property file. Use default if not specified."
@@ -220,7 +220,7 @@ if [[ ${depAppOnly} -eq 0 ]]; then
       echo 
       while ! [[ "${promptAnswer}" == "yes" || "${promptAnswer}" == "y" || 
                "${promptAnswer}" == "quit" || "${promptAnswer}" == "q" ]]; do
-         read -s -p "      Have you completed downloading the \"client.conf\" file? [yes|y|quit|q] " promptAnswer
+         read -s -p "      Have you completed preparing the proper \"client.conf\" file? [yes|y|quit|q] " promptAnswer
          echo
       done
 
@@ -356,16 +356,16 @@ fi
 # -----------------------------------------
 outputMsg "" 0 ${scnExecMainLogFile} true
 
-demoAppDeployHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/application_deploy"
+appDeployHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/application_deploy"
 
-dftAppDefFile="${demoAppDeployHomeDir}/demo_app_def.properties"
-appDefFile=$(getEffectiveFile ${appDefFile} ${dftAppDefFile})
+# Generate scenario specific application definition file if not sepcified explicitly
 if [[ -z "${appDefFile}" ]]; then
-   outputMsg "[ERROR] Must specify a valid demo app definition file!" 3 ${scnExecMainLogFile} true
-   errExit 300
+   appDefFile="${scnHomeDir}/app_def.properties"
+   appDefTemplateFile="${appDeployHomeDir}/template/app_def.properties.tmpl"
+   cp -rf ${appDefTemplateFile} ${appDefFile}
 fi
 
-appDeployScript="${demoAppDeployHomeDir}/deploy_demo_apps.sh"
+appDeployScript="${appDeployHomeDir}/deploy_demo_apps.sh"
 appDeployExecLogFile="${scnExecMainLogFileNoExt}_demoapp.log"
 
 outputMsg ">>> Deploying demo applications ..." 0 ${scnExecMainLogFile} true
@@ -377,8 +377,16 @@ if ! [[ -f "${appDeployScript}" ]]; then
    errExit 310
 else
    scnAppIdListStr=$(getPropVal ${scnPropFile} "scenario.app.ids")
+   IFS=',' read -r -a scnAppIdArr <<< "${scnAppIdListStr}"
 
-   eval '"${appDeployScript}" -scnName ${scnName} -appIdList ${scnAppIdListStr} -appDefFile ${appDefFile} -buildRepo ${rebuildApp} -useAstra ${useAstra}' \
+   for appId in "${scnAppIdArr[@]}"; do
+      appParamStr=$(getPropVal ${scnPropFile} "scenario.app.param.${appId}")
+      # appParamStr may contain '/'
+      appParamStr2=$(echo ${appParamStr} | sed 's/\//\\\//g')
+      sed -i "s/<PARAM_LIST_TMPL>/${appParamStr2}/g" ${appDefFile}
+   done
+
+   eval '"${appDeployScript}" -scnName ${scnName} -appIdArr ${scnAppIdArr} -appDefFile ${appDefFile} -buildRepo ${rebuildApp} -useAstra ${useAstra}' \
       > ${appDeployExecLogFile} 2>&1
 
    procScriptRtnCode $? ${scnExecMainLogFile} 4 \

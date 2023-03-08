@@ -34,8 +34,6 @@ public class PulsarProducerFullCfg extends PulsarWorkshopCmdApp {
 
     public PulsarProducerFullCfg(String[] inputParams) {
         super(inputParams);
-
-        addCommandLineOption(new Option("num","numMsg", true, "Number of message to produce."));
         addCommandLineOption(new Option("wrk","srcWrkldFile", true, "Data source workload file."));
     }
 

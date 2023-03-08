@@ -27,8 +27,6 @@ public class PulsarConsumerFullCfg extends PulsarWorkshopCmdApp {
 
     public PulsarConsumerFullCfg(String[] inputParams) {
         super(inputParams);
-
-        cliOptions.addOption(new Option("num","numMsg", true, "Number of message to produce."));
         cliOptions.addOption(new Option("sbt","subType", true, "Pulsar subscription type."));
         cliOptions.addOption(new Option("sbn", "subName", true, "Pulsar subscription name."));
     }

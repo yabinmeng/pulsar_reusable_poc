@@ -1,0 +1,38 @@
+###
+# Pulsar Client Applications
+# 
+# Format:
+#   client_app_id=<prog_language>|'client_app'|<app_path_identifier>|<class_name>|<app_cmd_parameters>
+#
+# Fields: 
+#   - <prog_language>       : programming language that the client application is written with| e.g. Java or Python
+#   - 'client_app'          : literal as is
+#   - <app_path_identifier> : releative path under 'application_code" folder| e.g. application_code/client_apps/java/[app_path_identifier]
+#   - <class_name>          : java class name without package (only relevant with Java apps)| e.g. PulsarConsumerFullCfg 
+#                             package name is standard as 'com.example.pulsarworkshop'
+#   - <app_cmd_parameters>  : space separated CLI input paramters of the specified application
+# --------------------------------------------------------------------------------
+
+# A Pulsar message producer using Pulsar native client API
+nativeapi_producer_full_config=java|client_app|nativeapi_producer_full_config|PulsarProducerFullCfg|<PARAM_LIST_TMPL>
+
+# A Pulsar message consumer using Pulsar native client API
+nativeapi_consumer_full_config=java|client_app|nativeapi_consumer_full_config|PulsarConsumerFullCfg|<PARAM_LIST_TMPL>
+
+
+###
+# Pulsar Functions
+# 
+# Format:
+#   client_app_id=<prog_language>|'function'|<app_path_identifier>|<class_name>|<function_creation_CLI_parametes>
+#
+# Fields: 
+#   - <prog_language>               : programming language that the client application is written with| e.g. Java or Python
+#   - 'function'                    : literal as is
+#   - <app_path_identifier>         : releative path under 'application_code" folder| e.g. application_code/functions/java/[app_path_identifier]
+#   - <class_name>                  : java class name without package (only relevant with Java apps)| e.g. AddMetadataFunc 
+#                                     package name is standard as 'com.example.pulsarworkshop'
+#   - <function_creation_parametes> : space separated pulsar function parameters
+#                                     see: https://pulsar.staged.apache.org/functions-rest-api/?version=2.9.1&apiversion=v3#operation/registerFunction
+# --------------------------------------------------------------------------------
+add-metadata=java|function|add-metadata|AddMetadataFunc|<PARAM_LIST_TMPL>

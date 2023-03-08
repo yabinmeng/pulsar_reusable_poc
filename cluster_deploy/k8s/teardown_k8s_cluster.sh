@@ -45,7 +45,7 @@ usage() {
    echo
 }
 
-if [[ $# -gt 4 ]]; then
+if [[ $# -eq 0 || $# -gt 4 ]]; then
    usage
    errExit 20
 fi
