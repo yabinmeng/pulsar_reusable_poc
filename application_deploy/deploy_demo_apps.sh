@@ -26,14 +26,14 @@ usage() {
    echo
    echo "Usage: deploy_demo_apps.sh [-h]"
    echo "                           -scnName <scenario_name>"
-   echo "                           -appIdArr <app_id_arrayt>"
+   echo "                           -appIdList <app_id_list>"
    echo "                           -appDefFile <app_definition_file>"
    echo "                           -buildRepo <1_or_0>"
    echo "                           -useAstra <1_or_0>"
    echo ""
    echo "       -h          : Show usage info"
    echo "       -scnName    : Demo scenario name."
-   echo "       -appIdArr   : Demo application Id array."
+   echo "       -appIdList  : Demo application id list string."
    echo "       -appDefFile : Full file path to a application defintion file."
    echo "       -buildRepo  : Whether to build application repository (1: yes, 0: no)."
    echo "       -useAstra   : Whether to use Astra streaming as the underlying infra (1: yes, 0: no)."
@@ -49,7 +49,7 @@ while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
       -scnName) scnName=$2; shift ;;
-      -appIdArr) appIdList=$2; shift ;;
+      -appIdList) appIdListStr=$2; shift ;;
       -appDefFile) appDefFile=$2; shift ;;
       -buildRepo) buildRepo=$2; shift ;;
       -useAstra) useAstra=$2; shift ;;
@@ -58,7 +58,7 @@ while [[ "$#" -gt 0 ]]; do
    shift
 done
 debugMsg "scnName=${scnName}"
-debugMsg "appIdArr=${appIdArr}"
+debugMsg "appIdList=${appIdList}"
 debugMsg "appDefFile=${appDefFile}"
 debugMsg "buildRepo=${buildRepo}"
 debugMsg "useAstra=${useAstra}"
@@ -201,7 +201,7 @@ if [[ ${buildRepo} -eq 1 ]]; then
     cd ${curDir}
 fi
 
-if [[ -n "${appIdList// }" ]]; then
+if [[ -n "${appIdListStr// }" ]]; then
     if ! [[ -f ${appDefFile// } ]]; then
         echo "[ERROR] Can't find the provided demo app definition file: \"${appDefFile}\"!"
         errExit 40; 
@@ -223,7 +223,8 @@ if [[ -n "${appIdList// }" ]]; then
     debugMsg "jwtTokenStr=${jwtTokenStr}"
     debugMsg "trustedCaCertFilePath=${trustedCaCertFilePath}"
 
-    for appId in "${scnAppIdArr[@]}"; do
+    IFS=',' read -r -a appIdArr <<< "${appIdListStr}"
+    for appId in "${appIdArr[@]}"; do
         echo "   - Demo App ID: ${appId} (type: ${appType})"
 
         appDefStr=$(getPropVal ${appDefFile} ${appId})

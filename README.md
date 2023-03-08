@@ -29,6 +29,8 @@ Second, this repository is meant for people who want to run a quick end-to-end d
 
 Depending on your purpose of using this repository, several quick start guides are provided:
 
-* [Quick start guide for using and building example codes](doc/example_code.md)
-* [Quick start guide for building and running a demo scenario with Astra Streaming (or any exiting Pulsar cluster)](doc/scenario_astra.md)
-* [Quick start guide for building and running a demo scenario with a new Pulsar cluster](doc/scenario_luna_new.md)
+* [Quick start guide for using and building example codes](doc/app_code.md)
+
+* [Quick start guide for building and running a demo scenario with Astra Streaming (or any exiting Luna Streaming/OSS Pulsar cluster)](doc/scenario_astra.md)
+
+* [Quick start guide for building and running a demo scenario with a new Luna Streaming Pulsar cluster](doc/scenario_luna_new.md)

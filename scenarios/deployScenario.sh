@@ -376,17 +376,17 @@ if ! [[ -f "${appDeployScript}" ]]; then
    outputMsg "[ERROR] Can't find the demo app deployment script file" 3 ${scnExecMainLogFile} true
    errExit 310
 else
-   scnAppIdListStr=$(getPropVal ${scnPropFile} "scenario.app.ids")
-   IFS=',' read -r -a scnAppIdArr <<< "${scnAppIdListStr}"
+   appIdListStr=$(getPropVal ${scnPropFile} "scenario.app.ids")
+   IFS=',' read -r -a appIdArr <<< "${appIdListStr}"
 
-   for appId in "${scnAppIdArr[@]}"; do
+   for appId in "${appIdArr[@]}"; do
       appParamStr=$(getPropVal ${scnPropFile} "scenario.app.param.${appId}")
       # appParamStr may contain '/'
       appParamStr2=$(echo ${appParamStr} | sed 's/\//\\\//g')
-      sed -i "s/<PARAM_LIST_TMPL>/${appParamStr2}/g" ${appDefFile}
+      sed -i "/${appId}/s/<PARAM_LIST_TMPL>/${appParamStr2}/g" ${appDefFile}
    done
 
-   eval '"${appDeployScript}" -scnName ${scnName} -appIdArr ${scnAppIdArr} -appDefFile ${appDefFile} -buildRepo ${rebuildApp} -useAstra ${useAstra}' \
+   eval '"${appDeployScript}" -scnName ${scnName} -appIdList ${appIdListStr} -appDefFile ${appDefFile} -buildRepo ${rebuildApp} -useAstra ${useAstra}' \
       > ${appDeployExecLogFile} 2>&1
 
    procScriptRtnCode $? ${scnExecMainLogFile} 4 \
@@ -402,7 +402,7 @@ scnPostDeployScript="${scnHomeDir}/post_deploy.sh"
 if [[ -f "${scnPostDeployScript// }"  ]]; then
    outputMsg "" 0 ${scnExecMainLogFile} true
    outputMsg ">>> Post deployment script file is detected: ${scnPostDeployScript}" 0 ${scnExecMainLogFile} true
-   outputMsg "* log file : ${scnExecPostDeployLogFile}" 4 ${scnExecMainLogFile} true
+   outputMsg "* Post deplopyment log file : ${scnExecPostDeployLogFile}" 4 ${scnExecMainLogFile} true
 
    eval '"${scnPostDeployScript}" ${scnName}' > ${scnExecPostDeployLogFile} 2>&1
 
