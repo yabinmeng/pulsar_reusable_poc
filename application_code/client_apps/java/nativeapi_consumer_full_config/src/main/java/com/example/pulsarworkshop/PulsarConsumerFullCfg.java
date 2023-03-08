@@ -4,9 +4,7 @@ import com.example.pulsarworkshop.common.PulsarWorkshopCmdApp;
 import com.example.pulsarworkshop.common.exception.InvalidParamException;
 import com.example.pulsarworkshop.common.exception.WorkshopRuntimException;
 
-import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.ParseException;
 import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.shade.org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -16,9 +14,6 @@ public class PulsarConsumerFullCfg extends PulsarWorkshopCmdApp {
 
     private final static Logger logger = LoggerFactory.getLogger(PulsarConsumerFullCfg.class);
 
-    // Default to consume 20 messages
-    // -1 means to consume all available messages (indefinitely)
-    private int numMsg = 20;
     private String subsriptionName;
     private SubscriptionType subscriptionType = SubscriptionType.Exclusive;
 
@@ -28,9 +23,8 @@ public class PulsarConsumerFullCfg extends PulsarWorkshopCmdApp {
     public PulsarConsumerFullCfg(String[] inputParams) {
         super(inputParams);
 
-        cliOptions.addOption(new Option("num","numMsg", true, "Number of message to produce."));
-        cliOptions.addOption(new Option("sbt","subType", true, "Pulsar subscription type."));
-        cliOptions.addOption(new Option("sbn", "subName", true, "Pulsar subscription name."));
+        addCommandLineOption(new Option("sbt","subType", true, "Pulsar subscription type."));
+        addCommandLineOption(new Option("sbn", "subName", true, "Pulsar subscription name."));
     }
 
     public static void main(String[] args) {
@@ -43,25 +37,11 @@ public class PulsarConsumerFullCfg extends PulsarWorkshopCmdApp {
 
     @Override
     public void processInputParams() throws InvalidParamException {
-        CommandLine commandLine = null;
-
-        try {
-            commandLine = cmdParser.parse(cliOptions, rawCmdInputParams);
-        } catch (ParseException e) {
-            throw new InvalidParamException("Failed to parse application CLI input parameters: " + e.getMessage());
-        }
-
-        super.processBasicInputParams(commandLine);
-
-        // (Required) CLI option for number of messages
-        numMsg = processIntegerInputParam(commandLine, "num");
-    	if ( (numMsg <= 0) && (numMsg != -1) ) {
-    		throw new InvalidParamException("Message number must be a positive integer or -1 (all available raw input)!");
-    	}    	
-
         // (Required) Pulsar subscription name
-        subsriptionName = processStringInputParam(commandLine, "subName");
-        String subType = processStringInputParam(commandLine, "subType");
+        subsriptionName = processStringInputParam("subName");
+
+        // (Optional) Pulsar subscription type
+        String subType = processStringInputParam("subType");
         if (!StringUtils.isBlank(subType)) {
         try {
 	            subscriptionType = SubscriptionType.valueOf(subType);
@@ -104,7 +84,7 @@ public class PulsarConsumerFullCfg extends PulsarWorkshopCmdApp {
 
         }
         catch (PulsarClientException pce) {
-            throw new WorkshopRuntimException("Unexpected error when consuming Pulsar messages!");
+            throw new WorkshopRuntimException("Unexpected error when consuming Pulsar messages: " + pce.getMessage());
         }
     }
 
