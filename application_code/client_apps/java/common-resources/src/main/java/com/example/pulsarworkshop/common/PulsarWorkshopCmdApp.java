@@ -42,7 +42,7 @@ abstract public class PulsarWorkshopCmdApp {
         this.commandParser = new DefaultParser();
 
         addCommandLineOption(new Option("h", "help", false, "Displays the usage method."));
-        addCommandLineOption(new Option("num","numMsg", true, "Number of message to produce."));
+        addCommandLineOption(new Option("num","numMsg", true, "Number of message to process."));
         addCommandLineOption(new Option("top", "topic", true, "Pulsar topic name."));
         addCommandLineOption(new Option("con","connFile", true, "\"client.conf\" file path."));
         addCommandLineOption(new Option("cfg", "cfgFile", true, "Extra config properties file path."));
@@ -133,7 +133,6 @@ abstract public class PulsarWorkshopCmdApp {
                 throw new InvalidParamException("Empty value for argument '" + optionName +"'");
         }
     	intVal = NumberUtils.toInt(value);
-System.out.println("int cl option " + optionName + "=" + intVal);
         
         return intVal;
     }

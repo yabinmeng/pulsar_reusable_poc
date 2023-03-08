@@ -20,7 +20,6 @@ public class RedeliveryConsumerApp extends PulsarWorkshopCmdApp {
     public RedeliveryConsumerApp(String[] inputParams) {
         super(inputParams);
 
-        addCommandLineOption(new Option("num","numMsg", true, "Number of message to produce."));
         addCommandLineOption(new Option("sbn", "subName", true, "Pulsar subscription name."));
         addCommandLineOption(new Option("dlt", "deadLetterTopic", true, 
         			"Pulsar dead letter topic where message go if redelivery fails."));
