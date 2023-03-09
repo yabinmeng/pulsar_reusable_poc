@@ -23,10 +23,10 @@ public class S4RQueueConsumer extends PulsarWorkshopCmdApp {
     Connection connection;
     Channel channel;
     DefaultConsumer consumer;
-
+    int MsgReceived = 0;
     public S4RQueueConsumer(String[] inputParams) {
         super(inputParams);
-        addCommandLineOption(new Option("s4rport", "s4rport", true, "S4R Pulsar RabbitMQ port number."));
+        addCommandLineOption(new Option("p", "s4rport", true, "S4R Pulsar RabbitMQ port number."));
         addCommandLineOption(new Option("q", "s4rqueue", true, "S4R Pulsar RabbitMQ queue name."));
     }
 
@@ -44,9 +44,9 @@ public class S4RQueueConsumer extends PulsarWorkshopCmdApp {
     	if ( S4RPort <= 0  ) {
     		throw new InvalidParamException("S4RPort number must be a positive integer.  Default is 5672");
     	}
-        S4RQueueName = processStringInputParam("s4rqueue");
-        if (StringUtils.isBlank(S4RQueueName)) {
-            S4RQueueName = "s4r-default-queue";
+        String queueName = processStringInputParam("s4rqueue");
+        if (!StringUtils.isBlank(queueName)) {
+            S4RQueueName = queueName;
         }
     }
 
@@ -63,13 +63,16 @@ public class S4RQueueConsumer extends PulsarWorkshopCmdApp {
                 @Override
                  public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
                         String message = new String(body, "UTF-8");
-                    // process the message
-//                        System.out.println("message is: " + message);
-                        logger.info("SR4 Consumer received message : " + message);
+                        // process the message
+                        logger.info("SR4 Consumer received message count: " + MsgReceived + " Message: " + message);
+                        MsgReceived++;
                  }
             };
             channel.basicConsume(S4RQueueName, true, consumer);
-            logger.info("SR4 Consumer created for queue " + S4RQueueName);
+            logger.info("SR4 Consumer created for queue " + S4RQueueName + " running until " + numMsg + " messages are received.");
+            while (numMsg > MsgReceived) {
+                Thread.sleep(2000);    
+            }
         } catch (Exception e) {
             throw new WorkshopRuntimException("Unexpected error when consuming S4R messages: " + e.getMessage());   
         }

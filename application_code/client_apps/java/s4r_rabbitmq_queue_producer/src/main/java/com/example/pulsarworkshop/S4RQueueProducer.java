@@ -16,14 +16,16 @@ public class S4RQueueProducer extends PulsarWorkshopCmdApp {
     private final static Logger logger = LoggerFactory.getLogger(S4RQueueProducer.class);
     int S4RPort = 5672;
     String S4RQueueName = "s4r-default-queue";
+    String S4RMessage = "This is a RabbitMQ message ******** Msg num: ";
     ConnectionFactory S4RFactory;
     Connection connection;
     Channel channel;
 
     public S4RQueueProducer(String[] inputParams) {
         super(inputParams);
-        addCommandLineOption(new Option("s4rport", "s4rport", true, "S4R Pulsar RabbitMQ port number."));
+        addCommandLineOption(new Option("p", "s4rport", true, "S4R Pulsar RabbitMQ port number, default is 5672"));
         addCommandLineOption(new Option("q", "s4rqueue", true, "S4R Pulsar RabbitMQ queue name."));
+        addCommandLineOption(new Option("m", "s4rmessage", true, "S4R Pulsar RabbitMQ message to send, otherwise a default is used."));
     }
     public static void main(String[] args) {
         PulsarWorkshopCmdApp workshopApp = new S4RQueueProducer(args);
@@ -39,9 +41,13 @@ public class S4RQueueProducer extends PulsarWorkshopCmdApp {
     	if ( S4RPort <= 0  ) {
     		throw new InvalidParamException("S4RPort number must be a positive integer.  Default is 5672");
     	}
-        S4RQueueName = processStringInputParam("s4rqueue");
-        if (StringUtils.isBlank(S4RQueueName)) {
-            S4RQueueName = "s4r-default-queue";
+       String queueName = processStringInputParam("s4rqueue");
+        if (!StringUtils.isBlank(queueName)) {
+            S4RQueueName = queueName;
+        }
+        String msgToSend = processStringInputParam("s4rmessage");
+        if (!StringUtils.isBlank(msgToSend)) {
+            S4RMessage = msgToSend;
         }
     }
 
@@ -57,7 +63,7 @@ public class S4RQueueProducer extends PulsarWorkshopCmdApp {
             channel.queueDeclare(S4RQueueName, true, false, false, null);
             int msgSent = 0;
             while (numMsg > msgSent) {
-                String message = "This is the RabbitMQ message ******** Msg num: " + msgSent; 
+                String message = S4RMessage; 
                 channel.basicPublish("", S4RQueueName, null, message.getBytes());
                 if (logger.isDebugEnabled()) {
                     logger.debug("Published a message: {}", msgSent);
