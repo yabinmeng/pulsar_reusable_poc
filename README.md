@@ -33,4 +33,4 @@ Depending on your purpose of using this repository, several quick start guides a
 
 * (**Quick Start Guide**) [Using and Building Example Application](doc/app_code.md)
 
-* (**Quick Start Guide**) [Building and Deploying Scenarios](doc/undersand_scenario.md)
+* (**Quick Start Guide**) [Building and Deploying Scenarios](doc/understand_scenario.md)
