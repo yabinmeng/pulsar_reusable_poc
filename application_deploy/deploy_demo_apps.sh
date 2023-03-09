@@ -33,7 +33,7 @@ usage() {
    echo ""
    echo "       -h          : Show usage info"
    echo "       -scnName    : Demo scenario name."
-   echo "       -appIdList  : Comma separated demo application Id list."
+   echo "       -appIdList  : Demo application id list string."
    echo "       -appDefFile : Full file path to a application defintion file."
    echo "       -buildRepo  : Whether to build application repository (1: yes, 0: no)."
    echo "       -useAstra   : Whether to use Astra streaming as the underlying infra (1: yes, 0: no)."
@@ -49,7 +49,7 @@ while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
       -scnName) scnName=$2; shift ;;
-      -appIdList) appIdList=$2; shift ;;
+      -appIdList) appIdListStr=$2; shift ;;
       -appDefFile) appDefFile=$2; shift ;;
       -buildRepo) buildRepo=$2; shift ;;
       -useAstra) useAstra=$2; shift ;;
@@ -201,7 +201,7 @@ if [[ ${buildRepo} -eq 1 ]]; then
     cd ${curDir}
 fi
 
-if [[ -n "${appIdList// }" ]]; then
+if [[ -n "${appIdListStr// }" ]]; then
     if ! [[ -f ${appDefFile// } ]]; then
         echo "[ERROR] Can't find the provided demo app definition file: \"${appDefFile}\"!"
         errExit 40; 
@@ -210,8 +210,6 @@ if [[ -n "${appIdList// }" ]]; then
     echo
     echo "--------------------------------------------------------------"
     echo ">> Generating the execution scripts for the specified demo applications ..."
-
-    IFS=',' read -r -a scnAppIdArr <<< "${appIdList}"
 
     if ! [[ -d "${scnHomeDir}/appexec/package" ]]; then
         mkdir -p "${scnHomeDir}/appexec/package"
@@ -225,7 +223,8 @@ if [[ -n "${appIdList// }" ]]; then
     debugMsg "jwtTokenStr=${jwtTokenStr}"
     debugMsg "trustedCaCertFilePath=${trustedCaCertFilePath}"
 
-    for appId in "${scnAppIdArr[@]}"; do
+    IFS=',' read -r -a appIdArr <<< "${appIdListStr}"
+    for appId in "${appIdArr[@]}"; do
         echo "   - Demo App ID: ${appId} (type: ${appType})"
 
         appDefStr=$(getPropVal ${appDefFile} ${appId})
@@ -250,6 +249,11 @@ if [[ -n "${appIdList// }" ]]; then
         if [[ ${validApp} -eq 1 && -z "${appClass}" ]]; then
             validApp=0
             invalidMsg="Unspecified classname for appID (${appId})."
+        fi
+
+        if [[ ${validApp} -eq 1 && -z "${appParam}" ]]; then
+            validApp=0
+            invalidMsg="Unspecified application parameter list for appID (${appId})."
         fi
 
         if [[ ${validApp} -eq 1 ]]; then
