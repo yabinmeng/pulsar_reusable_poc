@@ -1,7 +1,3 @@
-- [1. Overview](#1-overview)
-- [2. Framework Structure](#2-framework-structure)
-
-
 # 1. Overview
 
 This repository is intended to make it super easy for people to learn and use Apache Pulsar to satisfy a variety of common messaging and streaming processing needs. Based on our experiences, we find out that there are several common challenges that keep showing up for Pulsar customers, especially when they are new to Pulsar and/or don't have much hands-on Pulsar operation experience. These challenges are:

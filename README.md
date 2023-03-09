@@ -1,9 +1,3 @@
-- [1. Overview](#1-overview)
-  - [1.1. What is this repository about?](#11-what-is-this-repository-about)
-  - [1.2. Whom is this repository designed for?](#12-whom-is-this-repository-designed-for)
-- [2. Core Concept and Quick Start Guide](#2-core-concept-and-quick-start-guide)
-
-
 # 1. Overview
 
 ## 1.1. What is this repository about?
@@ -16,10 +10,10 @@ This repository is designed to make it easy to learn, use, and showcase Apache P
    * Native Kafka client API
    * Native RabbitMQ client API
 
-2. A simple configuration based tool to launch a K8s cluster and an Apache Pulsar cluster (see detailed doc [here]()).
+2. A simple configuration based tool to launch a K8s cluster and an Apache Pulsar cluster.
    * It also allows using Astra Streaming or any existing Apache Pulsar cluster as the running environment.
 
-3. A "scenario" based mechanism that allows you to run any typical messaging processing patterns by simply choosing desired example applications from the reusable application list (see detailed doc [here]()). 
+3. A "scenario" based mechanism that allows you to run any typical messaging processing patterns by simply choosing desired example applications from the reusable application list. 
 
 We'll go through each of these components with more details in the rest of the documents in this repository.
 

@@ -1,10 +1,3 @@
-- [1. Overview](#1-overview)
-- [2. Folder Structure](#2-folder-structure)
-- [3. Application List](#3-application-list)
-- [Appendix A: Build an Example Application](#appendix-a-build-an-example-application)
-  - [A.1 Build a Java based client application](#a1-build-a-java-based-client-application)
-
-
 # 1. Overview
 
 This repository is designed to include a plethora of example codes to showcase how to program with Apache Pulsar as a unified messaging and streaming platform. The objective is to help jumpstart quickly those who want to learn Pulsar programming on varied topics related with different (and typical) messaging and streaming processing capabilities and/or use cases.

@@ -1,7 +1,3 @@
-- [1. Overview](#1-overview)
-- [2. Weather Sensor Telemetry Data](#2-weather-sensor-telemetry-data)
-
-
 # 1. Overview
 
 In order to make the scenarios as close to real use cases as possible, this framework also provides some source data from actual resources. Below are some real data sources that we can use in this framework.

@@ -1,13 +1,3 @@
-- [1. Define a Scenario](#1-define-a-scenario)
-  - [1.1. File Structure of Defining a Scenario](#11-file-structure-of-defining-a-scenario)
-- [2. Deploy a Scenario](#2-deploy-a-scenario)
-  - [2.1. Infrastructure Deployment](#21-infrastructure-deployment)
-    - [2.1.1. K8s Deployment](#211-k8s-deployment)
-    - [2.1.2. Pulsar Deployment](#212-pulsar-deployment)
-  - [2.2. Application Deployment: Generate Application Execution Script](#22-application-deployment-generate-application-execution-script)
-  - [2.3. Deployment Logs](#23-deployment-logs)
-
-
 # 1. Define a Scenario
 
 As we explained in the overall structure document, this framework is designed around *demonstration scenarios* (or simply `scenarios`). The diagram below shows how this design works with the mindset in place that the example applications in the repository can be reused in different scenarios.
