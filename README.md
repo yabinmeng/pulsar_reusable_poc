@@ -1,14 +1,20 @@
-# Overview
+- [1. Overview](#1-overview)
+  - [1.1. What is this repository about?](#11-what-is-this-repository-about)
+  - [1.2. Whom is this repository designed for?](#12-whom-is-this-repository-designed-for)
+- [2. Core Concept and Quick Start Guide](#2-core-concept-and-quick-start-guide)
 
-## What is this repository about?
+
+# 1. Overview
+
+## 1.1. What is this repository about?
 
 This repository is designed to make it easy to learn, use, and showcase Apache Pulsar as a powerful and **unified** messaging and streaming processing platform. There are three major components at the core of this repository:
 
 1. A list of highly reusable Apache Pulsar example *client applications* and *functions* that are written in different languages and APIs (see detailed doc [here]()). Examples of the following APIs are included in this repository:
    * Native Pulsar client API (nativeapi)
    * Starlight for JMS API (s4j)
-   * Starlight for Kafka API (s4k)
-   * Starlight for RabbitMQ API (s4r)
+   * Native Kafka client API
+   * Native RabbitMQ client API
 
 2. A simple configuration based tool to launch a K8s cluster and an Apache Pulsar cluster (see detailed doc [here]()).
    * It also allows using Astra Streaming or any existing Apache Pulsar cluster as the running environment.
@@ -17,7 +23,7 @@ This repository is designed to make it easy to learn, use, and showcase Apache P
 
 We'll go through each of these components with more details in the rest of the documents in this repository.
 
-## Whom is this repository designed for? 
+## 1.2. Whom is this repository designed for? 
 
 First, this repository is meant for people who want to learn how to write Apache Pulsar client applications and functions for various messaging and streaming processing use cases. **Note** that the "client applications" can be native to other messaging and streaming technologies such as JMS, Kafka, and RabbitMQ; but they all can connect to an Apache Pulsar cluster. This is exactly why Apache Pulsar is so powerful as a unified messaging and streaming platform.
 
@@ -25,12 +31,12 @@ Second, this repository is meant for people who want to run a quick end-to-end d
 
 ---
 
-# Quick start guides
+# 2. Core Concept and Quick Start Guide
 
 Depending on your purpose of using this repository, several quick start guides are provided:
 
-* [Quick start guide for using and building example codes](doc/app_code.md)
+* (**Core Concept**) [Introduction and Overall Framework Structure](doc/overall_structure.md)
 
-* [Quick start guide for building and running a demo scenario with Astra Streaming (or any exiting Luna Streaming/OSS Pulsar cluster)](doc/scenario_astra.md)
+* (**Quick Start Guide**) [Using and Building Example Application](doc/app_code.md)
 
-* [Quick start guide for building and running a demo scenario with a new Luna Streaming Pulsar cluster](doc/scenario_luna_new.md)
+* (**Quick Start Guide**) [Building and Deploying Scenarios](doc/undersand_scenario.md)
