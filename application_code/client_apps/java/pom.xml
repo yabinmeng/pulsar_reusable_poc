@@ -39,6 +39,7 @@
         <module>native_simple_string_app</module>
         <module>nativeapi_producer_full_config</module>
         <module>nativeapi_consumer_full_config</module>
+        <module>reader</module>
         <module>redelivery_consumer</module>
         <module>springboot_producer_simple</module>
         <module>springboot_consumer_simple</module>
