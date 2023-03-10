@@ -14,132 +14,14 @@
 
     <properties>
         <datastax.version>4.14.1</datastax.version>
-        <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
-        <junit.version>4.11</junit.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <lombok.version>1.18.22</lombok.version>
-        <maven-assembly-plugin.version>3.1.1</maven-assembly-plugin.version>
-        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-        <maven-model.version>3.3.9</maven-model.version>
-        <maven-remote-resources-plugin.version>3.0.0</maven-remote-resources-plugin.version>
-        <maven.compiler.release>17</maven.compiler.release>
-        <mockito-all.version>1.9.5</mockito-all.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <slf4j-nop.version>1.7.26</slf4j-nop.version>
     </properties>
     <name>${project.artifactId}</name>
     <description>
         Pulsar workshop demo application - Pulsar producer with native client API.
     </description>
-
-    <build>
-        <plugins>
-          <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-remote-resources-plugin</artifactId>
-                <version>${maven-remote-resources-plugin.version}</version>
-                <configuration>
-                    <resourceBundles>
-                        <resourceBundle>com.example:common-resources:${project.version}</resourceBundle>
-                    </resourceBundles>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven-assembly-plugin.version}</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>assemble-all</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
-                <configuration>
-                    <excludes>
-                        <exclude>**/proto/*.java</exclude>
-                    </excludes>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                        <path>
-                            <groupId>com.datastax.oss</groupId>
-                            <artifactId>java-driver-mapper-processor</artifactId>
-                            <version>${datastax.version}</version>
-                        </path>
-                        <!-- Optional: add this if you want to avoid the SLF4J warning "Failed to load class
-                                                            StaticLoggerBinder, defaulting to no-operation implementation" when compiling. -->
-                        <path>
-                            <groupId>org.slf4j</groupId>
-                            <artifactId>slf4j-nop</artifactId>
-                            <version>${slf4j-nop.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-                <version>${git-commit-id-plugin.version}</version>
-                <configuration>
-                    <verbose>false</verbose>
-                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-                    <includeOnlyProperties>
-                        <includeOnlyProperty>^git.build.user.name$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.build.user.email$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.build.time$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.build.host$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.build.version$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.build.number$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.build.number.unique$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.branch$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.commit.id$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.commit.id.full$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.commit.id.describe-short$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.commit.id.describe$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.commit.user.name$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.commit.user.email$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.commit.message.full$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.commit.message.short$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.commit.time$</includeOnlyProperty>
-                        <includeOnlyProperty>^git.remote.origin.url$</includeOnlyProperty>
-                    </includeOnlyProperties>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>generate git.properties</id>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencies>
         <dependency>
@@ -164,18 +46,6 @@
             <version>${datastax.version}</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model</artifactId>
-            <version>${maven-model.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.pulsar</groupId>
             <artifactId>pulsar-functions-api</artifactId>
             <version>${pulsar.version}</version>
@@ -184,12 +54,6 @@
             <groupId>org.apache.pulsar</groupId>
             <artifactId>pulsar-io-core</artifactId>
             <version>${pulsar.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>${mockito-all.version}</version>
-            <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>

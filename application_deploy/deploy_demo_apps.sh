@@ -134,18 +134,31 @@ genExecScript_Func() {
             if [[ -z "${tenantName}" || -z "${namespaceName}" || ${#inputTopicArr[@]} -eq 0 ]]; then
                 echo "[ERROR] Must specify tenant', namespace, and input topic(s) for a Pulsar function."
             else
-            echo "funcCfgJsonFileTgt is  ${funcCfgJsonFileTgt}"
-                sed -i '' "s/<tenant_name>/${tenantName}/g" ${funcCfgJsonFileTgt}
-                sed -i '' "s/<namespace_name>/${namespaceName}/g" ${funcCfgJsonFileTgt}
-                sed -i '' "s/<func_nam>/${appId}/g" ${funcCfgJsonFileTgt}
+                funcJarFileTgt="${scnHomeDir}/appexec/package/${appId}.jar"
+                debugMsg "funcJarFileTgt=${funcJarFileTgt}"
                 # inputTopicList may contain '/'
                 inputTopicList2=$(echo ${inputTopicList} | sed 's/\//\\\//g')
-                sed -i '' "s/<input_topic_list>/${inputTopicList2}/g" ${funcCfgJsonFileTgt}
                 # outputTopic may contain '/'
                 outputTopic2=$(echo ${outputTopic} | sed 's/\//\\\//g')
-                sed -i '' "s/<output_topic>/${outputTopic2}/g" ${funcCfgJsonFileTgt}
-                sed -i '' "s/<auto_ack>/${autoAck}/g" ${funcCfgJsonFileTgt}
-                sed -i '' "s/<class_name>/${funcClassName}/g" ${funcCfgJsonFileTgt}
+                
+                # Mac workaround. See https://stackoverflow.com/questions/43171648/sed-gives-sed-cant-read-no-such-file-or-directory
+                if [[ "$OSTYPE" == "darwin"* ]]; then
+                    sed -i '' "s/<tenant_name>/${tenantName}/g" ${funcCfgJsonFileTgt}
+                    sed -i '' "s/<namespace_name>/${namespaceName}/g" ${funcCfgJsonFileTgt}
+                    sed -i '' "s/<func_nam>/${appId}/g" ${funcCfgJsonFileTgt}
+                    sed -i '' "s/<input_topic_list>/${inputTopicList2}/g" ${funcCfgJsonFileTgt}
+                    sed -i '' "s/<output_topic>/${outputTopic2}/g" ${funcCfgJsonFileTgt}
+                    sed -i '' "s/<auto_ack>/${autoAck}/g" ${funcCfgJsonFileTgt}
+                    sed -i '' "s/<class_name>/${funcClassName}/g" ${funcCfgJsonFileTgt}
+                else
+                    sed -i "s/<tenant_name>/${tenantName}/g" ${funcCfgJsonFileTgt}
+                    sed -i "s/<namespace_name>/${namespaceName}/g" ${funcCfgJsonFileTgt}
+                    sed -i "s/<func_nam>/${appId}/g" ${funcCfgJsonFileTgt}
+                    sed -i "s/<input_topic_list>/${inputTopicList2}/g" ${funcCfgJsonFileTgt}
+                    sed -i "s/<output_topic>/${outputTopic2}/g" ${funcCfgJsonFileTgt}
+                    sed -i "s/<auto_ack>/${autoAck}/g" ${funcCfgJsonFileTgt}
+                    sed -i "s/<class_name>/${funcClassName}/g" ${funcCfgJsonFileTgt}
+                fi
 
                 local curlCmd_CrtFunc="curl -v -k -X POST \\
     --write-out '%{http_code}' \\
