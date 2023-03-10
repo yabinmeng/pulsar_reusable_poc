@@ -27,7 +27,7 @@ scenarios/logs/*
 cluster_deploy/ext_tools/jaegar/jaeger_port_forward.nohup
 scenarios/*/*.conf
 scenarios/*/*.crt
-scenarios/*/*.properties
+#scenarios/*/*.properties
 scenarios/*/client.conf
 
 
