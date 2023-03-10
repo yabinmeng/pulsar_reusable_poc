@@ -116,8 +116,13 @@ function updatePulsarHelmChart() {
    debugMsg "tgtRelVer=${tgtRelVer}"
 
    # Update Pulsar cluster name
-   sed -i "s/fullnameOverride:.*/fullnameOverride: ${clstrName}/g" $1 
 
+   # Mac workaround. See https://stackoverflow.com/questions/43171648/sed-gives-sed-cant-read-no-such-file-or-directory
+   if [[ "$OSTYPE" == "darwin"* ]]; then
+      sed -i '' "s/fullnameOverride:.*/fullnameOverride: ${clstrName}/g" $1 
+   else
+      sed -i "s/fullnameOverride:.*/fullnameOverride: ${clstrName}/g" $1 
+   fi
    # Update image name
    curNameArr=()
    for name in $( grep "repository:" $1 | awk -F': ' '{ print $NF}' | uniq); do
@@ -127,7 +132,11 @@ function updatePulsarHelmChart() {
       if [[ "${curName}" != "${tgtRelName}"  ]]; then
          echo "   - replacing release name \"${curName}\" with \"${tgtRelName}\""
          # use '#' as separater because release name contains special character '/'
-         sed -i "s#repository: ${curName}#repository: ${tgtRelName}#g" $1 
+         if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "s#repository: ${curName}#repository: ${tgtRelName}#g" $1 
+         else
+            sed -i "s#repository: ${curName}#repository: ${tgtRelName}#g" $1 
+         fi
       fi
    done
 
@@ -140,7 +149,11 @@ function updatePulsarHelmChart() {
    for curVer in "${curVerArr[@]}"; do
       if [[ "${curVer}" != "${tgtRelVer}"  ]]; then
          echo "   - replacing release version \"${curVer}\" with \"${tgtRelVer}\""
-         sed -i "s/tag: ${curVer}/tag: ${tgtRelVer}/g" $1 
+         if [[ "$OSTYPE" == "darwin"* ]]; then
+            sed -i '' "s/tag: ${curVer}/tag: ${tgtRelVer}/g" $1 
+         else
+            sed -i "s/tag: ${curVer}/tag: ${tgtRelVer}/g" $1 
+         fi
       fi
    done
 }
