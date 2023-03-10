@@ -50,16 +50,16 @@ public class RedeliveryConsumerApp extends PulsarWorkshopCmdApp {
             pulsarClient = createNativePulsarClient();
 
             Consumer<byte[]> pulsarConsumer = pulsarClient.newConsumer()
-            		.ackTimeout(1, TimeUnit.SECONDS)
-            		.topic(pulsarTopicName)
+                    .ackTimeout(1, TimeUnit.SECONDS)
+                    .topic(pulsarTopicName)
                     .subscriptionName(subsriptionName)
                     .subscriptionType(SubscriptionType.Shared)
                     .enableRetry(true)
                     .deadLetterPolicy(DeadLetterPolicy.builder()
-                    		.maxRedeliverCount(5)
-                    		.deadLetterTopic(deadLetterTopicName)
-                    		.build())
-                    .subscribe();            
+                            .maxRedeliverCount(5)
+                            .deadLetterTopic(deadLetterTopicName)
+                            .build())
+                    .subscribe();
 
         	// Negative Acknowledge message until re-delivery attempts are exceeded
         	while (true) {
