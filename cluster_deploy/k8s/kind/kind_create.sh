@@ -74,13 +74,13 @@ echo ">> Create the Kind cluster with the name \"${clstrName}\" ..."
 
 clusterExistence=$(kind get clusters 2>&1 | grep "${clstrName}")
 if [[ -z "${clusterExistence}" ]] || [[ "${clusterExistence}" == "No kind clusters found."  ]]; then
-    kindCfgFile="${WORKSHOP_HOMEDIR}/cluster_deploy/kubernetes/kind/cluster-config.yaml"
+    kindCfgFile="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/k8s/kind/cluster-config.yaml"
     if ! [[ -f "${kindCfgFile}" ]]; then
         echo "   [ERROR] Cannot find the Kind cluster configuration file!"
         errExit 150
     fi
 
-    kind create cluster --name "${clstrName}" --config "${WORKSHOP_HOMEDIR}/cluster_deploy/kubernetes/kind/cluster-config.yaml"
+    kind create cluster --name "${clstrName}" --config "${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/k8s/kind/cluster-config.yaml"
     if [[ $? -ne 0 ]]; then
         echo "   [ERROR] Cluster creation failed!"
         errExit 160

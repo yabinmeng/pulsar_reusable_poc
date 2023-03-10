@@ -44,6 +44,7 @@
         <module>springboot_producer_simple</module>
         <module>springboot_consumer_simple</module>
         <module>s4j_queue_receiver</module>
+        <module>s4j_queue_sender</module>
         <module>s4j_topic_producer</module>
         <module>s4j_topic_subscriber</module>
         <module>s4k_kafka_producer</module>
