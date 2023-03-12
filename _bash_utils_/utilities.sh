@@ -192,3 +192,11 @@ outputMsg() {
         fi
     fi
 }
+
+
+##
+# Check if the sed being used is GNU sed
+isGnuSed() {
+    local gnu_sed=$(sed --version | grep "GNU sed" | wc -l)
+    echo ${gnu_sed}
+}

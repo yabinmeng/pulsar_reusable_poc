@@ -142,7 +142,8 @@ genExecScript_Func() {
                 outputTopic2=$(echo ${outputTopic} | sed 's/\//\\\//g')
                 
                 # Mac workaround. See https://stackoverflow.com/questions/43171648/sed-gives-sed-cant-read-no-such-file-or-directory
-                if [[ "$OSTYPE" == "darwin"* ]]; then
+                gnuSed=$(isGnuSed)
+                if [[ "$OSTYPE" == "darwin"* && ${gnuSed} -eq 0 ]]; then
                     sed -i '' "s/<tenant_name>/${tenantName}/g" ${funcCfgJsonFileTgt}
                     sed -i '' "s/<namespace_name>/${namespaceName}/g" ${funcCfgJsonFileTgt}
                     sed -i '' "s/<func_nam>/${appId}/g" ${funcCfgJsonFileTgt}
@@ -239,8 +240,6 @@ if [[ -n "${appIdListStr// }" ]]; then
 
     IFS=',' read -r -a appIdArr <<< "${appIdListStr}"
     for appId in "${appIdArr[@]}"; do
-        echo "   - Demo App ID: ${appId} (type: ${appType})"
-
         appDefStr=$(getPropVal ${appDefFile} ${appId})
         validApp=1
         if [[ ${validApp} -eq 1 && -z "${appDefStr}" ]]; then
@@ -254,6 +253,8 @@ if [[ -n "${appIdListStr// }" ]]; then
         appPath=${appDefArr[2]}
         appClass=${appDefArr[3]}
         appParam=${appDefArr[4]}
+
+        echo "   - Demo App ID: ${appId} (type: ${appType})"
 
         if [[ ${validApp} -eq 1 ]] && ! [[ -n "${appPath}" && -d "${demoAppCodeHomeDir}/${appType}s/${appLanguage}/${appPath}" ]]; then
             validApp=0
