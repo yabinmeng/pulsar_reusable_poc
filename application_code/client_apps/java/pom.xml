@@ -37,15 +37,15 @@
         -->
         <module>common-resources</module>
         <module>native_simple_string_app</module>
-        <module>nativeapi_producer_full_config</module>
-        <module>nativeapi_consumer_full_config</module>
+        <module>native_producer_full_config</module>
+        <module>native_consumer_full_config</module>
         <module>redelivery_consumer</module>
         <module>springboot_producer_simple</module>
         <module>springboot_consumer_simple</module>
-        <module>s4j_queue_receiver</module>
-        <module>s4j_queue_sender</module>
-        <module>s4j_topic_producer</module>
-        <module>s4j_topic_subscriber</module>
+        <module>s4j_jms_queue_receiver</module>
+        <module>s4j_jms_queue_sender</module>
+        <module>s4j_jms_topic_producer</module>
+        <module>s4j_jms_topic_subscriber</module>
         <module>s4k_kafka_producer</module>
         <module>s4k_kafka_consumer</module>
         <module>s4r_rabbitmq_queue_consumer</module>

@@ -10,12 +10,12 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>nativeapi_producer_full_config</artifactId>
+    <artifactId>s4j_jms_queue_sender</artifactId>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
     <description>
-        Pulsar workshop demo application - Comprehensive Pulsar producer with native client API.
+        Pulsar workshop demo application - S4J API for a message sender to a JMS queue.
     </description>
 
     <build>
@@ -40,6 +40,10 @@
         </plugins>
     </build>
 
+    <properties>
+        <s4j.version>3.2.1</s4j.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -48,9 +52,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.pulsar</groupId>
-            <artifactId>pulsar-client</artifactId>
-            <version>${pulsar.version}</version>
+            <groupId>com.datastax.oss</groupId>
+            <artifactId>pulsar-jms</artifactId>
+            <version>${s4j.version}</version>
         </dependency>
     </dependencies>
 
