@@ -197,6 +197,6 @@ outputMsg() {
 ##
 # Check if the sed being used is GNU sed
 isGnuSed() {
-    local gnu_sed=$(sed --version | grep "GNU sed" | wc -l)
+    local gnu_sed=$(sed --version 2>&1 | grep -v 'illegal\|usage\|^\s' | grep "GNU sed" | wc -l)
     echo ${gnu_sed}
 }
