@@ -122,8 +122,6 @@ Please **NOTE** there is `application list definition master file` that defines 
 This file is [app_list_def.properties](../application_deploy/app_list_def.properties), and it has the following format:
 
 ```
-<app_id>=<prog_language>|['client_app'|'function']|<app_path>|<class_name>|<app_jar_name>
-
 # for Client applications
 <app_id>=<prog_language>|'client_app'|<app_path>|<class_name>|<app_jar_name>
 
