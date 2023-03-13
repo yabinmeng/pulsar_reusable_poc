@@ -2,26 +2,23 @@
 
 ## 1.1. What is this repository about?
 
-This repository is designed to make it easy to learn, use, and showcase Apache Pulsar as a powerful and **unified** messaging and streaming processing platform. There are three major components at the core of this repository:
+The `Reusable PoC framework` (or simply the framework) as presented in this GitHub repository is designed to make it easy to use and showcase Apache Pulsar as a powerful and **unified** messaging and streaming processing platform for common messaging and streaming processing use cases (aka, `PoC scenario`). There are three major components at the core of this framework:
 
-1. A list of highly reusable Apache Pulsar example *client applications* and *functions* that are written in different languages and APIs (see detailed doc [here]()). Examples of the following APIs are included in this repository:
-   * Native Pulsar client API (nativeapi)
-   * Starlight for JMS API (s4j)
-   * Native Kafka client API
-   * Native RabbitMQ client API
+1. A repository of reusable example Apache Pulsar codes, *client applications* and *functions*, that are written in different languages and APIs.
 
-2. A simple configuration based tool to launch a K8s cluster and an Apache Pulsar cluster.
-   * It also allows using Astra Streaming or any existing Apache Pulsar cluster as the running environment.
+2. A simple configuration based (PoC) scenario building tool that allows you to build a reusable scenario that represents a typical messaging and streaming processing scenario.
 
-3. A "scenario" based mechanism that allows you to run any typical messaging processing patterns by simply choosing desired example applications from the reusable application list. 
+3. A reusable (PoC) scenario repository for people who want to run the scenario directly without worrying about creating the underlying infrastructure and/or writing application codes.
 
-We'll go through each of these components with more details in the rest of the documents in this repository.
+**NOTE**: It has to be pointed out though that this repository is `NOT` a Pulsar tutorial. It won't teach you neither Apache Pulsar basics nor messaging and streaming processing fundamentals. 
 
 ## 1.2. Whom is this repository designed for? 
 
-First, this repository is meant for people who want to learn how to write Apache Pulsar client applications and functions for various messaging and streaming processing use cases. **Note** that the "client applications" can be native to other messaging and streaming technologies such as JMS, Kafka, and RabbitMQ; but they all can connect to an Apache Pulsar cluster. This is exactly why Apache Pulsar is so powerful as a unified messaging and streaming platform.
+First and foremost, this framework is meant to `enable the enablers`. This framework provides a simple and ready-to-use tool to the streaming Data Architects and/or Solutions Architects and allow them to easily showcase the power of Apache Pulsar system without spending lengthy time on environment setup and code writing from the scratch.
 
-Second, this repository is meant for people who want to run a quick end-to-end demo of using Apache Pulsar to address certain messaging and streaming processing use cases; but don't want to go through all the details of how to properly prepare, install, and configure an Apache Pulsar cluster. This repository greatly simplifies the task of "cluster provisioning" via a simple configuration based, fully automated script.
+Secondly, this framework offers the capability of building a PoC demonstration scenario in a fast and simple configuration based approach. The built scenario follows the common format and workflow and will automatically become a part of a reusable scenario repository. This helps avoid the `reinvent the wheel` problem; and also makes possible of quick-iteration when needed. This will greatly expedite and enhance the customer interaction experience.
+
+Last but not the least, this framework maintains reusable Pulsar example codes. For end-users who have basic understanding of Apache Pulsar, this framework offers them a great way to enhance and expand their knowledge via concrete examples. 
 
 ---
 
@@ -29,8 +26,14 @@ Second, this repository is meant for people who want to run a quick end-to-end d
 
 Depending on your purpose of using this repository, several quick start guides are provided:
 
-* (**Core Concept**) [Introduction and Overall Framework Structure](doc/overall_structure.md)
+* [Introduction and Overall Framework Structure](doc/overall_structure.md)
 
-* (**Quick Start Guide**) [Using and Building Example Application](doc/app_code.md)
+* [Building Example Applications](doc/app_code.md)
 
-* (**Quick Start Guide**) [Building and Deploying Scenarios](doc/understand_scenario.md)
+* [Building and Deploying Scenarios](doc/understand_scenario.md)
+
+---
+
+For those who want to jump right into the reusable demo scenarios, please check the following link: 
+
+* [Reusable Demo Scenario Repository](doc/reusable_scn_repos.md)
