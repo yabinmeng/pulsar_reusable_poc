@@ -16,7 +16,7 @@ The diagram below shows how the high level structure of this framework.
 
 ![framework_structure](images/reusable_poc-structure.png)
 
-In the above structure, there are two major components:
+In the above structure, there are three major components:
 
 1. An example application repository that include both messaging producing/consuming client applications and Pulsar functions.
    
@@ -26,8 +26,11 @@ In the above structure, there are two major components:
       * An Astra Streaming cluster or an existing Luna Streaming/OSS Pulsar cluster.
    * The example applications to be included in this scenario
 
+3. A reusable demonstration scenario repository. 
 
-Based on the settings in the *scenario definition file*, the scenario builder will take the following steps in sequence:
+# 3. Building a Scenario
+
+Based on the settings in the *scenario definition file*, the scenario builder will take the following steps in sequence when building a new scenario. The newly built scenario will be automatically added as part of the `reusable scenario repository`.
 
 1. If the chosen Pulsar infrastructure is Astra Streaming or an existing Pulsar cluster, it reminds you to download or prepare the correct files (e.g. `client.conf`, the trusted ca certificate for TLS connection) in the right folder. Then skip the next two steps and jump to *step 4*.
 

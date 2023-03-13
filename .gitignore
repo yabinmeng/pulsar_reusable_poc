@@ -24,12 +24,12 @@ application_code/functions/java/*/dependency-reduced-pom.xml
 application_code/functions/java/*/*/dependency-reduced-pom.xml
 application_code/codes_from_old_repo/*
 scenarios/*.nohup
+scenarios/*/appconf/*
 scenarios/*/appexec/*
 scenarios/logs/*
 cluster_deploy/ext_tools/jaegar/jaeger_port_forward.nohup
 scenarios/*/*.conf
 scenarios/*/*.crt
-scenarios/*/*.properties
 scenarios/*/client.conf
 scenarios/gcloud
 
