@@ -1,7 +1,7 @@
 # 1. Overview
 
 ## 1.1. What is this scenario about?
-To show RabbitMQ clients can connect and exchanges messages with Pulsar.  Existing RabbitMQ clients, with only configuration changes, like "host", "port", "virtual_host" parameters updated to use Pulsar with Starlight for RabbitMQ.  
+This scenario shows how RabbitMQ clients can connect and exchanges messages with Pulsar.  Existing RabbitMQ clients, with only configuration changes, like to "host", "port", "virtual_host" parameters, to connect and use Pulsar with Starlight for RabbitMQ.  
 
 For more details on Starlight for RabbitMQ see these links  
 [Astra Streaming with RabbitMQ](https://docs.datastax.com/en/streaming/streaming-learning/use-cases-architectures/starlight/rabbitmq/index.html)  
@@ -38,15 +38,26 @@ These options for available for both Producer and Consumer RabbitMQ clients.
 -m or s4rmessage to specify a message string to send with the Producer.  This option is ignored for consumers
 ```
 ## 4.2. Download Astra Streaming RabbitMQ conf file
-If using Astra Streaming, download the **rabbitmq.conf** file from the Astra UI.  Place the conf file in the appconf/rabbitmq.conf  
+If using Astra Streaming, download the **rabbitmq.conf** file from the Astra UI.  Place the conf file in appconf/rabbitmq.conf  
+
+If using an existing Pulsar cluster, create a rabbitmq.conf file with those settings.  See example below.
+```
+username=
+password=
+host=localhost
+port=5672
+virtual_host=public/default
+```
 
 ## 4.3. Deploying RabbitMQ clients
+To deploy this scenario, run the script as shown below.  This script will create a new directory **appexec** which will contain the scripts and JARS needed to execute/run the scenario.
 ```
 cd demo-s4r-client
 ../deployScenario.sh -scnName demo-s4r-client -depAppOnly
 ``` 
 **Note**  the **-depAppOnly** option is enabled.  Deployment errors will occur if this option is not enabled.
 ## 4.4. Running the RabbitMQ clients
+To run the scenario, simply execute the auto-created scripts for the Producers and Consumers.
 ```
 cd demo-s4r-client
 appexec/run_s4r_rabbitmq_queue_consumer.sh
