@@ -200,3 +200,26 @@ isGnuSed() {
     local gnu_sed=$(sed --version 2>&1 | grep -v 'illegal\|usage\|^\s' | grep "GNU sed" | wc -l)
     echo ${gnu_sed}
 }
+
+
+##
+# Replace the occurrence of a string place holder with a specific value in a file
+# Four input prarameters:
+# - 1st parameter: the place holder string to be replaced
+# - 2nd parameter: the value string to replace the place holder
+# - 3rd parameter: the file
+# - 4th parameter: (Optional) a particular line identififer to replace.
+#                  if specified, only replace the place holder in the matching line
+#                  otherwise, replace all occurrence in the file
+#
+# TBD: use this function to hide GNU difference (Mac vs Linux, GNU or not)
+#
+replaceStringInFile() {
+    local placeHolderStr=${1}
+    local valueStr=${2}
+    local fileToScan=${3}
+    local lineIdentifier=${4}
+
+
+}
+

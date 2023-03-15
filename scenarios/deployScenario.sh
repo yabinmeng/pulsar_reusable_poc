@@ -398,7 +398,7 @@ else
       echo "${appId}=${appDefBaseStr}|${appParamStr}" >> ${appDefFile}
    done
 
-   pulsarDepCmd="${appDeployScript} \\
+   appDepCmd="${appDeployScript} \\
    -scnName ${scnName} \\
    -appIdList ${appIdListStr} \\
    -appDefFile ${appDefFile} \\
@@ -406,7 +406,7 @@ else
    -buildRepo ${rebuildApp} \\
    -useAstra ${useAstra}"
 
-   eval "${pulsarDepCmd}" > ${appDeployExecLogFile} 2>&1
+   eval "${appDepCmd}" > ${appDeployExecLogFile} 2>&1
 
    procScriptRtnCode $? ${scnExecMainLogFile} 4 \
       320 "Failed to execute demo app deployment script" 

@@ -34,12 +34,12 @@ usage() {
    echo
 }
 
-if [[ $# -gt 4 ]]; then
+if [[ $# -eq 0 || $# -gt 4 ]]; then
    usage
    errExit 20
 fi
 
-while [[ $# -eq 0 || "$#" -gt 0 ]]; do
+while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
       -clstrName) pulsarClstrName=$2; shift ;;
