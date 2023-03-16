@@ -27,7 +27,6 @@ public class S4RQueueConsumer extends PulsarWorkshopCmdApp {
     String S4RRabbitMQHost = "localhost";
     String S4RPassword = "";
     String S4RUser = "";
-    String AMQP_URI = "";
     String S4RVirtualHost = "";
     ConnectionFactory S4RFactory;
     Connection connection;
@@ -39,7 +38,6 @@ public class S4RQueueConsumer extends PulsarWorkshopCmdApp {
 
     public S4RQueueConsumer(String[] inputParams) {
         super(inputParams);
-        addCommandLineOption(new Option("p", "s4rport", true, "S4R Pulsar RabbitMQ port number."));
         addCommandLineOption(new Option("q", "s4rqueue", true, "S4R Pulsar RabbitMQ queue name."));
         addCommandLineOption(new Option("c", "rabbitmqconf", true, "S4R Pulsar RabbitMQ conf filename. Default is rabbitmq.conf."));
         addCommandLineOption(new Option("a", "useAstra", true, "Use Astra Streaming for RabbitMQ server."));
@@ -55,27 +53,21 @@ public class S4RQueueConsumer extends PulsarWorkshopCmdApp {
 
     @Override
     public void processInputParams() throws InvalidParamException {
-        S4RPort = processIntegerInputParam("s4rport");
-    	if ( S4RPort <= 0  ) {
-//    		throw new InvalidParamException("S4RPort number must be a positive integer.  Default is 5672");
-            S4RPort = 5672;
-    	}
         String queueName = processStringInputParam("s4rqueue");
         if (!StringUtils.isBlank(queueName)) {
             S4RQueueName = queueName;
         }
         rabbitmqConnfFile = processFileInputParam("rabbitmqconf");
-        if(rabbitmqConnfFile != null) {
-//            rabbitmqConnfFile = new File("/home/pat/newproject/pulsar_workshop/scenarios/demo-s4r-client/appconf/rabbitmq.conf");
-            processRabbitMQConfFile();
+        if(rabbitmqConnfFile == null) {
+            throw new InvalidParamException("rabbitmq.conf file must be provided.");
         }
+        processRabbitMQConfFile();
         String useAstra= processStringInputParam("useAstra");
         if(useAstra != null) {
             AstraInUse = true;
         } else {
             AstraInUse = false;
         }
-
     }
 
     @Override
@@ -139,7 +131,6 @@ public class S4RQueueConsumer extends PulsarWorkshopCmdApp {
             S4RUser = ""; // null will cause connection errors, set to blank ""
         }
         S4RVirtualHost = clientConnMap.get("virtual_host");
-        AMQP_URI = clientConnMap.get("amqp_URI");
     }
 
 }
