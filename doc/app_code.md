@@ -81,4 +81,4 @@ Please **NOTE** that this class already supports several CLI parameters as the "
 
 For a template of how a new Java based example client application can be created, please follow the following example:
 
-* [nativeapi_producer_full_config](../application_code/client_apps/java/nativeapi_producer_full_config/)
+* [nativeapi_producer_full_config](../application_code/client_apps/java/native_producer_full_config/)

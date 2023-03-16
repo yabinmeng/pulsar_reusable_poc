@@ -10,7 +10,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>nativeapi_consumer_full_config</artifactId>
+    <artifactId>native_consumer_full_config</artifactId>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>

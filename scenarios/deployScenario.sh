@@ -98,6 +98,7 @@ startTime2=${startTime//[: -]/}
 # trims trailing slash character if there is any
 scnName=$(echo "${scnName}" | sed 's:/*$::')
 scnHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/scenarios/${scnName}"
+debugMsg "scnHomeDir=${scnHomeDir}"
 
 scnLogHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/scenarios/logs/${startDate}"
 if ! [[ -d "${scnLogHomeDir}" ]]; then
@@ -107,13 +108,23 @@ scnExecMainLogFileNoExt="${scnLogHomeDir}/deploy_${scnName}"
 scnExecMainLogFile="${scnExecMainLogFileNoExt}_main.log"
 scnExecPostDeployLogFile="${scnExecMainLogFileNoExt}_post_deploy.log"
 
+scnAppConfHomeDir="${scnHomeDir}/appconf"
+if ! [[ -d "${scnAppConfHomeDir}" ]]; then
+   mkdir -p ${scnAppConfHomeDir}
+fi
+
+scnAppExecHomeDir="${scnHomeDir}/appexec"
+if ! [[ -d "${scnAppExecHomeDir}" ]]; then
+   mkdir -p ${scnAppExecHomeDir}
+fi
+
 dftScnPropFile="${scnHomeDir}/scenario.properties"
 if ! [[ -n "${scnPropFile}" && -f "${scnPropFile}" ]]; then
    if [[ -f "${dftScnPropFile}" ]]; then
       scnPropFile=${dftScnPropFile}
    fi
 fi
-debugMsg "scnHomeDir=${scnHomeDir}"
+
 outputMsg ">>> Starting demo scenario deployment [name: ${scnName}, time: ${startTime}, application only: ${depAppOnly}]" 0 ${scnExecMainLogFile} true
 if ! [[ -n "${scnName}" && -d "${scnHomeDir}"  ]]; then
     outputMsg "[ERROR] The specified scenario name doesn't exist!" 4 ${scnExecMainLogFile} true
@@ -134,6 +145,8 @@ outputMsg "** Scenario properties file : ${scnPropFile}" 4 ${scnExecMainLogFile}
 # - Only needed when Luna Streaming is the deployment type
 # -----------------------------------------
 
+scnClntConnFile=$(getPropVal ${scnPropFile} "scenario.clientconf.location")
+
 ##
 # - Check what type of Pulsar infrastructure to use: Astra Streaming or Luna Streaming
 infraDeployMode=$(getPropVal ${scnPropFile} "scenario.infra_mode")
@@ -152,7 +165,6 @@ else
     echo "        Must be one of the following values: \"${SCN_DEPLOY_MODES[@]}\""
     errExit 60;
 fi
-
 
 ##
 # Get the effective file name between the provided one and the default one
@@ -215,18 +227,11 @@ if [[ ${depAppOnly} -eq 0 ]]; then
    # - Download "client.conf"
    ##
    if [[ "${infraDeployMode}" == "astra" || "${infraDeployMode}" == "luna_existing" ]]; then
-      echo "    - Please prepare the proper \"client.conf\" file to the current demo scenario folder:"
-      echo "      ${scnHomeDir}"
-      echo 
-      while ! [[ "${promptAnswer}" == "yes" || "${promptAnswer}" == "y" || 
-               "${promptAnswer}" == "quit" || "${promptAnswer}" == "q" ]]; do
-         read -s -p "      Have you completed preparing the proper \"client.conf\" file? [yes|y|quit|q] " promptAnswer
-         echo
-      done
-
-      if [[ "${promptAnswer}" == "quit" || "${promptAnswer}" == "q"  ]]; then
-         errExit 1
+      if ! [[ -n "${scnClntConnFile// }" && -f "${scnClntConnFile}" ]]; then
+         outputMsg "[ERROR] The specified 'client.conf' file is invalid!" 4 ${scnExecMainLogFile} true
+         errExit 70   
       fi
+      echo
    ##
    # New Luna Streaming
    # - Deploy a K8s cluster
@@ -298,12 +303,12 @@ if [[ ${depAppOnly} -eq 0 ]]; then
          outputMsg "[ERROR] Can't find the Pulsar cluster deployment script file" 6 ${scnExecMainLogFile} true
          errExit 220
       else
-         upgradeExistingPulsar=$(getPropVal ${scnPropFile} "ls.upgrade.existing.pulsar")
+         upgradeExistingPulsar=$(getPropVal ${scnPropFile} "upgrade.existing.pulsar")
          if [[ "${upgradeExistingPulsar}" == "false" ]]; then
-            eval '"${pulsarDeployScript}" -clstrName ${pulsarClstrName} -propFile ${pulsarPropFile} -genClntConfFile ${scnHomeDir}' > \
+            eval '"${pulsarDeployScript}" -clstrName ${pulsarClstrName} -propFile ${pulsarPropFile} -genClntConfFile ${scnAppConfHomeDir}' > \
                ${pulsarDeployExecLogFile} 2>&1
          else
-            eval '"${pulsarDeployScript}" -clstrName ${pulsarClstrName} -propFile ${pulsarPropFile} -upgrade -genClntConfFile ${scnHomeDir}' > \
+            eval '"${pulsarDeployScript}" -clstrName ${pulsarClstrName} -propFile ${pulsarPropFile} -upgrade -genClntConfFile ${scnAppConfHomeDir}' > \
                ${pulsarDeployExecLogFile} 2>&1
          fi
 
@@ -357,12 +362,16 @@ fi
 outputMsg "" 0 ${scnExecMainLogFile} true
 
 appDeployHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/application_deploy"
+appListDefPropfile="${appDeployHomeDir}/app_list_def.properties"
 
 # Generate scenario specific application definition file if not sepcified explicitly
 if [[ -z "${appDefFile}" ]]; then
-   appDefFile="${scnHomeDir}/app_def.properties"
-   appDefTemplateFile="${appDeployHomeDir}/template/app_def.properties.tmpl"
-   cp -rf ${appDefTemplateFile} ${appDefFile}
+   appDefFile="${scnAppConfHomeDir}/app_def.properties"
+   echo "# <app_id>=<prog_language>|'<app_type>'|<app_path>|<class_name>|<app_jar_name>" > ${appDefFile}
+fi
+
+if [[ -z "${scnClntConnFile}" ]]; then
+   scnClntConnFile="${scnAppConfHomeDir}/client.conf"
 fi
 
 appDeployScript="${appDeployHomeDir}/deploy_demo_apps.sh"
@@ -380,14 +389,24 @@ else
    IFS=',' read -r -a appIdArr <<< "${appIdListStr}"
 
    for appId in "${appIdArr[@]}"; do
+      appDefBaseStr=$(getPropVal ${appListDefPropfile} "${appId}")
+      
       appParamStr=$(getPropVal ${scnPropFile} "scenario.app.param.${appId}")
       # appParamStr may contain '/'
       appParamStr2=$(echo ${appParamStr} | sed 's/\//\\\//g')
-      sed -i "/${appId}/s/<PARAM_LIST_TMPL>/${appParamStr2}/g" ${appDefFile}
+
+      echo "${appId}=${appDefBaseStr}|${appParamStr}" >> ${appDefFile}
    done
 
-   eval '"${appDeployScript}" -scnName ${scnName} -appIdList ${appIdListStr} -appDefFile ${appDefFile} -buildRepo ${rebuildApp} -useAstra ${useAstra}' \
-      > ${appDeployExecLogFile} 2>&1
+   pulsarDepCmd="${appDeployScript} \\
+   -scnName ${scnName} \\
+   -appIdList ${appIdListStr} \\
+   -appDefFile ${appDefFile} \\
+   -clntConnFile ${scnClntConnFile} \\
+   -buildRepo ${rebuildApp} \\
+   -useAstra ${useAstra}"
+
+   eval "${pulsarDepCmd}" > ${appDeployExecLogFile} 2>&1
 
    procScriptRtnCode $? ${scnExecMainLogFile} 4 \
       320 "Failed to execute demo app deployment script" 

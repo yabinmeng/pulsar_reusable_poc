@@ -10,12 +10,12 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>s4j_queue_receiver</artifactId>
+    <artifactId>s4j_jms_topic_producer</artifactId>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
     <description>
-        Pulsar workshop demo application - S4J API for a message receiver from a JMS queue.
+        Pulsar workshop demo application - S4J API for a message producer to a JMS topic.
     </description>
 
     <build>

@@ -28,19 +28,21 @@ usage() {
    echo "                           -scnName <scenario_name>"
    echo "                           -appIdList <app_id_list>"
    echo "                           -appDefFile <app_definition_file>"
+   echo "                           -clntConnFile <client.conf_file>"
    echo "                           -buildRepo <1_or_0>"
    echo "                           -useAstra <1_or_0>"
    echo ""
-   echo "       -h          : Show usage info"
-   echo "       -scnName    : Demo scenario name."
-   echo "       -appIdList  : Demo application id list string."
-   echo "       -appDefFile : Full file path to a application defintion file."
-   echo "       -buildRepo  : Whether to build application repository (1: yes, 0: no)."
-   echo "       -useAstra   : Whether to use Astra streaming as the underlying infra (1: yes, 0: no)."
+   echo "       -h            : Show usage info"
+   echo "       -scnName      : Demo scenario name."
+   echo "       -appIdList    : Demo application id list string."
+   echo "       -appDefFile   : Full file path to a application defintion file."
+   echo "       -clntConnFile : Full file path to client.conf file."
+   echo "       -buildRepo    : Whether to build application repository (1: yes, 0: no)."
+   echo "       -useAstra     : Whether to use Astra streaming as the underlying infra (1: yes, 0: no)."
    echo
 }
 
-if [[ $# -eq 0 || $# -gt 10 ]]; then
+if [[ $# -eq 0 || $# -gt 12 ]]; then
    usage
    errExit 20
 fi
@@ -51,6 +53,7 @@ while [[ "$#" -gt 0 ]]; do
       -scnName) scnName=$2; shift ;;
       -appIdList) appIdListStr=$2; shift ;;
       -appDefFile) appDefFile=$2; shift ;;
+      -clntConnFile) clntConnFile=$2; shift ;;
       -buildRepo) buildRepo=$2; shift ;;
       -useAstra) useAstra=$2; shift ;;
       *) echo "[ERROR] Unknown parameter passed: $1"; exit 30 ;;
@@ -60,6 +63,7 @@ done
 debugMsg "scnName=${scnName}"
 debugMsg "appIdList=${appIdList}"
 debugMsg "appDefFile=${appDefFile}"
+debugMsg "clntConnFile=${clntConnFile}"
 debugMsg "buildRepo=${buildRepo}"
 debugMsg "useAstra=${useAstra}"
 
@@ -99,13 +103,14 @@ genExecScript_Func() {
     local restApiUrl=${2}
     local jwtToken=${3}
     local caCertFile=${4}
-    local functionParams=${5}
+    local funcJarFileName=${5}
+    local functionParams=${6}
 
     ##
     # TBD: add supuport for apps written in other languages
     ##
     if [[ "${appLanguage}" == "java" ]]; then
-        funcJarFileSrc="${demoAppCodeHomeDir}/functions/java/${appPath}/target/${appId}-1.0.0.jar"
+        funcJarFileSrc="${demoAppCodeHomeDir}/functions/java/${appPath}/target/${funcJarFileName}-1.0.0.jar"
         funcJarFileTgt="${scnHomeDir}/appexec/package/${appId}.jar"
         funcCfgJsonFileTgt="${scnHomeDir}/appexec/package/${appId}.config.json"
         funcClassName="com.example.pulsarworkshop.${appClass}"
@@ -142,7 +147,8 @@ genExecScript_Func() {
                 outputTopic2=$(echo ${outputTopic} | sed 's/\//\\\//g')
                 
                 # Mac workaround. See https://stackoverflow.com/questions/43171648/sed-gives-sed-cant-read-no-such-file-or-directory
-                if [[ "$OSTYPE" == "darwin"* ]]; then
+                gnuSed=$(isGnuSed)
+                if [[ "$OSTYPE" == "darwin"* && ${gnuSed} -eq 0 ]]; then
                     sed -i '' "s/<tenant_name>/${tenantName}/g" ${funcCfgJsonFileTgt}
                     sed -i '' "s/<namespace_name>/${namespaceName}/g" ${funcCfgJsonFileTgt}
                     sed -i '' "s/<func_nam>/${appId}/g" ${funcCfgJsonFileTgt}
@@ -225,82 +231,94 @@ if [[ -n "${appIdListStr// }" ]]; then
     echo "--------------------------------------------------------------"
     echo ">> Generating the execution scripts for the specified demo applications ..."
 
-    if ! [[ -d "${scnHomeDir}/appexec/package" ]]; then
-        mkdir -p "${scnHomeDir}/appexec/package"
+    scnAppConfHomeDir="${scnHomeDir}/appconf"
+    scnAppExecHomeDir="${scnHomeDir}/appexec"
+
+    if ! [[ -d "${scnAppExecHomeDir}/package" ]]; then
+        mkdir -p "${scnAppExecHomeDir}/package"
     fi
 
-    clntConnFile="${scnHomeDir}/client.conf"
-    restApiUrl=$(grep -v ^\# ${clntConnFile} | grep webServiceUrl | awk -F= '{print $2}' | tr -d '"')
-    jwtTokenStr=$(grep -v ^\# ${clntConnFile} | grep authParams | awk -F: '{print $2}' | tr -d '"')
-    trustedCaCertFilePath=$(grep -v ^\# ${clntConnFile} | grep tlsTrustCertsFilePath | awk -F= '{print $2}' | tr -d '"')
-    debugMsg "restApiUrl=${restApiUrl}"
-    debugMsg "jwtTokenStr=${jwtTokenStr}"
-    debugMsg "trustedCaCertFilePath=${trustedCaCertFilePath}"
+    if [[ -z "${clntConnFile}" ]]; then
+        clntConnFile="${scnAppConfHomeDir}/client.conf"        
+    fi
 
-    IFS=',' read -r -a appIdArr <<< "${appIdListStr}"
-    for appId in "${appIdArr[@]}"; do
-        echo "   - Demo App ID: ${appId} (type: ${appType})"
+    if ! [[ -f "${clntConnFile}" ]]; then
+        outputMsg "[ERROR] Can't find the client.conf file!" 5 ${appDeployExecLogFile} true
+    else
+        restApiUrl=$(grep -v ^\# ${clntConnFile} | grep webServiceUrl | awk -F= '{print $2}' | tr -d '"')
+        jwtTokenStr=$(grep -v ^\# ${clntConnFile} | grep authParams | awk -F: '{print $2}' | tr -d '"')
+        trustedCaCertFilePath=$(grep -v ^\# ${clntConnFile} | grep tlsTrustCertsFilePath | awk -F= '{print $2}' | tr -d '"')
+        debugMsg "restApiUrl=${restApiUrl}"
+        debugMsg "jwtTokenStr=${jwtTokenStr}"
+        debugMsg "trustedCaCertFilePath=${trustedCaCertFilePath}"
 
-        appDefStr=$(getPropVal ${appDefFile} ${appId})
-        validApp=1
-        if [[ ${validApp} -eq 1 && -z "${appDefStr}" ]]; then
-            validApp=0
-            invalidMsg="Can't find corresponding appID (${appId}) in the client app definition file."
-        fi
-        
-        IFS='|' read -r -a appDefArr <<< "${appDefStr}"
-        appLanguage=${appDefArr[0]}
-        appType=${appDefArr[1]}
-        appPath=${appDefArr[2]}
-        appClass=${appDefArr[3]}
-        appParam=${appDefArr[4]}
+        IFS=',' read -r -a appIdArr <<< "${appIdListStr}"
+        for appId in "${appIdArr[@]}"; do
+            appDefStr=$(getPropVal ${appDefFile} ${appId})
+            validApp=1
+            if [[ ${validApp} -eq 1 && -z "${appDefStr}" ]]; then
+                validApp=0
+                invalidMsg="Can't find corresponding appID (${appId}) in the client app definition file."
+            fi
+            
+            IFS='|' read -r -a appDefArr <<< "${appDefStr}"
+            appLanguage=${appDefArr[0]}
+            appType=${appDefArr[1]}
+            appPath=${appDefArr[2]}
+            appClass=${appDefArr[3]}
+            appJar=${appDefArr[4]}
+            appParam=${appDefArr[5]}
 
-        if [[ ${validApp} -eq 1 ]] && ! [[ -n "${appPath}" && -d "${demoAppCodeHomeDir}/${appType}s/${appLanguage}/${appPath}" ]]; then
-            validApp=0
-            invalidMsg="Can't find the corresponding code path for appID (${appId})."
-        fi
+            echo "   - Demo App ID: ${appId} (type: ${appType})"
 
-        if [[ ${validApp} -eq 1 && -z "${appClass}" ]]; then
-            validApp=0
-            invalidMsg="Unspecified classname for appID (${appId})."
-        fi
-
-        if [[ ${validApp} -eq 1 && -z "${appParam}" ]]; then
-            validApp=0
-            invalidMsg="Unspecified application parameter list for appID (${appId})."
-        fi
-
-        if [[ ${validApp} -eq 1 ]]; then
-            appExcFile="${scnHomeDir}/appexec/run_${appId}.sh"
-        
-            echo "#! /bin/bash" > ${appExcFile}
-            echo >> ${appExcFile}
-            echo "##" >> ${appExcFile}
-            echo "# This is an automatically generated script for " >> ${appExcFile}
-            echo "# - Demo scenario Name  : \"${scnName}\"" >> ${appExcFile}
-            echo "# - App ID : \"${appId}\" (type: \"${appType}\")" >> ${appExcFile}
-            echo "##" >> ${appExcFile}
-            echo >> ${appExcFile}
-
-            if [[ "${appType}" == "client_app" ]]; then
-                if [[ ${useAstra} -eq 1 ]]; then
-                    appParam="-as ${appParam}"
-                fi
-                rtnMsg=$(genExecScript_ClntApp)
-            else
-                rtnMsg=$(genExecScript_Func \
-                    "${appId}" \
-                    "${restApiUrl}" \
-                    "${jwtTokenStr}" \
-                    "${trustedCaCertFilePath}" \
-                    "${appParam}")
+            if [[ ${validApp} -eq 1 ]] && ! [[ -n "${appPath}" && -d "${demoAppCodeHomeDir}/${appType}s/${appLanguage}/${appPath}" ]]; then
+                validApp=0
+                invalidMsg="Can't find the corresponding code path for appID (${appId})."
             fi
 
-            chmod +x "${appExcFile}"
+            if [[ ${validApp} -eq 1 && -z "${appClass}" ]]; then
+                validApp=0
+                invalidMsg="Unspecified classname for appID (${appId})."
+            fi
 
-            outputMsg "${rtnMsg}" 5 ${appDeployExecLogFile} true
-        else
-            outputMsg "[ERROR] ${invalidMsg}" 5 ${appDeployExecLogFile} true
-        fi
-    done
+            if [[ ${validApp} -eq 1 && -z "${appParam}" ]]; then
+                validApp=0
+                invalidMsg="Unspecified application parameter list for appID (${appId})."
+            fi
+
+            if [[ ${validApp} -eq 1 ]]; then
+                appExcFile="${scnHomeDir}/appexec/run_${appId}.sh"
+            
+                echo "#! /bin/bash" > ${appExcFile}
+                echo >> ${appExcFile}
+                echo "##" >> ${appExcFile}
+                echo "# This is an automatically generated script for " >> ${appExcFile}
+                echo "# - Demo scenario Name  : \"${scnName}\"" >> ${appExcFile}
+                echo "# - App ID : \"${appId}\" (type: \"${appType}\")" >> ${appExcFile}
+                echo "##" >> ${appExcFile}
+                echo >> ${appExcFile}
+
+                if [[ "${appType}" == "client_app" ]]; then
+                    if [[ ${useAstra} -eq 1 ]]; then
+                        appParam="-as ${appParam}"
+                    fi
+                    rtnMsg=$(genExecScript_ClntApp)
+                else
+                    rtnMsg=$(genExecScript_Func \
+                        "${appId}" \
+                        "${restApiUrl}" \
+                        "${jwtTokenStr}" \
+                        "${trustedCaCertFilePath}" \
+                        "${appJar}" \
+                        "${appParam}")
+                fi
+
+                chmod +x "${appExcFile}"
+
+                outputMsg "${rtnMsg}" 5 ${appDeployExecLogFile} true
+            else
+                outputMsg "[ERROR] ${invalidMsg}" 5 ${appDeployExecLogFile} true
+            fi
+        done
+    fi
 fi

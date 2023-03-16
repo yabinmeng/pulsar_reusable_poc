@@ -19,14 +19,14 @@ All defined scenarios are organized under the `scenarios` folder, an example is 
 
 ```
 scenarios/
-├── demo-scenario-1
+├── message-e2e-enrich
 │   ├── post_deploy.sh
 │   └── scenario.properties
 │
 ├── ... 
 ```
 
-In order to create a new *scenario*, create a subfolder `scnearios` and the subfolder name will be the scenario name to be used when running the scenario deployment script.
+In order to create a new *scenario*, create a subfolder under `scnearios` and the subfolder name will be the scenario name to be used when running the scenario deployment script.
 
 1. You must create a text file named `scenario.properties` in the scenario subfolder. In this file, you defined the required scenario information as explained above.
 
@@ -99,7 +99,7 @@ When it comes to the deployment of the example applications included in a scenar
 
 2. It is up to "user or designer" of a scenario to determine when to execute the involved example applications and in what order. This step is manual.
 
-For example, in the scenario named [demo-scenario-1](../scenarios/demo-scenario-1/), there are 3 example (java) applications involved:
+For example, in the scenario named [message-e2e-enrich](../scenarios/message-e2e-enrich/), there are 3 example (java) applications involved:
 * One Pulsar producer publishing to the 1st topic
 * One Pulsar function adding metadata to each message from the 1st topic and publish to the 2nd topic
 * One Pulsar consumer receives messages from the 2nd topic
@@ -113,6 +113,20 @@ scenarios/demo-scenario-1/appexec/
 ├── run_add-metadata.sh
 ├── run_nativeapi_consumer_full_config.sh
 └── run_nativeapi_producer_full_config.sh
+```
+
+### 2.2.1. Application List Definition Master File
+
+Please **NOTE** there is `application list definition master file` that defines the fundamental information of chosen application (in the scenario), such as application language (Java, Python, etc.), application type (client applications or functions), application code path, main class, jar file, etc. Every time when a new example application is added in this framework, this file must be updated. 
+
+This file is [app_list_def.properties](../application_deploy/app_list_def.properties), and it has the following format:
+
+```
+# for Client applications
+<app_id>=<prog_language>|'client_app'|<app_path>|<class_name>|<app_jar_name>
+
+# for Pulsar functions
+<app_id>=<prog_language>|'function'|<app_path>|<class_name>|<function_jar_name>
 ```
 
 ## 2.3. Deployment Logs

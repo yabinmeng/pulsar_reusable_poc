@@ -16,7 +16,7 @@ public class S4RQueueProducer extends PulsarWorkshopCmdApp {
     private final static Logger logger = LoggerFactory.getLogger(S4RQueueProducer.class);
     int S4RPort = 5672;
     String S4RQueueName = "s4r-default-queue";
-    String S4RMessage = "This is a RabbitMQ message ******** Msg num: ";
+    String S4RMessage = "This is a RabbitMQ message ******** ";
     ConnectionFactory S4RFactory;
     Connection connection;
     Channel channel;

@@ -8,6 +8,7 @@ application_code/client_apps/java/.idea
 application_code/client_apps/java/target
 application_code/client_apps/java/*/target
 application_code/client_apps/java/*/*/target
+application_code/client_apps/java/*.iml
 application_code/client_apps/java/*/*.iml
 application_code/client_apps/java/dependency-reduced-pom.xml
 application_code/client_apps/java/*/dependency-reduced-pom.xml
@@ -16,20 +17,21 @@ application_code/functions/java/.idea
 application_code/functions/java/target
 application_code/functions/java/*/target
 application_code/functions/java/*/*/target
+application_code/functions/java/*.iml
 application_code/functions/java/*/*.iml
 application_code/functions/java/dependency-reduced-pom.xml
 application_code/functions/java/*/dependency-reduced-pom.xml
 application_code/functions/java/*/*/dependency-reduced-pom.xml
 application_code/codes_from_old_repo/*
 scenarios/*.nohup
+scenarios/*/appconf/*
 scenarios/*/appexec/*
 scenarios/logs/*
 cluster_deploy/ext_tools/jaegar/jaeger_port_forward.nohup
 scenarios/*/*.conf
 scenarios/*/*.crt
-scenarios/*/*.properties
 scenarios/*/client.conf
-
+scenarios/gcloud
 
 # Created by https://www.toptal.com/developers/gitignore/api/intellij
 # Edit at https://www.toptal.com/developers/gitignore?templates=intellij
@@ -354,5 +356,3 @@ Temporary Items
 
 # End of https://www.toptal.com/developers/gitignore/api/macos
 *.nohup
-
-scenarios/gcloud
