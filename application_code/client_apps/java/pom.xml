@@ -37,7 +37,7 @@
         -->
         <module>common-resources</module>
         <module>native_simple_string_app</module>
-        <module>reader</module>
+        <!-- <module>reader</module> -->
         <module>native_producer_full_config</module>
         <module>native_consumer_full_config</module>
         <module>redelivery_consumer</module>

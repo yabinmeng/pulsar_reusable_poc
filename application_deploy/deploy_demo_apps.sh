@@ -76,14 +76,11 @@ genExecScript_ClntApp() {
     # TBD: add supuport for apps written in other languages
     ##
     if [[ "${appLanguage}" == "java" ]]; then
-        clientAppJarFileSrc="${demoAppCodeHomeDir}/client_apps/java/${appPath}/target/${appId}-1.0.0.jar"
-        clientAppFileTgt="${scnHomeDir}/appexec/package/${appId}.jar"
+        clientAppJarFile="${demoAppCodeHomeDir}/client_apps/java/${appPath}/target/${appId}-1.0.0.jar"
 
-        if [[ -f "${clientAppJarFileSrc}" ]]; then
-            cp -rf ${clientAppJarFileSrc} ${clientAppFileTgt}
-        
+        if [[ -f "${clientAppJarFile}" ]]; then
             echo "java \\" >> ${appExcFile}
-            echo "  -cp ${scnHomeDir}/appexec/package/${appId}.jar \\" >> ${appExcFile}
+            echo "  -cp ${clientAppJarFile} \\" >> ${appExcFile}
             if [[ -n "${appParam// }" ]]; then
                 echo "  com.example.pulsarworkshop.${appClass} \\" >> ${appExcFile}
                 echo "  ${appParam}" >> ${appExcFile}
@@ -110,14 +107,12 @@ genExecScript_Func() {
     # TBD: add supuport for apps written in other languages
     ##
     if [[ "${appLanguage}" == "java" ]]; then
-        funcJarFileSrc="${demoAppCodeHomeDir}/functions/java/${appPath}/target/${funcJarFileName}-1.0.0.jar"
-        funcJarFileTgt="${scnHomeDir}/appexec/package/${appId}.jar"
-        funcCfgJsonFileTgt="${scnHomeDir}/appexec/package/${appId}.config.json"
+        funcJarFile="${demoAppCodeHomeDir}/functions/java/${appPath}/target/${funcJarFileName}-1.0.0.jar"
+        funcCfgJsonFile="${scnHomeDir}/appexec/package/${appId}.config.json"
         funcClassName="com.example.pulsarworkshop.${appClass}"
         
-        if [[ -f "${funcJarFileSrc}" ]]; then
-            cp -rf ${funcJarFileSrc} ${funcJarFileTgt}
-            cp -rf ${demoAppDeployHomeDir}/template/function.config.java.tmpl ${funcCfgJsonFileTgt}
+        if [[ -f "${funcJarFile}" ]]; then
+            cp -rf ${demoAppDeployHomeDir}/template/function.config.java.tmpl ${funcCfgJsonFile}
 
             paramArr=(${functionParams})            
             for p in "${paramArr[@]}"; do
@@ -141,30 +136,14 @@ genExecScript_Func() {
             else
                 funcJarFileTgt="${scnHomeDir}/appexec/package/${appId}.jar"
                 debugMsg "funcJarFileTgt=${funcJarFileTgt}"
-                # inputTopicList may contain '/'
-                inputTopicList2=$(echo ${inputTopicList} | sed 's/\//\\\//g')
-                # outputTopic may contain '/'
-                outputTopic2=$(echo ${outputTopic} | sed 's/\//\\\//g')
-                
-                # Mac workaround. See https://stackoverflow.com/questions/43171648/sed-gives-sed-cant-read-no-such-file-or-directory
-                gnuSed=$(isGnuSed)
-                if [[ "$OSTYPE" == "darwin"* && ${gnuSed} -eq 0 ]]; then
-                    sed -i '' "s/<tenant_name>/${tenantName}/g" ${funcCfgJsonFileTgt}
-                    sed -i '' "s/<namespace_name>/${namespaceName}/g" ${funcCfgJsonFileTgt}
-                    sed -i '' "s/<func_nam>/${appId}/g" ${funcCfgJsonFileTgt}
-                    sed -i '' "s/<input_topic_list>/${inputTopicList2}/g" ${funcCfgJsonFileTgt}
-                    sed -i '' "s/<output_topic>/${outputTopic2}/g" ${funcCfgJsonFileTgt}
-                    sed -i '' "s/<auto_ack>/${autoAck}/g" ${funcCfgJsonFileTgt}
-                    sed -i '' "s/<class_name>/${funcClassName}/g" ${funcCfgJsonFileTgt}
-                else
-                    sed -i "s/<tenant_name>/${tenantName}/g" ${funcCfgJsonFileTgt}
-                    sed -i "s/<namespace_name>/${namespaceName}/g" ${funcCfgJsonFileTgt}
-                    sed -i "s/<func_nam>/${appId}/g" ${funcCfgJsonFileTgt}
-                    sed -i "s/<input_topic_list>/${inputTopicList2}/g" ${funcCfgJsonFileTgt}
-                    sed -i "s/<output_topic>/${outputTopic2}/g" ${funcCfgJsonFileTgt}
-                    sed -i "s/<auto_ack>/${autoAck}/g" ${funcCfgJsonFileTgt}
-                    sed -i "s/<class_name>/${funcClassName}/g" ${funcCfgJsonFileTgt}
-                fi
+
+                replaceStringInFile "<tenant_name>" "${tenantName}" ${funcCfgJsonFileTgt}
+                replaceStringInFile "<namespace_name>" "${namespaceName}" ${funcCfgJsonFileTgt}
+                replaceStringInFile "<func_nam>" "${appId}" ${funcCfgJsonFileTgt}
+                replaceStringInFile "<input_topic_list>" "${inputTopicList}" ${funcCfgJsonFileTgt}
+                replaceStringInFile "<output_topic>" "${outputTopic}" ${funcCfgJsonFileTgt}
+                replaceStringInFile "<auto_ack>" "${autoAck}" ${funcCfgJsonFileTgt}
+                replaceStringInFile "<class_name>" "${funcClassName}" ${funcCfgJsonFileTgt}
 
                 local curlCmd_CrtFunc="curl -v -k -X POST \\
     --write-out '%{http_code}' \\
@@ -181,12 +160,12 @@ genExecScript_Func() {
                 fi
 
                 curlCmd_CrtFunc="${curlCmd_CrtFunc}
-    --form \"functionConfig=@${funcCfgJsonFileTgt};type=application/json\" \\
-    --form \"data=@${funcJarFileTgt};type=application/octet-stream\""
+    --form \"functionConfig=@${funcCfgJsonFile};type=application/json\" \\
+    --form \"data=@${funcJarFile};type=application/octet-stream\""
 
                 echo "${curlCmd_CrtFunc}" >> ${appExcFile}
                 echo "[SUCCESS]"
-            fi
+            fi 
         else
             echo "[ERROR] Can't find the corresponding function JAR file."
         fi
@@ -241,6 +220,7 @@ if [[ -n "${appIdListStr// }" ]]; then
     if [[ -z "${clntConnFile}" ]]; then
         clntConnFile="${scnAppConfHomeDir}/client.conf"        
     fi
+    debugMsg "clntConnFile=${clntConnFile}"
 
     if ! [[ -f "${clntConnFile}" ]]; then
         outputMsg "[ERROR] Can't find the client.conf file!" 5 ${appDeployExecLogFile} true

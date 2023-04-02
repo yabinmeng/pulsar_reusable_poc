@@ -1,6 +1,6 @@
 #! /bin/bash
 
-DEBUG=false
+DEBUG=true
 
 ##
 # Supported K8s deployment options
@@ -220,6 +220,28 @@ replaceStringInFile() {
     local fileToScan=${3}
     local lineIdentifier=${4}
 
+    debugMsg "placeHolderStr=${placeHolderStr}"
+    debugMsg "valueStr=${valueStr}"
+    debugMsg "fileToScan=${fileToScan}"
+    debugMsg "lineIdentifier=${lineIdentifier}"
 
+    # in case '/' is part of the string
+    placeHolderStr=$(echo ${placeHolderStr} | sed 's/\//\\\//g')
+    valueStr=$(echo ${valueStr} | sed 's/\//\\\//g')
+
+    gnuSed=$(isGnuSed)
+    if [[ "$OSTYPE" == "darwin"* && ${gnuSed} -eq 0 ]]; then
+        if ! [[ -z "${lineIdentifier// }" ]]; then
+            sed -i '' "${lineIdentifier}s/${placeHolderStr}/${valueStr}/g" ${fileToScan}
+        else
+            sed -i '' "s/${placeHolderStr}/${valueStr}/g" ${fileToScan}
+        fi
+    else
+        if ! [[ -z "${lineIdentifier// }" ]]; then
+            sed -i "${lineIdentifier}s/${placeHolderStr}/${valueStr}/g" ${funcCfgJsonFileTgt}
+        else
+            sed -i "s/${placeHolderStr}/${valueStr}/g" ${fileToScan}
+        fi
+    fi
 }
 

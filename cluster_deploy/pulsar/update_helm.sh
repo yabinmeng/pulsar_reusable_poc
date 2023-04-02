@@ -66,11 +66,6 @@ debugMsg "depUpdat=${depUpdt}"
 debugMsg "clstrName=${clstrName}"
 debugMsg "tgtRelease=${tgtRelease}"
 
-if [[ -z "{tgtRelName// }" || -z  "{tgtRelName// }" ]]; then
-   echo "Incorrect specified target docker image release information: \"tgtRelease\". It must be in format <release_name>:<release_version>!"
-   exit 40
-fi
-
 pulsarDeployHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/cluster_deploy/pulsar"
 helmChartHomeDir="${pulsarDeployHomeDir}/helm"
 
@@ -81,9 +76,8 @@ echo ">> Create the helm chart file (${helmChartFile}) from the corresponding te
 if ! [[ -f "${helmChartHomeDir}/template/${helmChartFile}.tmpl" ]]; then
    echo "  [ERROR] Can't find the required Pulsar helm chart file template!"
    echo "          (\"${helmChartHomeDir}/template/${helmChartFile}.tmpl\")"
-   errExit 50   
+   errExit 40 
 fi
-
 cp -rf "${helmChartHomeDir}/template/${helmChartFile}.tmpl" "${helmChartHomeDir}/${helmChartFile}"
 
 # Update Pulsar helm chart dependency if needed
@@ -116,13 +110,9 @@ function updatePulsarHelmChart() {
    debugMsg "tgtRelVer=${tgtRelVer}"
 
    # Update Pulsar cluster name
+   echo "   - setting pulsar cluster name to \"${clstrName}\""
+   replaceStringInFile "fullnameOverride:.*" "fullnameOverride: ${clstrName}" $1
 
-   # Mac workaround. See https://stackoverflow.com/questions/43171648/sed-gives-sed-cant-read-no-such-file-or-directory
-   if [[ "$OSTYPE" == "darwin"* ]]; then
-      sed -i '' "s/fullnameOverride:.*/fullnameOverride: ${clstrName}/g" $1 
-   else
-      sed -i "s/fullnameOverride:.*/fullnameOverride: ${clstrName}/g" $1 
-   fi
    # Update image name
    curNameArr=()
    for name in $( grep "repository:" $1 | awk -F': ' '{ print $NF}' | uniq); do
@@ -131,12 +121,7 @@ function updatePulsarHelmChart() {
    for curName in "${curNameArr[@]}"; do
       if [[ "${curName}" != "${tgtRelName}"  ]]; then
          echo "   - replacing release name \"${curName}\" with \"${tgtRelName}\""
-         # use '#' as separater because release name contains special character '/'
-         if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s#repository: ${curName}#repository: ${tgtRelName}#g" $1 
-         else
-            sed -i "s#repository: ${curName}#repository: ${tgtRelName}#g" $1 
-         fi
+         replaceStringInFile "repository: ${curName}" "repository: ${tgtRelName}" $1
       fi
    done
 
@@ -149,16 +134,16 @@ function updatePulsarHelmChart() {
    for curVer in "${curVerArr[@]}"; do
       if [[ "${curVer}" != "${tgtRelVer}"  ]]; then
          echo "   - replacing release version \"${curVer}\" with \"${tgtRelVer}\""
-         if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "s/tag: ${curVer}/tag: ${tgtRelVer}/g" $1 
-         else
-            sed -i "s/tag: ${curVer}/tag: ${tgtRelVer}/g" $1 
-         fi
+         replaceStringInFile "tag: ${curVer}" "tag: ${tgtRelVer}" $1
       fi
    done
 }
 
 echo
 echo "--------------------------------------------------------------"
-echo ">> Update Pulsar image release to \"${tgtRelease}\""
-updatePulsarHelmChart "${helmChartHomeDir}/${helmChartFile}" "${tgtRelease}"
+if ! [[ -z "${tgtRelease}" ]]; then 
+   echo ">> Update Pulsar image release to \"${tgtRelease}\""
+   updatePulsarHelmChart "${helmChartHomeDir}/${helmChartFile}" "${tgtRelease}"
+else
+   echo ">> Skip Pulsar image release and/or version update ..."
+fi

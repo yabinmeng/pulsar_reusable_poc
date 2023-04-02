@@ -2,31 +2,31 @@ image:
   broker:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
   brokerSts:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
   function:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
   zookeeper:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
   bookkeeper:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
   proxy:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
   bastion:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
 
 fullnameOverride: mypulsar
 enableAntiAffinity: true
@@ -78,6 +78,13 @@ bookkeeper:
       size: 5Gi
   configData:
     BOOKIE_MEM: "-Xms800m -Xmx800m -XX:MaxDirectMemorySize=224m -XX:+ExitOnOutOfMemoryError"
+
+##
+# This is a temporary workaround to bypass the following error in the init container of pulsarHeartbeat Pod
+# "Could not resolve host: pulsar-brokersts.default.svc.cluster.local"
+# https://github.com/datastax/pulsar-helm-chart/blob/1af6b7c0f6036c9a0ebdaef158db5875b8d4260e/helm-chart-sources/pulsar/templates/pulsar-heartbeat/pulsar-heartbeat-deployment.yaml#L87-L95
+brokerSts:
+  component: broker
 
 broker:
   component: broker

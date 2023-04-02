@@ -2,31 +2,31 @@ image:
   broker:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
   brokerSts:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
   function:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
   zookeeper:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
   bookkeeper:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
   proxy:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
   bastion:
     repository: datastax/lunastreaming-all
     pullPolicy: IfNotPresent
-    tag: 2.10_3.1
+    tag: 2.10_4.0
 
 fullnameOverride: mypulsar
 enableAntiAffinity: true
@@ -49,6 +49,26 @@ cert-manager:
 createCertificates:
   selfSigned:
     enabled: true
+
+######
+## default storage setting examples
+## ==============================================
+### Azure storage class doc (https://learn.microsoft.com/en-us/azure/aks/concepts-storage#storage-classes)
+# default_storage:
+#   existingStorageClassName: managed-csi-premium
+##  --------------------------------------
+## NOTE: 
+##    Somehow the following setting won't work. StandardSSD is still provisioned;
+##    Use the above setting!
+##  --------------------------------------
+##   provisioner: kubernetes.io/azure-disk
+##   fsType: ext4
+##   type: managed-premium
+##   extraParams:
+##     storageaccounttype: Premium_LRS
+##     kind: Managed
+##     cachingmode: ReadOnly
+
 
 zookeeper:
   replicaCount: 3

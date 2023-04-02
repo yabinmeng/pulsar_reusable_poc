@@ -29,10 +29,12 @@ usage() {
    echo "Usage: createReadme.sh [-h]"
    echo "                       -scnName <scenario_name>"
    echo "                       [-scnPropFile] <scenario_property_file>"
+   echo "                       [-replace]"
    echo ""
    echo "       -h              : Show usage info"
    echo "       -scnName        : Demo scenario name."
    echo "       -scnPropFile    : (Optional) Full file path to a scenario property file. Use default if not specified."
+   echo "       -replace        : (Optional) Replace existing README file if exists (default: 0)"
 }
 
 if [[ $# -eq 0 || $# -gt 6 ]]; then
@@ -40,19 +42,20 @@ if [[ $# -eq 0 || $# -gt 6 ]]; then
    errExit 20
 fi
 
-depAppOnly=0
-rebuildApp=0
+replaceExistingReadMe=0
 while [[ "$#" -gt 0 ]]; do
    case $1 in
       -h) usage; exit 0 ;;
       -scnName) scnName=$2; shift ;;
       -scnPropFile) scnPropFile=$2; shift ;;
+      -replace) replaceExistingReadMe=1; shift ;;
       *) echo "[ERROR] Unknown parameter passed: $1"; exit 30 ;;
    esac
    shift
 done
 debugMsg "scnName=${scnName}"
 debugMsg "scnPropfile=${scnPropFile}"
+debugMsg "replaceExistingReadMe=${replaceExistingReadMe}"
 
 scnName=$(echo "${scnName}" | sed 's:/*$::')
 scnHomeDir="${PULSAR_WORKSHOP_HOMEDIR}/scenarios/${scnName}"
@@ -80,3 +83,34 @@ appListDefPropfile="${appDeployHomeDir}/app_list_def.properties"
 debugMsg "appListDefPropfile=${appListDefPropfile}"
 
 tgtScnReadmeTmplFile="${PULSAR_WORKSHOP_HOMEDIR}/scenarios/template/master_readme_tmpl.md"
+tgtScnReadmeFile="${PULSAR_WORKSHOP_HOMEDIR}/scenarios/${scnName}/README.md"
+
+if ! [[ -f ${tgtScnReadmeTmplFile} ]]; then
+   outputMsg "[ERROR] Can't find the reamde template file; skip generating README!" 4
+   errExit 60
+else
+   if [[ -f ${tgtScnReadmeFile} && ${replaceExistingReadMe} -eq 0 ]]; then
+      outputMsg "[ERROR] Found an existing README file for this scenario; quit since '-replace' option is not specified!" 4
+      errExit 70
+   else
+      if [[ -f ${tgtScnReadmeFile} ]]; then
+         outputMsg "[WARN] Found an existing README file for this scenario and it will be overwirtten!" 4
+      fi
+
+      cp -f ${tgtScnReadmeTmplFile} ${tgtScnReadmeFile}
+
+      scnNameStr=$(getPropVal ${scnPropFile} "scenario.name")
+      replaceStringInFile "<scn_name>" "${scnNameStr}" ${tgtScnReadmeFile}
+
+      scnDescStr=$(getPropVal ${scnPropFile} "scenario.description")
+      replaceStringInFile "<scn_desc>" "${scnDescStr}" ${tgtScnReadmeFile}
+
+      scnAssumptionStr=$(getPropVal ${scnPropFile} "scenario.assumption")
+      if [[ -z "${scnAssumptionStr// }" ]]; then
+         scnAssumptionStr="N/A"
+      fi
+      replaceStringInFile "<scn_assumption>" "${scnAssumptionStr}" ${tgtScnReadmeFile}
+   fi
+fi
+
+echo

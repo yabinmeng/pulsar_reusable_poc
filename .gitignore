@@ -32,6 +32,7 @@ cluster_deploy/ext_tools/jaegar/jaeger_port_forward.nohup
 scenarios/*/*/*.conf
 scenarios/*/appconf/*.properties
 scenarios/*/*.crt
+scenarios/*/*/*.crt
 scenarios/*/client.conf
 scenarios/gcloud
 

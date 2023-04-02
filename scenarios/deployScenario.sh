@@ -221,24 +221,26 @@ procScriptRtnCode() {
 }
 
 
-if [[ ${depAppOnly} -eq 0 ]]; then
-   ##
-   # Astra Streaming or Existing Luna Streaming
-   # - Download "client.conf"
-   ##
-   if [[ "${infraDeployMode}" == "astra" || "${infraDeployMode}" == "luna_existing" ]]; then
-      if ! [[ -n "${scnClntConnFile// }" && -f "${scnClntConnFile}" ]]; then
-         outputMsg "[ERROR] The specified 'client.conf' file is invalid!" 4 ${scnExecMainLogFile} true
-         errExit 70   
-      fi
-      echo
-   ##
-   # New Luna Streaming
-   # - Deploy a K8s cluster
-   # - Deploy a Pulsar cluster
-   # - Forward Pulsar proxy ports to localhost
-   ## 
-   else
+##
+# Astra Streaming or Existing Luna Streaming
+# - Download "client.conf"
+##
+if [[ "${infraDeployMode}" == "astra" || "${infraDeployMode}" == "luna_existing" ]]; then
+   if ! [[ -n "${scnClntConnFile// }" && -f "${scnClntConnFile}" ]]; then
+      outputMsg "[ERROR] The specified 'client.conf' file is invalid!" 4 ${scnExecMainLogFile} true
+      errExit 70   
+   fi
+   echo
+##
+# New Luna Streaming
+# - Deploy a K8s cluster
+# - Deploy a Pulsar cluster
+# - Forward Pulsar proxy ports to localhost
+## 
+else
+   scnClntConnFile="${scnAppConfHomeDir}/client.conf"
+
+   if [[ ${depAppOnly} -eq 0 ]]; then
       #
       # Deploy a self-managed K8s cluster
       #
@@ -368,10 +370,6 @@ appListDefPropfile="${appDeployHomeDir}/app_list_def.properties"
 if [[ -z "${appDefFile}" ]]; then
    appDefFile="${scnAppConfHomeDir}/app_def.properties"
    echo "# <app_id>=<prog_language>|'<app_type>'|<app_path>|<class_name>|<app_jar_name>" > ${appDefFile}
-fi
-
-if [[ -z "${scnClntConnFile}" ]]; then
-   scnClntConnFile="${scnAppConfHomeDir}/client.conf"
 fi
 
 appDeployScript="${appDeployHomeDir}/deploy_demo_apps.sh"
